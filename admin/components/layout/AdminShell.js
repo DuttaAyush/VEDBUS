@@ -1,29 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import { useAdmin } from './AuthGate';
 
 export default function AdminShell({ children, noScroll = false }) {
-  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [authorized, setAuthorized] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("admin_token");
-      if (!token) {
-        router.replace("/login");
-      } else {
-        setAuthorized(true);
-        setChecking(false);
-      }
-    }
-  }, [router]);
-
-  if (checking || !authorized) {
+  const currentUser = useAdmin()?.user;
+  if (!currentUser || !['ADMIN', 'SUPER_ADMIN'].includes(currentUser.role)) {
     return (
       <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "#0F172A" }}>
         <div style={{ textAlign: "center", color: "#F8FAFC" }}>
@@ -39,7 +24,7 @@ export default function AdminShell({ children, noScroll = false }) {
 
   return (
     <div style={{ display: "flex", height: "100vh", maxHeight: "100vh", overflow: "hidden" }}>
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar user={currentUser} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div
         className="admin-main-content"
         style={{
@@ -54,7 +39,7 @@ export default function AdminShell({ children, noScroll = false }) {
           width: "calc(100% - 220px)",
         }}
       >
-        <Topbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+        <Topbar user={currentUser} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main
           className="admin-main-wrapper"
           style={{

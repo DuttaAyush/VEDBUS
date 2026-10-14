@@ -5,7 +5,7 @@ import PackageDetailModal from '@/components/site/PackageDetailModal';
 
 const destinationsData = [
   {
-    id: 'bali',
+    id: 'bali-escape',
     country: 'INDONESIA',
     title: 'Bali & Ubud Retreat',
     rating: '4.7',
@@ -31,7 +31,7 @@ const destinationsData = [
     image: '/images/yatra_international_holiday_travel_packages_3.jpg'
   },
   {
-    id: 'dubai',
+    id: 'dubai-combo',
     country: 'UNITED ARAB EMIRATES',
     title: 'Dubai & Marina Dhow',
     rating: '4.8',
@@ -44,7 +44,7 @@ const destinationsData = [
     image: '/images/yatra_international_holiday_travel_packages_5.jpg'
   },
   {
-    id: 'singapore',
+    id: 'singapore-malaysia',
     country: 'SOUTHEAST ASIA',
     title: 'Singapore & Malaysia Wonders',
     rating: '4.8',
@@ -57,7 +57,7 @@ const destinationsData = [
     image: '/images/yatra_international_holiday_travel_packages_1.jpg'
   },
   {
-    id: 'swiss',
+    id: 'europe-wonders',
     country: 'EUROPE CIRCUIT',
     title: 'Swiss Alps & Paris Romance',
     rating: '4.9',
@@ -70,7 +70,7 @@ const destinationsData = [
     image: '/images/yatra_international_holiday_travel_packages_3.jpg'
   },
   {
-    id: 'thailand',
+    id: 'thailand-holiday',
     country: 'THAILAND',
     title: 'Phuket & Krabi Explorer',
     rating: '4.7',
@@ -221,7 +221,7 @@ export default function SpotlightDestinations({ rotating = true }) {
                 : 'translate(0px, 0px) scale(1) rotate(0deg)';
               opacity = 1;
               zIndex = isHovered ? 50 : 30;
-              widthClass = 'w-full max-w-[410px] sm:max-w-[470px]';
+              widthClass = 'w-full max-w-[calc(100vw-2rem)] sm:max-w-[470px]';
               heightClass = 'h-[465px]';
             } else if (isLeft) {
               // Immediate Left Card
@@ -366,4 +366,3 @@ export default function SpotlightDestinations({ rotating = true }) {
     </section>
   );
 }
-

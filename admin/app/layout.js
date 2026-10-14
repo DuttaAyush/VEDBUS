@@ -1,4 +1,5 @@
 import "./globals.css";
+import AuthGate from '@/components/layout/AuthGate';
 
 export const metadata = {
   title: "YatraBus Admin Panel",
@@ -23,7 +24,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="antialiased">
-        {children}
+        <AuthGate>{children}</AuthGate>
       </body>
     </html>
   );

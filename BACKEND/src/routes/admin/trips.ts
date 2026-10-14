@@ -143,7 +143,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.patch('/:id', async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
-    const { busId, routeId, departureDatetime, arrivalDatetime, baseFare, status } = req.body;
+    const { busId, routeId, departureDatetime, arrivalDatetime, baseFare, status, seatPricingConfig, seatStatuses } = req.body;
 
     const trip = await prisma.trip.findUnique({ where: { id } });
     if (!trip) return sendError(res, 'Trip not found.', 404);
@@ -153,15 +153,21 @@ router.patch('/:id', async (req: Request, res: Response) => {
       return sendError(res, `status must be one of: ${validStatuses.join(', ')}.`, 400);
     }
 
+    const nextDeparture = departureDatetime ? new Date(departureDatetime) : trip.departureDatetime;
+    const nextArrival = arrivalDatetime ? new Date(arrivalDatetime) : trip.arrivalDatetime;
+    if (isNaN(nextDeparture.getTime()) || isNaN(nextArrival.getTime()) || nextArrival <= nextDeparture) return sendError(res, 'arrivalDatetime must be after departureDatetime.', 400);
+    if (baseFare !== undefined && (!Number.isFinite(Number(baseFare)) || Number(baseFare) <= 0)) return sendError(res, 'baseFare must be positive.', 400);
     const updated = await prisma.trip.update({
       where: { id },
       data: {
         ...(busId             && { busId: String(busId) }),
         ...(routeId           && { routeId: String(routeId) }),
-        ...(departureDatetime && { departureDatetime: new Date(departureDatetime) }),
-        ...(arrivalDatetime   && { arrivalDatetime:   new Date(arrivalDatetime) }),
-        ...(baseFare          && { baseFare: Number(baseFare) }),
+        ...(departureDatetime && { departureDatetime: nextDeparture }),
+        ...(arrivalDatetime   && { arrivalDatetime: nextArrival }),
+        ...(baseFare !== undefined && { baseFare: Number(baseFare) }),
         ...(status            && { status }),
+        ...(seatPricingConfig !== undefined && { seatPricingConfig }),
+        ...(seatStatuses !== undefined && { seatStatuses }),
       },
       include: { bus: true, route: true },
     });

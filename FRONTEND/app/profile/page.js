@@ -487,7 +487,7 @@ export default function CustomerProfilePage() {
                 </div>
 
                 <p className="text-xs font-semibold text-slate-700">
-                  {userProfile?.email || 'traveller@yatrabus.in'} <span className="mx-1 font-normal text-slate-400">|</span> {userProfile?.phone || '+91 98765 43210'}
+                  {userProfile?.email || 'traveller@vedbus.in'} <span className="mx-1 font-normal text-slate-400">|</span> {userProfile?.phone || '+91 98765 43210'}
                 </p>
 
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-0.5">
@@ -756,7 +756,7 @@ export default function CustomerProfilePage() {
                           )}
 
                           <Link
-                            href={`/customize-package/${trip.pkgId || 'chardham'}`}
+                             href={`/customize-package?package=${encodeURIComponent(trip.pkgId || 'chardham')}`}
                             className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[16px]">tune</span>
@@ -1005,7 +1005,7 @@ export default function CustomerProfilePage() {
                         )}
 
                         <Link
-                          href={`/track-bus/${trip.id}`}
+                          href={`/track-bus?id=${encodeURIComponent(trip.id)}`}
                           className="px-4 py-2 rounded-full bg-[#0B1527] hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
                         >
                           <span className="material-symbols-outlined text-[16px] text-emerald-400">my_location</span>
@@ -1025,7 +1025,7 @@ export default function CustomerProfilePage() {
                           type="button"
                           onClick={() => {
                             const shareText = `🎟️ Confirmed Ticket #${trip.id}\nRoute: ${trip.from} ➔ ${trip.to}\nDate: ${trip.depDate}\nSeats: ${trip.seats.join(', ')}\nBus Plate: ${trip.busPlate}`;
-                            const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/track-bus/${trip.id}` : '';
+                            const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/track-bus?id=${encodeURIComponent(trip.id)}` : '';
                             if (typeof navigator !== 'undefined' && navigator.share) {
                               navigator.share({
                                 title: `Confirmed Ticket #${trip.id}`,

@@ -23,6 +23,7 @@ model User {
   passwordHash    String
   role            Role             @default(USER)
   isActive        Boolean          @default(true)
+  tokenVersion    Int              @default(0)
   createdAt       DateTime         @default(now())
   
   busBookings     BusBooking[]
@@ -43,6 +44,7 @@ model Admin {
   passwordHash String
   role         AdminRole @default(ADMIN)
   isActive     Boolean   @default(true)
+  tokenVersion Int       @default(0)
   createdAt    DateTime  @default(now())
 }
 
@@ -98,6 +100,7 @@ model Trip {
   bus               Bus        @relation(fields: [busId], references: [id])
   route             Route      @relation(fields: [routeId], references: [id])
   bookings          BusBooking[]
+  seatAllocations   BusBookingSeat[]
 }
 
 enum BookingStatus {
@@ -115,9 +118,30 @@ model BusBooking {
   totalAmount  Decimal       @db.Decimal(10, 2)
   status       BookingStatus @default(Pending)
   bookingDate  DateTime      @default(now())
+  passengers   Json?
+  contact      Json?
+  options      Json?
+  requestKey   String?       @unique
 
   user         User          @relation(fields: [userId], references: [id])
   trip         Trip          @relation(fields: [tripId], references: [id])
+  seatAllocations BusBookingSeat[]
+}
+
+// One row per booked seat gives PostgreSQL a real uniqueness constraint for
+// concurrent checkout requests. The legacy seatNumbers array is retained for
+// API compatibility and printable tickets.
+model BusBookingSeat {
+  id         String     @id @default(uuid())
+  tripId     String
+  bookingId  String
+  seatNumber String
+
+  trip       Trip       @relation(fields: [tripId], references: [id])
+  booking    BusBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, seatNumber])
+  @@index([bookingId])
 }
 
 enum PackageCategory {
@@ -146,6 +170,11 @@ model PackageBooking {
   travelDate     DateTime
   totalAmount    Decimal       @db.Decimal(10, 2)
   status         BookingStatus @default(Pending)
+  bookingDate    DateTime      @default(now())
+  travelers      Json?
+  contact        Json?
+  options        Json?
+  requestKey     String?       @unique
 
   user           User          @relation(fields: [userId], references: [id])
   package        TourPackage   @relation(fields: [packageId], references: [id])

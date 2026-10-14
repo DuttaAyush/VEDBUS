@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import PackageDetailModal from '@/components/site/PackageDetailModal';
-import { apiFetch } from '@/lib/api';
 
 const yatraPackages = [
   {
-    id: 1,
+    id: 'chardham',
     category: 'chardham',
     title: 'Char Dham Yatra & Haridwar Special',
     duration: '10 Days / 9 Nights',
@@ -18,7 +17,7 @@ const yatraPackages = [
     price: '₹24,499'
   },
   {
-    id: 2,
+    id: 'maharashtra-5jyotirlinga',
     category: 'jyotirlinga maharashtra',
     title: 'Maharashtra 5 Jyotirlinga Darshan Circuit',
     duration: '7 Days / 6 Nights',
@@ -30,7 +29,7 @@ const yatraPackages = [
     price: '₹11,499'
   },
   {
-    id: 3,
+    id: 'kashi-ayodhya',
     category: 'jyotirlinga ayodhya',
     title: 'Kashi Vishwanath & Ayodhya Ram Mandir',
     duration: '4 Days / 3 Nights',
@@ -42,7 +41,7 @@ const yatraPackages = [
     price: '₹6,499'
   },
   {
-    id: 4,
+    id: 'tirupati-south',
     category: 'south',
     title: 'Tirupati Balaji & Meenakshi Amman',
     duration: '5 Days / 4 Nights',
@@ -54,7 +53,7 @@ const yatraPackages = [
     price: '₹8,950'
   },
   {
-    id: 5,
+    id: 'shirdi-express',
     category: 'maharashtra',
     title: 'Shirdi Sai Baba & Shani Shingnapur Express',
     duration: '2 Days / 1 Night',
@@ -66,7 +65,7 @@ const yatraPackages = [
     price: '₹2,899'
   },
   {
-    id: 6,
+    id: 'somnath-dwarka',
     category: 'jyotirlinga',
     title: 'Gujarat Somnath-Dwarka & Nageshwar',
     duration: '4 Days / 3 Nights',

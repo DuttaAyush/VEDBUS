@@ -7,6 +7,7 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import { apiFetch } from '@/lib/api';
 import AuthGuard from '@/components/auth/AuthGuard';
+import { getStoredUser } from '@/lib/auth';
 
 // ── 36-Seat RedBus-Style Sleeper Layout Definition ──────────────────────────
 // Lower Deck: 18 Seats (L1 to L18) - 1+2 Sleeper Configuration
@@ -19,23 +20,23 @@ const lowerDeck36 = [
   { id: 'L2', name: 'L2', row: 1, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L1' },
 
   // Row 2: Left Single (L3), Right Double (L4, L5)
-  { id: 'L3', name: 'L3', row: 2, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male' },
-  { id: 'L4', name: 'L4', row: 2, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L5' },
-  { id: 'L5', name: 'L5', row: 2, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_female', adjacentId: 'L4' },
+  { id: 'L3', name: 'L3', row: 2, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available' },
+  { id: 'L4', name: 'L4', row: 2, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L5' },
+  { id: 'L5', name: 'L5', row: 2, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L4' },
 
   // Row 3: Left Single (L6), Right Double (L7, L8)
-  { id: 'L6', name: 'L6', row: 3, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male' },
-  { id: 'L7', name: 'L7', row: 3, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L8' },
-  { id: 'L8', name: 'L8', row: 3, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L7' },
+  { id: 'L6', name: 'L6', row: 3, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available' },
+  { id: 'L7', name: 'L7', row: 3, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L8' },
+  { id: 'L8', name: 'L8', row: 3, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L7' },
 
   // Row 4: Left Single (L9), Right Double (L10, L11)
-  { id: 'L9', name: 'L9', row: 4, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male' },
-  { id: 'L10', name: 'L10', row: 4, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L11' },
-  { id: 'L11', name: 'L11', row: 4, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L10' },
+  { id: 'L9', name: 'L9', row: 4, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available' },
+  { id: 'L10', name: 'L10', row: 4, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L11' },
+  { id: 'L11', name: 'L11', row: 4, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L10' },
 
   // Row 5: Left Single (L12), Right Double (L13, L14)
-  { id: 'L12', name: 'L12', row: 5, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'sold_male' },
-  { id: 'L13', name: 'L13', row: 5, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'sold_male', adjacentId: 'L14' },
+  { id: 'L12', name: 'L12', row: 5, col: 'left-single', type: 'single', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available' },
+  { id: 'L13', name: 'L13', row: 5, col: 'right-aisle', type: 'double', isWindow: false, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L14' },
   { id: 'L14', name: 'L14', row: 5, col: 'right-window', type: 'double', isWindow: true, deck: 'lower', price: 700, defaultStatus: 'available', adjacentId: 'L13' },
 
   // Row 6: Left Single (L15), Right Double (L16, L17, L18)
@@ -52,22 +53,22 @@ const upperDeck36 = [
   { id: 'U3', name: 'U3', row: 1, col: 'right-window', type: 'double', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U2' },
 
   // Row 2: Left Single (U4), Right Double (U5, U6)
-  { id: 'U4', name: 'U4', row: 2, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'sold_female' },
+  { id: 'U4', name: 'U4', row: 2, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available' },
   { id: 'U5', name: 'U5', row: 2, col: 'right-aisle', type: 'double', isWindow: false, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U6' },
   { id: 'U6', name: 'U6', row: 2, col: 'right-window', type: 'double', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U5' },
 
   // Row 3: Left Single (U7), Right Double (U8, U9)
-  { id: 'U7', name: 'U7', row: 3, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'sold_male' },
+  { id: 'U7', name: 'U7', row: 3, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available' },
   { id: 'U8', name: 'U8', row: 3, col: 'right-aisle', type: 'double', isWindow: false, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U9' },
   { id: 'U9', name: 'U9', row: 3, col: 'right-window', type: 'double', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U8' },
 
   // Row 4: Left Single (U10), Right Double (U11, U12)
-  { id: 'U10', name: 'U10', row: 4, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'sold_male' },
+  { id: 'U10', name: 'U10', row: 4, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available' },
   { id: 'U11', name: 'U11', row: 4, col: 'right-aisle', type: 'double', isWindow: false, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U12' },
   { id: 'U12', name: 'U12', row: 4, col: 'right-window', type: 'double', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U11' },
 
   // Row 5: Left Single (U13), Right Double (U14, U15)
-  { id: 'U13', name: 'U13', row: 5, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'sold_male' },
+  { id: 'U13', name: 'U13', row: 5, col: 'left-single', type: 'single', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available' },
   { id: 'U14', name: 'U14', row: 5, col: 'right-aisle', type: 'double', isWindow: false, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U15' },
   { id: 'U15', name: 'U15', row: 5, col: 'right-window', type: 'double', isWindow: true, deck: 'upper', price: 700, defaultStatus: 'available', adjacentId: 'U14' },
 
@@ -227,7 +228,7 @@ function CinemaSeatBookingContent() {
     const newSeatObj = {
       id: seat.id,
       name: seat.name,
-      price: seat.price || busInfo.price,
+       price: busInfo.price,
       isWindow: seat.isWindow,
       deck: seat.deck,
       type: seat.type,
@@ -254,10 +255,10 @@ function CinemaSeatBookingContent() {
   const proceedWithPayload = async (customSeats = selectedSeats) => {
     if (customSeats.length === 0) return;
 
-    let lockHolderId = 'holder_guest';
-    if (typeof window !== 'undefined') {
-      lockHolderId = localStorage.getItem('lock_holder_id') || `holder_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      localStorage.setItem('lock_holder_id', lockHolderId);
+    const lockHolderId = getStoredUser()?.id;
+    if (!lockHolderId) {
+      setHoldAlertMessage('Please log in again before reserving seats.');
+      return;
     }
 
     try {
@@ -269,16 +270,18 @@ function CinemaSeatBookingContent() {
           lockHolderId,
         })
       });
-      if (holdRes.status === 409) {
-        const holdData = await holdRes.json();
-        setHoldAlertMessage(holdData.message || 'One or more selected seats were recently reserved. Please choose other seats.');
+      const holdData = await holdRes.json();
+      if (!holdRes.ok || !holdData.success) {
+        setHoldAlertMessage(holdData.message || 'The selected seats could not be held. Please choose other seats.');
         return;
       }
     } catch (err) {
-      console.warn('Seat hold network notice:', err);
+      setHoldAlertMessage('Unable to reserve seats because the booking service is unavailable.');
+      return;
     }
 
     const bookingPayload = {
+      tripId: busInfo.id,
       busId: busInfo.id,
       lockHolderId,
       operator: busInfo.operator,
@@ -298,6 +301,7 @@ function CinemaSeatBookingContent() {
       baseFare: customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0),
       taxes: Math.round(customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0) * 0.05),
       totalAmount: Math.round(customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0) * 1.05),
+      requestKey: `bus-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     };
 
     if (typeof window !== 'undefined') {

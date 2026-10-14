@@ -2,22 +2,21 @@
 
 import React, { useState, useEffect } from 'react';
 import PackageDetailModal from '@/components/site/PackageDetailModal';
-import { apiFetch } from '@/lib/api';
 
 const packagesData = [
   {
-    id: 1,
+    id: 'dubai-combo',
     category: 'family',
     image: '/images/yatra_international_holiday_travel_packages_6.jpg',
     duration: '5 Nights / 6 Days',
     subtitle: 'Return Flights • Visa',
-    title: 'Dubai & Abu Dhabi Royal Extravaganza',
-    desc: 'Burj Khalifa VIP, Ferrari World, Desert Dune Safari & Marina Yacht Cruise with Indian Dinner.',
+    title: 'Dubai Desert Safari & Marina Skyline',
+    desc: 'Burj Khalifa entry, desert dune safari, Marina dhow dinner cruise, and comfortable city transfers.',
     tag: '5★ Marriott Stay • Daily Indian Meals',
     price: '₹58,999'
   },
   {
-    id: 2,
+    id: 'bali-escape',
     category: 'honeymoon',
     image: '/images/yatra_international_holiday_travel_packages_8.jpg',
     duration: '6 Nights / 7 Days',
@@ -28,7 +27,7 @@ const packagesData = [
     price: '₹44,999'
   },
   {
-    id: 3,
+    id: 'europe-wonders',
     category: 'europe',
     image: '/images/yatra_international_holiday_travel_packages_9.jpg',
     duration: '8 Nights / 9 Days',
@@ -39,15 +38,15 @@ const packagesData = [
     price: '₹1,49,999'
   },
   {
-    id: 4,
+    id: 'thailand-holiday',
     category: 'honeymoon',
     image: '/images/yatra_international_holiday_travel_packages_10.jpg',
-    duration: '5 Nights / 6 Days',
-    subtitle: 'Island Flight + Ferry',
-    title: 'Santorini Romantic Cyclades Getaway',
-    desc: 'Caldera sunset catamaran sailing, Akrotiri archaeological tour, volcanic beach picnic & wine tasting.',
-    tag: 'Cliffside Suite • VIP Transfers',
-    price: '₹89,999'
+    duration: '5 Days / 4 Nights',
+    subtitle: 'Bangkok • Pattaya • Coral Island',
+    title: 'Thailand Bangkok & Pattaya Beach Resort',
+    desc: 'Coral Island speedboat tour, Pattaya beach resort, Bangkok temple visits, and a guided city experience.',
+    tag: 'Speedboat Coral Island Tour',
+    price: '₹36,999'
   }
 ];
 

@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import PackageDetailModal from '@/components/site/PackageDetailModal';
-import { apiFetch } from '@/lib/api';
 
 const domesticPackagesData = [
   {
-    id: 1,
+    id: 'goa-coastal',
     category: 'coastal',
     image: '/images/yatra_india_local_holiday_travel_packages_5.jpg',
     duration: '4 Nights / 5 Days',
@@ -18,7 +17,7 @@ const domesticPackagesData = [
     price: '₹7,499'
   },
   {
-    id: 2,
+    id: 'kerala-backwaters',
     category: 'heritage',
     image: '/images/yatra_india_local_holiday_travel_packages_6.jpg',
     duration: '5 Nights / 6 Days',
@@ -30,7 +29,7 @@ const domesticPackagesData = [
     price: '₹11,899'
   },
   {
-    id: 3,
+    id: 'himachal-manali',
     category: 'hills',
     image: '/images/yatra_india_local_holiday_travel_packages_7.jpg',
     duration: '6 Nights / 7 Days',
@@ -42,13 +41,13 @@ const domesticPackagesData = [
     price: '₹10,499'
   },
   {
-    id: 4,
+    id: 'corbett-nainital',
     category: 'heritage',
     image: '/images/yatra_india_local_holiday_travel_packages_8.jpg',
     duration: '5 Nights / 6 Days',
     subtitle: 'BharatBenz AC Coach',
-    title: 'Golden Triangle & Coastal Heritage Circuit',
-    desc: 'Historic monument entries, guided royal fort walks, luxury coach transit with comfortable reclining leg-rests.',
+    title: 'Jim Corbett National Park & Nainital',
+    desc: 'Open 4x4 jeep safari in Corbett, Naini Lake boating, and a comfortable hill-station stay with guided local sightseeing.',
     tag1: '4★ Heritage Hotels',
     tag2: 'Guided Excursions',
     price: '₹8,999'
@@ -182,4 +181,3 @@ export default function IndiaLocalCatalog() {
     </section>
   );
 }
-

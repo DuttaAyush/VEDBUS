@@ -164,7 +164,7 @@ export default function Header() {
           >
             <div className="px-2 sm:px-2.5 py-1 bg-white/95 backdrop-blur-md rounded-xl border border-white/30 shadow-md flex items-center justify-center">
               <img
-                alt="YatraBus Logo"
+                alt="VedBus Logo"
                 className="h-6 sm:h-7 w-auto object-contain"
                 src="/images/logo.png"
                 fetchPriority="high"
@@ -415,7 +415,7 @@ export default function Header() {
               <div className="flex items-center gap-2">
                 <div className="px-2 py-1 bg-white/95 rounded-lg border border-white/30 shadow-sm flex items-center justify-center">
                   <img
-                    alt="YatraBus Logo"
+                    alt="VedBus Logo"
                     className="h-5 sm:h-6 w-auto object-contain"
                     src="/images/logo.png"
                   />

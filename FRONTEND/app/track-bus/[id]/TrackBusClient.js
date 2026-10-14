@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import { apiFetch } from '@/lib/api';
+import { getStoredUser } from '@/lib/auth';
 
 const sampleTrackerData = {
   'YB-994821': {
@@ -50,7 +51,9 @@ export default function TrackBusClient({ params }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const stored = localStorage.getItem('user_trips');
+        const user = getStoredUser();
+        const key = user?.id ? `user_trips_${user.id}` : (user?.phone ? `user_trips_${user.phone}` : 'user_trips');
+        const stored = localStorage.getItem(key);
         if (stored) {
           const trips = JSON.parse(stored);
           const found = trips.find(t => t.id === ticketId);
@@ -62,7 +65,13 @@ export default function TrackBusClient({ params }) {
     }
   }, [ticketId]);
 
-  const defaultTrack = sampleTrackerData[ticketId] || sampleTrackerData['YB-994821'];
+  const defaultTrack = sampleTrackerData[ticketId];
+  if (!userTrip && !liveTracking && !defaultTrack) {
+    return <div className="min-h-screen bg-slate-50 flex flex-col"><Header /><main className="flex-1 flex items-center justify-center p-6"><div className="max-w-md text-center bg-white rounded-3xl border border-slate-200 shadow-sm p-8"><h1 className="text-xl font-serif font-bold text-slate-900">Tracking unavailable</h1><p className="text-sm text-slate-600 mt-2">This booking is not available for tracking yet.</p><Link href="/profile" className="inline-flex mt-5 px-4 py-2 rounded-xl bg-brand-scarlet text-white text-xs font-bold">Back to journeys</Link></div><Footer /></main></div>;
+  }
+  const safeDefaultTrack = defaultTrack || {
+    ticketId, operator: liveTracking?.busType || 'VedBus Fleet', busPlate: liveTracking?.busPlate || 'Assigned at departure', busType: liveTracking?.busType || 'Luxury Coach', route: `${liveTracking?.origin || 'Origin'} ➔ ${liveTracking?.destination || 'Destination'}`, seats: [], driverName: 'Assigned at departure', driverPhone: '', speed: 'GPS unavailable', progressPercent: liveTracking?.progressPercentage || 0, onTimeStatus: `${liveTracking?.status || 'Scheduled'} (GPS provider pending)`, milestones: []
+  };
   const track = userTrip ? {
     ticketId: userTrip.id,
     operator: userTrip.operator,
@@ -82,7 +91,7 @@ export default function TrackBusClient({ params }) {
       { location: 'Regional Interchange Bypass', time: '03:15', status: 'upcoming', label: 'Scheduled' },
       { location: `${userTrip.to} (${userTrip.toStation || 'Arrival Point'})`, time: userTrip.arrTime, status: 'upcoming', label: 'Destination' },
     ]
-  } : defaultTrack;
+  } : safeDefaultTrack;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans antialiased">

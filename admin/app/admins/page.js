@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AdminShell from "@/components/layout/AdminShell";
 import { adminFetch } from "@/lib/api";
+import { useAdmin } from "@/components/layout/AuthGate";
 
 const AVATAR_COLORS = [
   "#2563EB", "#D97706", "#059669", "#DC2626",
@@ -30,6 +32,11 @@ function getInitials(name = "") {
 }
 
 export default function AdminsManagementPage() {
+  const router = useRouter();
+  const adminCtx = useAdmin();
+  const currentUser = adminCtx?.user;
+  const currentAdminId = currentUser?.id || "";
+
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -63,17 +70,11 @@ export default function AdminsManagementPage() {
     password: "",
   });
 
-  // Current logged in admin info
-  const [currentAdminId, setCurrentAdminId] = useState("");
-
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const u = JSON.parse(localStorage.getItem("admin_user") || "{}");
-        if (u.id) setCurrentAdminId(u.id);
-      } catch {}
+    if (currentUser && currentUser.role !== "SUPER_ADMIN") {
+      router.replace("/dashboard");
     }
-  }, []);
+  }, [currentUser, router]);
 
   const fetchAdmins = useCallback(async () => {
     setLoading(true);
@@ -94,7 +95,7 @@ export default function AdminsManagementPage() {
   }, []);
 
   useEffect(() => {
-    fetchAdmins();
+    Promise.resolve().then(fetchAdmins);
   }, [fetchAdmins]);
 
   // Flash messages helper
@@ -281,6 +282,10 @@ export default function AdminsManagementPage() {
     borderBottom: "1px solid #E2E8F0",
     whiteSpace: "nowrap",
   };
+
+  if (currentUser && currentUser.role !== "SUPER_ADMIN") {
+    return null;
+  }
 
   return (
     <AdminShell noScroll>

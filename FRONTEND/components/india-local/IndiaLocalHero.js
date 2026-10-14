@@ -94,6 +94,30 @@ export default function IndiaLocalHero() {
     });
   };
 
+  const getFilteredPackages = () => {
+    const trimmed = destination.trim().toLowerCase();
+    const isSelected = domesticPackagesList.some(p => p.title.toLowerCase() === trimmed);
+    if (!trimmed || isSelected) {
+      return domesticPackagesList;
+    }
+    const filtered = domesticPackagesList.filter(p =>
+      p.title.toLowerCase().includes(trimmed) || p.highlight.toLowerCase().includes(trimmed)
+    );
+    return filtered.length > 0 ? filtered : domesticPackagesList;
+  };
+
+  const getFilteredDepartureCities = () => {
+    const trimmed = departureFrom.trim().toLowerCase();
+    const isSelected = domesticDepartureCities.some(c => c.city.toLowerCase() === trimmed);
+    if (!trimmed || isSelected) {
+      return domesticDepartureCities;
+    }
+    const filtered = domesticDepartureCities.filter(c =>
+      c.city.toLowerCase().includes(trimmed) || c.state.toLowerCase().includes(trimmed)
+    );
+    return filtered.length > 0 ? filtered : domesticDepartureCities;
+  };
+
   const handleSearch = (e) => {
     if (e) e.preventDefault();
     setIsDestinationOpen(false);
@@ -229,36 +253,31 @@ export default function IndiaLocalHero() {
                     <span className="text-[9px] text-slate-400">Direct Fleets</span>
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1 space-y-1 custom-scrollbar">
-                    {domesticPackagesList
-                      .filter(p =>
-                        p.title.toLowerCase().includes(destination.toLowerCase().trim()) ||
-                        p.highlight.toLowerCase().includes(destination.toLowerCase().trim())
-                      )
-                      .map((pkg) => (
-                        <button
-                          key={pkg.id}
-                          type="button"
-                          onClick={() => {
-                            setDestination(pkg.title);
-                            setIsDestinationOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all flex items-start justify-between gap-2 cursor-pointer ${
-                            destination.toLowerCase() === pkg.title.toLowerCase()
-                              ? 'bg-teal-50 text-teal-900 border border-teal-200'
-                              : 'hover:bg-slate-50 text-slate-800'
-                          }`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="font-bold text-slate-900 text-xs truncate">{pkg.title}</div>
-                            <div className="text-[10px] text-slate-500 truncate">{pkg.highlight}</div>
-                            <div className="text-[9px] text-teal-600 font-semibold mt-0.5">{pkg.duration}</div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-[10px] font-extrabold text-teal-700 block">{pkg.price}</span>
-                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-teal-100/80 text-teal-800">{pkg.badge}</span>
-                          </div>
-                        </button>
-                      ))}
+                    {getFilteredPackages().map((pkg) => (
+                      <button
+                        key={pkg.id}
+                        type="button"
+                        onClick={() => {
+                          setDestination(pkg.title);
+                          setIsDestinationOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs transition-all flex items-start justify-between gap-2 cursor-pointer ${
+                          destination.toLowerCase() === pkg.title.toLowerCase()
+                            ? 'bg-teal-50 text-teal-900 border border-teal-200'
+                            : 'hover:bg-slate-50 text-slate-800'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-slate-900 text-xs truncate">{pkg.title}</div>
+                          <div className="text-[10px] text-slate-500 truncate">{pkg.highlight}</div>
+                          <div className="text-[9px] text-teal-600 font-semibold mt-0.5">{pkg.duration}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className="text-[10px] font-extrabold text-teal-700 block">{pkg.price}</span>
+                          <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-teal-100/80 text-teal-800">{pkg.badge}</span>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -296,29 +315,27 @@ export default function IndiaLocalHero() {
                     Select Departure Hub
                   </div>
                   <div className="max-h-48 overflow-y-auto py-1 space-y-0.5 custom-scrollbar">
-                    {domesticDepartureCities
-                      .filter(c => c.city.toLowerCase().includes(departureFrom.toLowerCase().trim()) || c.state.toLowerCase().includes(departureFrom.toLowerCase().trim()))
-                      .map((c) => (
-                        <button
-                          key={c.city}
-                          type="button"
-                          onClick={() => {
-                            setDepartureFrom(c.city);
-                            setIsDepartureOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
-                            departureFrom.toLowerCase() === c.city.toLowerCase()
-                              ? 'bg-teal-50 text-teal-900 font-bold'
-                              : 'hover:bg-slate-50 text-slate-700'
-                          }`}
-                        >
-                          <div>
-                            <span className="block text-xs font-bold text-slate-900">{c.city}</span>
-                            <span className="text-[10px] text-slate-400">{c.desc}</span>
-                          </div>
-                          <span className="text-[10px] text-teal-600 font-bold">{c.state}</span>
-                        </button>
-                      ))}
+                    {getFilteredDepartureCities().map((c) => (
+                      <button
+                        key={c.city}
+                        type="button"
+                        onClick={() => {
+                          setDepartureFrom(c.city);
+                          setIsDepartureOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                          departureFrom.toLowerCase() === c.city.toLowerCase()
+                            ? 'bg-teal-50 text-teal-900 font-bold'
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
+                        <div>
+                          <span className="block text-xs font-bold text-slate-900">{c.city}</span>
+                          <span className="text-[10px] text-slate-400">{c.desc}</span>
+                        </div>
+                        <span className="text-[10px] text-teal-600 font-bold">{c.state}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -353,7 +370,7 @@ export default function IndiaLocalHero() {
 
             {/* 4. TRAVELERS SELECTOR */}
             <div
-              className="relative md:col-span-2 flex items-center bg-slate-50 hover:bg-teal-50/50 rounded-2xl px-3 py-2.5 border border-slate-200 text-center cursor-pointer transition-all select-none"
+              className={`relative md:col-span-2 flex items-center bg-slate-50 hover:bg-teal-50/50 rounded-2xl px-3 py-2.5 border border-slate-200 text-center cursor-pointer transition-all select-none ${isPassengerOpen ? 'z-[9999]' : 'z-10'}`}
               onClick={() => {
                 setIsPassengerOpen(!isPassengerOpen);
                 setIsDestinationOpen(false);
@@ -364,7 +381,7 @@ export default function IndiaLocalHero() {
               <div className="flex-1 min-w-0 text-left">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 cursor-pointer">Travelers</label>
                 <div className="text-xs font-bold text-slate-900 truncate">
-                  {passengers} {passengers === 1 ? 'Adult' : 'Adults'}{passengers <= 2 ? ', 1 Room' : `, ${Math.ceil(passengers / 2)} Rooms`}
+                  {passengers} {passengers === 1 ? 'Traveler' : 'Travelers'}
                 </div>
               </div>
 
@@ -372,19 +389,36 @@ export default function IndiaLocalHero() {
               {isPassengerOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full right-0 sm:right-auto sm:left-0 mt-2 w-64 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-200 p-3 z-50 text-left animate-fadeIn"
+                  aria-label="Travelers Selection Bubble"
+                  className="absolute bottom-full mb-3.5 right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-[99999] w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white/98 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_rgba(15,23,42,0.35)] border border-slate-200/90 p-4 text-slate-800 animate-in fade-in zoom-in-95 duration-200 text-left"
                 >
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-teal-700 pb-2 border-b border-slate-100 flex items-center justify-between">
-                    <span>Number of Travelers</span>
-                    <span className="text-[10px] text-slate-400">Hotel &amp; Transit</span>
+                  {/* Speech Bubble Arrow Indicator */}
+                  <div className="absolute top-full right-8 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-0 h-0 border-x-[10px] border-x-transparent border-t-[10px] border-t-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.08)]" />
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[18px] text-teal-600">
+                        group
+                      </span>
+                      <span className="font-serif text-sm font-bold text-slate-900">Travelers</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsPassengerOpen(false)}
+                      className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">close</span>
+                    </button>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                  {/* Stepper only */}
+                  <div className="flex items-center justify-between pt-3">
                     <div>
-                      <span className="text-xs font-bold text-slate-900 block">Adults</span>
-                      <span className="text-[10px] text-slate-500">12+ years</span>
+                      <span className="text-xs font-bold text-slate-900 block">Seats to reserve</span>
+                      <span className="text-[10px] text-slate-500">Reserved holiday seats</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-100 px-2 py-1 rounded-xl">
+                    <div className="flex items-center gap-2 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">
                       <button
                         type="button"
                         onClick={() => setPassengers(Math.max(1, passengers - 1))}
@@ -392,7 +426,7 @@ export default function IndiaLocalHero() {
                       >
                         -
                       </button>
-                      <span className="font-extrabold text-sm text-teal-700 w-5 text-center">{passengers}</span>
+                      <span className="font-extrabold text-sm text-teal-700 w-6 text-center">{passengers}</span>
                       <button
                         type="button"
                         onClick={() => setPassengers(Math.min(10, passengers + 1))}
@@ -401,26 +435,6 @@ export default function IndiaLocalHero() {
                         +
                       </button>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-1.5 pt-2">
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => {
-                          setPassengers(num);
-                          setIsPassengerOpen(false);
-                        }}
-                        className={`py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                          passengers === num
-                            ? 'bg-teal-600 text-white shadow-sm'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
-                      >
-                        {num} {num === 1 ? 'Adult' : 'Adults'}
-                      </button>
-                    ))}
                   </div>
                 </div>
               )}

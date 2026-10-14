@@ -4,10 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import AdminShell from "@/components/layout/AdminShell";
 import { adminFetch } from "@/lib/api";
+import { useAdmin } from "@/components/layout/AuthGate";
 
 export default function SettingsPage() {
+  const session = useAdmin();
   const [activeTab, setActiveTab] = useState("profile"); // "profile" | "admins"
-  const [currentUser, setCurrentUser] = useState(null);
+  const currentUser = session?.user || null;
+  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
 
   // Profile Form state
   const [displayName, setDisplayName] = useState("Super Admin");
@@ -35,19 +38,6 @@ export default function SettingsPage() {
   const [newAdminRole, setNewAdminRole] = useState("ADMIN");
   const [addingAdmin, setAddingAdmin] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("admin_user");
-        if (stored) {
-          const u = JSON.parse(stored);
-          setCurrentUser(u);
-          if (u.name) setDisplayName(u.name);
-        }
-      } catch {}
-    }
-  }, []);
-
   const loadAdmins = async () => {
     setLoadingAdmins(true);
     setAdminError("");
@@ -68,27 +58,32 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (activeTab === "admins") {
-      loadAdmins();
+      if (!isSuperAdmin) {
+        setActiveTab("profile");
+        return;
+      }
+      Promise.resolve().then(loadAdmins);
     }
-  }, [activeTab]);
+  }, [activeTab, isSuperAdmin]);
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (newPassword && newPassword !== confirmPassword) {
       setProfileMsg("New passwords do not match.");
       return;
     }
-    if (currentUser) {
-      const updated = { ...currentUser, name: displayName };
-      localStorage.setItem("admin_user", JSON.stringify(updated));
-      setCurrentUser(updated);
-    }
-    setSaved(true);
-    setProfileMsg("Settings saved successfully!");
-    setTimeout(() => {
-      setSaved(false);
-      setProfileMsg("");
-    }, 3000);
+    if (newPassword && !currentPassword) { setProfileMsg("Current password is required to change the password."); return; }
+    try {
+      const res = await adminFetch('/api/auth/account', { method: 'PATCH', body: JSON.stringify({ name: displayName, currentPassword, password: newPassword || undefined }) });
+      const data = await res.json();
+      if (!res.ok || !data.success) { setProfileMsg(data.message || "Unable to save settings."); return; }
+      const updated = data.data?.user || data.user;
+      if (updated) { session?.setUser(updated); }
+      if (data.data?.accessToken) window.localStorage.setItem('admin_token', data.data.accessToken);
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
+      setSaved(true); setProfileMsg("Settings saved successfully!");
+      setTimeout(() => { setSaved(false); setProfileMsg(""); }, 3000);
+    } catch { setProfileMsg("Could not connect to the authentication service."); }
   };
 
   const handleToggleAdminStatus = async (adminId) => {
@@ -162,7 +157,7 @@ export default function SettingsPage() {
         setNewAdminPhone("");
         setNewAdminPassword("");
         setNewAdminRole("ADMIN");
-        loadAdmins();
+      Promise.resolve().then(loadAdmins);
         setTimeout(() => setAdminSuccess(""), 3500);
       } else {
         setAdminError(data.message || "Failed to create admin account.");
@@ -174,7 +169,6 @@ export default function SettingsPage() {
     }
   };
 
-  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
 
   return (
     <AdminShell>
@@ -246,30 +240,30 @@ export default function SettingsPage() {
             Profile & Security
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("admins")}
-            style={{
-              padding: "0.45rem 1rem",
-              borderRadius: 7,
-              border: "none",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              cursor: "pointer",
-              backgroundColor: activeTab === "admins" ? "#FFFFFF" : "transparent",
-              color: activeTab === "admins" ? "#B91C1C" : "#64748B",
-              boxShadow: activeTab === "admins" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.35rem",
-              transition: "all 150ms",
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 17, color: activeTab === "admins" ? "#B91C1C" : "inherit" }}>
-              admin_panel_settings
-            </span>
-            Admin Team & Roles
-            {isSuperAdmin && (
+          {isSuperAdmin && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("admins")}
+              style={{
+                padding: "0.45rem 1rem",
+                borderRadius: 7,
+                border: "none",
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                backgroundColor: activeTab === "admins" ? "#FFFFFF" : "transparent",
+                color: activeTab === "admins" ? "#B91C1C" : "#64748B",
+                boxShadow: activeTab === "admins" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                transition: "all 150ms",
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 17, color: activeTab === "admins" ? "#B91C1C" : "inherit" }}>
+                admin_panel_settings
+              </span>
+              Admin Team & Roles
               <span style={{
                 backgroundColor: "#FDE68A",
                 color: "#78350F",
@@ -281,8 +275,8 @@ export default function SettingsPage() {
               }}>
                 SUPER
               </span>
-            )}
-          </button>
+            </button>
+          )}
         </div>
       </div>
 
@@ -603,7 +597,7 @@ export default function SettingsPage() {
       )}
 
       {/* TAB 2: ADMIN TEAM & ROLES (SUPER ADMIN) */}
-      {activeTab === "admins" && (
+      {isSuperAdmin && activeTab === "admins" && (
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
           {/* Banner for Super Admin */}
           <div style={{

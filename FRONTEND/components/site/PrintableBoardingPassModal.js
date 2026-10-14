@@ -54,7 +54,7 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
       navigator.share({
         title: `E-Ticket #${bookingId}`,
         text: text,
-        url: typeof window !== 'undefined' ? `${window.location.origin}/track-bus/${bookingId}` : '',
+        url: typeof window !== 'undefined' ? `${window.location.origin}/track-bus?id=${encodeURIComponent(bookingId)}` : '',
       }).catch(() => {});
     } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);

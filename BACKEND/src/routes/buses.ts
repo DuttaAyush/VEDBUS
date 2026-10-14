@@ -361,7 +361,7 @@ router.get('/gallery', async (_req: Request, res: Response) => {
 // Public — search trips with filters
 router.get(['/search', '/routes'], async (req: Request, res: Response) => {
   try {
-    const { from, to, category, timeSlots } = req.query;
+    const { from, to, category, timeSlots, date } = req.query;
 
     if (!from || !to) {
       // If neither is provided, return default scheduled trips
@@ -372,7 +372,13 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
       }).catch(() => []);
       
       if (allTrips.length > 0) {
-        const formatted = allTrips.map(mapTripToOutput);
+        const occupancy = await prisma.busBooking.findMany({
+          where: { tripId: { in: allTrips.map(t => t.id) }, status: { in: ['Pending', 'Confirmed'] } },
+          select: { tripId: true, seatNumbers: true },
+        }).catch(() => []);
+        const occupancyMap = new Map<string, number>();
+        occupancy.forEach(b => occupancyMap.set(b.tripId, (occupancyMap.get(b.tripId) || 0) + b.seatNumbers.length));
+        const formatted = allTrips.map(t => mapTripToOutput({ ...t, bookedSeatCount: occupancyMap.get(t.id) || 0 }));
         return res.status(200).json(formatted);
       }
       return res.status(200).json([]);
@@ -391,7 +397,14 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
       },
       include: {
         trips: {
-          where: { status: { notIn: ['Cancelled', 'Completed'] } },
+          where: {
+            status: { notIn: ['Cancelled', 'Completed'] },
+            ...(date && !isNaN(new Date(String(date)).getTime()) ? (() => {
+              const start = new Date(String(date));
+              const end = new Date(start); end.setDate(end.getDate() + 1);
+              return { departureDatetime: { gte: start, lt: end } };
+            })() : {}),
+          },
           include: { bus: true, route: true },
         },
       },
@@ -399,101 +412,17 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
 
     let routeWithTrips = matchingRoutes.find(r => r.trips && r.trips.length > 0);
 
-    // 2. If no matching route with trips found, auto-provision authentic route & trips
-    if (!routeWithTrips || routeWithTrips.trips.length === 0) {
-      try {
-        const routeSpec = getProceduralRoute(qFrom, qTo);
-
-        // Find or create route record
-        let route = matchingRoutes[0];
-        if (!route) {
-          route = await prisma.route.create({
-            data: {
-              originCity: qFrom,
-              destinationCity: qTo,
-              waypoints: routeSpec.waypoints,
-              distanceKm: routeSpec.distanceKm,
-            },
-            include: { trips: { include: { bus: true, route: true } } },
-          });
-        }
-
-        // Get fleet of buses to assign
-        const dbBuses = await prisma.bus.findMany({ where: { status: 'Active' } });
-        const busMap = new Map<string, any>();
-        for (const b of dbBuses) {
-          busMap.set(b.plateNumber, b);
-        }
-
-        const now = new Date();
-        const createdTrips = [];
-
-        // Create trips for today & tomorrow
-        for (let dayOffset = 0; dayOffset <= 1; dayOffset++) {
-          const tripDate = new Date(now.getTime() + dayOffset * 24 * 60 * 60 * 1000);
-
-          for (let i = 0; i < routeSpec.trips.length; i++) {
-            const tSpec = routeSpec.trips[i];
-            const assignedBus = busMap.get(tSpec.busPlate) || dbBuses[i % dbBuses.length] || DEFAULT_FLEET[0];
-
-            const depDatetime = new Date(tripDate);
-            depDatetime.setHours(tSpec.depHour, tSpec.depMin, 0, 0);
-
-            const arrDatetime = new Date(depDatetime.getTime() + Math.round(routeSpec.durationHours * 60 * 60 * 1000));
-
-            const trip = await prisma.trip.create({
-              data: {
-                busId: assignedBus.id,
-                routeId: route.id,
-                departureDatetime: depDatetime,
-                arrivalDatetime: arrDatetime,
-                baseFare: tSpec.fare,
-                status: 'Scheduled',
-              },
-              include: { bus: true, route: true },
-            });
-            createdTrips.push(trip);
-          }
-        }
-
-        routeWithTrips = { ...route, trips: createdTrips };
-      } catch (err) {
-        console.error('[buses/search] Failed to auto-provision route trips:', err);
-      }
-    }
-
     let tripsToReturn: any[] = routeWithTrips?.trips || [];
 
-    if (tripsToReturn.length === 0) {
-      const fallbackSpec = getProceduralRoute(qFrom, qTo);
-      const now = new Date();
-      tripsToReturn = fallbackSpec.trips.map((tSpec, idx) => {
-        const depDatetime = new Date(now);
-        depDatetime.setHours(tSpec.depHour, tSpec.depMin, 0, 0);
-        const arrDatetime = new Date(depDatetime.getTime() + Math.round(fallbackSpec.durationHours * 60 * 60 * 1000));
-        return {
-          id: `trip_proc_${idx + 1}`,
-          departureDatetime: depDatetime,
-          arrivalDatetime: arrDatetime,
-          baseFare: tSpec.fare,
-          status: 'Scheduled',
-          bus: {
-            id: `bus_proc_${idx + 1}`,
-            plateNumber: tSpec.busPlate,
-            type: tSpec.fare >= 700 ? 'BharatBenz AC Sleeper (2+1)' : 'Volvo Multi-Axle AC Seater',
-            busStyle: tSpec.fare >= 700 ? 'sleeper' : 'seater',
-            amenities: ['wifi', 'charging', 'water', 'blanket'],
-          },
-          route: {
-            originCity: qFrom,
-            destinationCity: qTo,
-            waypoints: fallbackSpec.waypoints,
-          },
-        };
-      });
-    }
+    if (tripsToReturn.length === 0) return res.status(200).json([]);
 
-    let results = tripsToReturn.map(mapTripToOutput);
+    const occupancy = await prisma.busBooking.findMany({
+      where: { tripId: { in: tripsToReturn.map(t => t.id) }, status: { in: ['Pending', 'Confirmed'] } },
+      select: { tripId: true, seatNumbers: true },
+    }).catch(() => []);
+    const occupancyMap = new Map<string, number>();
+    occupancy.forEach(b => occupancyMap.set(b.tripId, (occupancyMap.get(b.tripId) || 0) + b.seatNumbers.length));
+    let results = tripsToReturn.map(t => mapTripToOutput({ ...t, bookedSeatCount: occupancyMap.get(t.id) || 0 }));
 
     // Filter by category
     if (category && category !== 'all') {
@@ -531,11 +460,14 @@ function mapTripToOutput(t: any) {
   if (hour >= 17 && hour < 21) timeSlot = 'evening';
   if (hour >= 21 || hour < 5) timeSlot = 'night';
 
-  // Seeded deterministic seats left calculation
   const idHash = t.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
   const totalSeats = t.bus?.totalSeats || 40;
-  const bookedSeed = (idHash % 14) + 6;
-  const seatsLeft = Math.max(4, totalSeats - bookedSeed);
+  const confirmedBookedCount = Number(t.bookedSeatCount || 0);
+  const blockedCount =
+    t.seatStatuses && typeof t.seatStatuses === 'object'
+      ? Object.values(t.seatStatuses).filter((s) => s === 'blocked').length
+      : 0;
+  const seatsLeft = Math.max(0, totalSeats - confirmedBookedCount - blockedCount);
 
   const busStyle = t.bus?.busStyle || (t.bus?.type?.toLowerCase().includes('sleeper') ? 'sleeper' : 'seater');
 

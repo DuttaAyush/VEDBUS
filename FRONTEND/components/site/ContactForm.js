@@ -79,7 +79,7 @@ export default function ContactForm() {
                   </div>
                   <div>
                     <span className="block text-[10px] text-slate-400 uppercase font-bold tracking-wider">Email Concierge</span>
-                    <span className="text-sm font-bold text-white">support@yatrabus.com</span>
+                    <span className="text-sm font-bold text-white">support@vedbus.in</span>
                   </div>
                 </div>
               </div>

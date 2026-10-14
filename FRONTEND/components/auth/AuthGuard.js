@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { isAuthenticated, getStoredUser, openAuthModal } from '@/lib/auth';
+import { isAuthenticated, getStoredToken, openAuthModal } from '@/lib/auth';
+import { apiFetch } from '@/lib/api';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 
@@ -16,16 +17,34 @@ export default function AuthGuard({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const isUserAuthed = isAuthenticated();
-      setAuthed(isUserAuthed);
-      setChecking(false);
-      if (!isUserAuthed) {
-        // Automatically pop up login modal for a frictionless user flow
-        setTimeout(() => {
-          openAuthModal('login');
-        }, 300);
+    const checkAuth = async () => {
+      const hasLocalCredentials = isAuthenticated();
+      if (!hasLocalCredentials && !getStoredToken()) {
+        setAuthed(false);
+        setChecking(false);
+        setTimeout(() => openAuthModal('login'), 300);
+        return;
       }
+
+      try {
+        const response = await apiFetch('/api/auth/me');
+        const data = await response.json();
+        const user = data?.data?.user || data?.data || data?.user;
+        if (response.ok && data?.success !== false && user?.id) {
+          localStorage.setItem('auth_user', JSON.stringify(user));
+          setAuthed(true);
+          return;
+        }
+      } catch {
+        // The guard below keeps protected content hidden when verification fails.
+      } finally {
+        setChecking(false);
+      }
+
+      setAuthed(false);
+      setTimeout(() => {
+        openAuthModal('login');
+      }, 300);
     };
 
     checkAuth();

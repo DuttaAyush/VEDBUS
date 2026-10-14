@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,25 +18,9 @@ const BASE_NAV_ITEMS = [
   { href: "/settings",         icon: "settings",            label: "Settings" },
 ];
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose, user }) {
   const pathname = usePathname();
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const u = JSON.parse(localStorage.getItem("admin_user") || "{}");
-        if (
-          u.role === "SUPER_ADMIN" ||
-          u.email?.includes("superadmin") ||
-          u.email === "admin@yatrabus.in" ||
-          u.email === "superadmin@yatrabus.in"
-        ) {
-          setIsSuperAdmin(true);
-        }
-      } catch {}
-    }
-  }, []);
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
 
   const navItems = isSuperAdmin
     ? [

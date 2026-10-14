@@ -25,7 +25,8 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const initialFrom = searchParams.get('from') || 'Nagpur';
   const initialTo = searchParams.get('to') || 'Pune';
-  const initialDate = searchParams.get('date') || 'Tomorrow, 24 Oct';
+  const initialDate = searchParams.get('dateLabel') || searchParams.get('date') || 'Tomorrow, 24 Oct';
+  const initialDateValue = searchParams.get('date') || '';
 
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,7 @@ function SearchContent() {
   const [selectedDate, setSelectedDate] = useState({
     mainText: initialDate,
     subText: 'Scheduled Journey',
+    date: initialDateValue,
   });
   const [passengerCount, setPassengerCount] = useState(() => {
     const p = parseInt(searchParams.get('passengers'));
@@ -62,11 +64,12 @@ function SearchContent() {
     return 'Thursday';
   };
 
-  const fetchBuses = async (queryFrom = fromCity, queryTo = toCity) => {
+  const fetchBuses = async (queryFrom = fromCity, queryTo = toCity, queryDate = selectedDate.date) => {
     setLoading(true);
     setBuses([]);
     try {
-      const res = await apiFetch(`/api/buses/search?from=${encodeURIComponent(queryFrom)}&to=${encodeURIComponent(queryTo)}`);
+      const dateParam = queryDate ? `&date=${encodeURIComponent(queryDate)}` : '';
+      const res = await apiFetch(`/api/buses/search?from=${encodeURIComponent(queryFrom)}&to=${encodeURIComponent(queryTo)}${dateParam}`);
       if (res.ok) {
         const data = await res.json();
         const items = Array.isArray(data) ? data : data.data || [];
@@ -83,7 +86,7 @@ function SearchContent() {
   };
 
   React.useEffect(() => {
-    fetchBuses(initialFrom, initialTo);
+    fetchBuses(initialFrom, initialTo, initialDateValue);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFrom, initialTo]);
 
@@ -106,11 +109,12 @@ function SearchContent() {
   };
 
   // Instant live sync of search parameters into URL without needing "Update Search"
-  const syncSearchLive = (nextFrom = fromCity, nextTo = toCity, nextDateText = selectedDate?.mainText, nextPax = passengerCount) => {
+  const syncSearchLive = (nextFrom = fromCity, nextTo = toCity, nextDateText = selectedDate?.mainText, nextPax = passengerCount, nextDateValue = selectedDate?.date) => {
     const params = new URLSearchParams();
     if (nextFrom) params.set('from', nextFrom);
     if (nextTo) params.set('to', nextTo);
-    if (nextDateText) params.set('date', nextDateText);
+    if (nextDateValue) params.set('date', nextDateValue);
+    if (nextDateText) params.set('dateLabel', nextDateText);
     params.set('passengers', nextPax.toString());
     const newUri = `/search?${params.toString()}`;
     router.replace(newUri, { scroll: false });
@@ -122,7 +126,7 @@ function SearchContent() {
     const newTo = fromCity;
     setFromCity(newFrom);
     setToCity(newTo);
-    fetchBuses(newFrom, newTo);
+    fetchBuses(newFrom, newTo, selectedDate.date);
     syncSearchLive(newFrom, newTo, selectedDate?.mainText, passengerCount);
   };
 
@@ -130,8 +134,10 @@ function SearchContent() {
     setSelectedDate({
       mainText: dateResult.mainText,
       subText: dateResult.subText,
+      date: dateResult.date,
     });
-    syncSearchLive(fromCity, toCity, dateResult.mainText, passengerCount);
+    fetchBuses(fromCity, toCity, dateResult.date);
+    syncSearchLive(fromCity, toCity, dateResult.mainText, passengerCount, dateResult.date);
   };
 
   const handlePassengerSelect = (count) => {
@@ -157,7 +163,7 @@ function SearchContent() {
   const handleUpdateSearch = () => {
     closeAllDropdowns();
     setIsMobileSearchExpanded(false);
-    fetchBuses(fromCity, toCity);
+    fetchBuses(fromCity, toCity, selectedDate.date);
     syncSearchLive(fromCity, toCity, selectedDate?.mainText, passengerCount);
   };
 

@@ -1,27 +1,43 @@
 import type { Config } from 'jest';
 
-const config: Config = {
-  preset: 'ts-jest',
+const shared = {
+  rootDir: '.',
   testEnvironment: 'node',
-  roots: ['<rootDir>/tests'],
-  testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   verbose: true,
   testTimeout: 30000,
-  forceExit: true,
-  detectOpenHandles: true,
   clearMocks: true,
   restoreMocks: true,
-  collectCoverageFrom: [
-    'src/routes/**/*.ts',
-    'src/middleware/**/*.ts',
-    '!src/server.ts',
-    '!src/seed.ts',
-  ],
+};
+
+const config: Config = {
+  testTimeout: 30000,
   coverageReporters: ['text', 'lcov', 'clover'],
+  projects: [
+    {
+      ...shared,
+      displayName: 'unit',
+      testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
+      setupFiles: ['<rootDir>/tests/setup/unit-env.cjs'],
+      collectCoverageFrom: [
+        'src/routes/**/*.ts',
+        'src/middleware/**/*.ts',
+        'src/utils/**/*.ts',
+        '!src/server.ts',
+        '!src/seed.ts',
+      ],
+    },
+    {
+      ...shared,
+      displayName: 'integration',
+      testMatch: ['<rootDir>/tests/integration/**/*.test.ts'],
+      setupFiles: ['<rootDir>/tests/setup/integration-env.cjs'],
+      globalTeardown: '<rootDir>/tests/setup/integration-teardown.cjs',
+    },
+  ],
 };
 
 export default config;

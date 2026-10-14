@@ -106,32 +106,15 @@ export default function PackageDetailModal({ pkg, isOpen, onClose }) {
   const badge = pkg.badge || pkg.tag || 'Popular Package';
   const badgeColor = pkg.badgeColor || pkg.tagBg || 'bg-teal-600 text-white';
   const duration = pkg.duration || '7 Days / 6 Nights';
-  const price = pkg.price || '₹54,999';
-  const image = pkg.image || '/images/yatra_international_holiday_travel_packages_1.jpg';
-  const shortPlan = pkg.shortPlan || pkg.description || 'Complete guided odyssey with luxury stays, sightseeing, and private AC transfers.';
-  const itinerary = pkg.itinerary || [
-    { day: 'Day 1', title: 'Arrival & Welcome Reception', desc: 'Private luxury transfer from airport/station to hotel. Relaxation and evening briefing.' },
-    { day: 'Day 2', title: 'City Tour & Icon Sightseeing', desc: 'Guided morning tour past main monuments, photo points, and heritage landmarks.' },
-    { day: 'Day 3', title: 'Excursion & Adventure Day', desc: 'Full day sightseeing excursion with special pass entry and curated lunch.' },
-    { day: 'Day 4', title: 'Leisure & Cultural Experience', desc: 'Free morning for shopping followed by evening cultural show and specialty dinner.' },
-    { day: 'Day 5', title: 'Departure & Return Transit', desc: 'Breakfast at hotel, free time for souvenirs, drop-off at transit station.' }
-  ];
-  const highlights = pkg.highlights || [
-    'Handpicked 4★ / 5★ Luxury Accommodations',
-    'Private AC Bus & Coach Transfers',
-    'Verified Gourmet & Satvik Meals',
-    'Sightseeing & Entry Passes Included'
-  ];
-  const inclusions = pkg.inclusions || [
-    'All Sightseeing Tours & Entry Tickets',
-    'Daily International/Regional Buffet Breakfast & Dinner',
-    'Private AC Coach Transit with Professional Guide'
-  ];
-  const exclusions = pkg.exclusions || ['Personal Laundry & Mini Bar', 'Optional Water Sports / Activity Fees'];
-  const hotels = pkg.hotels || [
-    { city: 'Main City (3 Nights)', hotel: 'Grand Luxury Resort (4★/5★)', meal: 'Daily Breakfast & Dinner' },
-    { city: 'Excursion Resort (2 Nights)', hotel: 'Heritage Hill Palace (4★)', meal: 'All Meals Included' }
-  ];
+  const price = pkg.price || 'Price available after live package lookup';
+  const image = pkg.image || '/images/screen.png';
+  const shortPlan = pkg.shortPlan || pkg.description || 'Package details are available after the live package record is opened.';
+  const itinerary = Array.isArray(pkg.itinerary) ? pkg.itinerary : [];
+  const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
+  const inclusions = Array.isArray(pkg.inclusions) ? pkg.inclusions : [];
+  const exclusions = Array.isArray(pkg.exclusions) ? pkg.exclusions : [];
+  const hotels = Array.isArray(pkg.hotels) ? pkg.hotels : [];
+  const packageId = pkg.id || pkg.slug;
 
   return (
     <div
@@ -230,20 +213,25 @@ export default function PackageDetailModal({ pkg, isOpen, onClose }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <a
-                href={`/customize-package/${pkg.id || 'chardham'}`}
+               {packageId ? <a
+                 href={`/customize-package?package=${encodeURIComponent(packageId)}`}
                 className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">tune</span>
                 <span>Customize</span>
-              </a>
-              <a
-                href={`/packages/checkout?package=${pkg.id || 'chardham'}`}
+               </a> : <a
+                 href="/contact"
+                 className="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider border border-slate-200"
+               >
+                 Contact support
+               </a>}
+               {packageId ? <a
+                 href={`/packages/checkout?package=${encodeURIComponent(packageId)}`}
                 className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Book Package</span>
                 <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </a>
+               </a> : null}
             </div>
           </div>
 

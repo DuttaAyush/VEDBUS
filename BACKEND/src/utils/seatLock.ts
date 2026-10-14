@@ -82,8 +82,8 @@ function getLockKey(tripId: string, seatNumber: string): string {
 }
 
 // ── Global Seat Hold Duration Configuration ─────────────────────────────────
-// Set to 120 seconds (2 minutes). To change hold duration, simply edit this number!
-export const SEAT_HOLD_DURATION_SECONDS = 120;
+// Set to 600 seconds (10 minutes) as recommended for checkout completion.
+export const SEAT_HOLD_DURATION_SECONDS = 600;
 
 /**
  * Attempts to atomically hold a set of seats for a customer.
@@ -102,42 +102,52 @@ export async function tryHoldSeats(
 ): Promise<{ success: boolean; conflictingSeats: string[]; ttlSeconds: number }> {
   const conflictingSeats: string[] = [];
   const now = Date.now();
+  const uniqueSeatNumbers = Array.from(new Set(seatNumbers.filter(Boolean)));
 
+  if (uniqueSeatNumbers.length === 0) {
+    return { success: false, conflictingSeats: [], ttlSeconds };
+  }
+
+  if (REDIS_URL && (!redisClient || !isRedisConnected)) throw new Error('Seat reservation service unavailable.');
   // 1. Try via Redis if connected
   if (redisClient && isRedisConnected) {
     try {
-      // Check existing locks in Redis
-      const keys = seatNumbers.map((s) => getLockKey(tripId, s));
-      const currentHolders = await redisClient.mget(...keys);
+       // The check and all writes must happen in one Redis script. A read followed
+       // by SET commands allows two checkout requests to win the same seat race.
+       const keys = uniqueSeatNumbers.map((s) => getLockKey(tripId, s));
+       const result = await redisClient.eval(
+         `
+           for i = 1, #KEYS do
+             local holder = redis.call('GET', KEYS[i])
+             if holder and holder ~= ARGV[1] then
+               return i
+             end
+           end
+           for i = 1, #KEYS do
+             redis.call('SET', KEYS[i], ARGV[1], 'EX', ARGV[2])
+           end
+           return 0
+         `,
+         keys.length,
+         ...keys,
+         lockHolderId,
+         String(ttlSeconds)
+       );
 
-      for (let i = 0; i < seatNumbers.length; i++) {
-        const holder = currentHolders[i];
-        if (holder && holder !== lockHolderId) {
-          conflictingSeats.push(seatNumbers[i]);
-        }
-      }
+       if (Number(result) > 0) {
+         return { success: false, conflictingSeats: [uniqueSeatNumbers[Number(result) - 1]], ttlSeconds };
+       }
 
-      if (conflictingSeats.length > 0) {
-        return { success: false, conflictingSeats, ttlSeconds };
-      }
-
-      // Atomically set all keys with TTL in a pipeline
-      const pipeline = redisClient.pipeline();
-      for (const key of keys) {
-        pipeline.set(key, lockHolderId, 'EX', ttlSeconds);
-      }
-      await pipeline.exec();
-
-      return { success: true, conflictingSeats: [], ttlSeconds };
+       return { success: true, conflictingSeats: [], ttlSeconds };
     } catch (err) {
       console.warn('⚠️ [Redis] Error during tryHoldSeats, falling back to in-memory:', err);
-      // Fall through to in-memory below
+      throw new Error('Seat reservation service unavailable.');
     }
   }
 
   // 2. In-Memory Engine (Primary or Fallback)
   // Check conflicts
-  for (const seat of seatNumbers) {
+  for (const seat of uniqueSeatNumbers) {
     const key = getLockKey(tripId, seat);
     const existing = inMemoryLocks.get(key);
     if (existing && existing.expiresAt > now && existing.holderId !== lockHolderId) {
@@ -150,7 +160,7 @@ export async function tryHoldSeats(
   }
 
   // Set locks
-  for (const seat of seatNumbers) {
+  for (const seat of uniqueSeatNumbers) {
     const key = getLockKey(tripId, seat);
     const existing = inMemoryLocks.get(key);
     if (existing) {
@@ -183,18 +193,12 @@ export async function releaseSeats(
   if (redisClient && isRedisConnected) {
     try {
       const keys = seatNumbers.map((s) => getLockKey(tripId, s));
-      const currentHolders = await redisClient.mget(...keys);
-      const keysToDelete: string[] = [];
-
-      for (let i = 0; i < keys.length; i++) {
-        if (currentHolders[i] === lockHolderId) {
-          keysToDelete.push(keys[i]);
-        }
-      }
-
-      if (keysToDelete.length > 0) {
-        await redisClient.del(...keysToDelete);
-      }
+      if (keys.length) await redisClient.eval(`
+        for i = 1, #KEYS do
+          if redis.call('GET', KEYS[i]) == ARGV[1] then redis.call('DEL', KEYS[i]) end
+        end
+        return 1
+      `, keys.length, ...keys, lockHolderId);
     } catch (err) {
       console.warn('⚠️ [Redis] Error during releaseSeats:', err);
     }
@@ -222,7 +226,12 @@ export async function getHeldSeats(tripId: string): Promise<string[]> {
   // 1. Fetch from Redis
   if (redisClient && isRedisConnected) {
     try {
-      const keys = await redisClient.keys(`${prefix}*`);
+      const keys: string[] = [];
+      let cursor = '0';
+      do {
+        const result = await redisClient.scan(cursor, 'MATCH', `${prefix}*`, 'COUNT', 100);
+        cursor = result[0]; keys.push(...result[1]);
+      } while (cursor !== '0');
       for (const k of keys) {
         held.add(k.replace(prefix, ''));
       }
@@ -247,10 +256,12 @@ export async function getHeldSeats(tripId: string): Promise<string[]> {
 export async function verifySeatLocks(
   tripId: string,
   seatNumbers: string[],
-  lockHolderId: string
+  lockHolderId: string,
+  requireExistingHold = false
 ): Promise<{ valid: boolean; unauthorizedSeats: string[] }> {
   const unauthorizedSeats: string[] = [];
   const now = Date.now();
+  if (REDIS_URL && (!redisClient || !isRedisConnected)) throw new Error('Seat reservation service unavailable.');
 
   // 1. Verify in Redis
   if (redisClient && isRedisConnected) {
@@ -260,14 +271,14 @@ export async function verifySeatLocks(
 
       for (let i = 0; i < seatNumbers.length; i++) {
         const holder = currentHolders[i];
-        if (holder && holder !== lockHolderId) {
+        if ((holder && holder !== lockHolderId) || (requireExistingHold && !holder)) {
           unauthorizedSeats.push(seatNumbers[i]);
         }
       }
 
       return { valid: unauthorizedSeats.length === 0, unauthorizedSeats };
     } catch (err) {
-      console.warn('⚠️ [Redis] Error during verifySeatLocks, verifying in-memory:', err);
+      throw new Error('Seat reservation service unavailable.');
     }
   }
 
@@ -275,7 +286,8 @@ export async function verifySeatLocks(
   for (const seat of seatNumbers) {
     const key = getLockKey(tripId, seat);
     const existing = inMemoryLocks.get(key);
-    if (existing && existing.expiresAt > now && existing.holderId !== lockHolderId) {
+    const isActive = existing && existing.expiresAt > now;
+    if ((isActive && existing.holderId !== lockHolderId) || (requireExistingHold && !isActive)) {
       unauthorizedSeats.push(seat);
     }
   }

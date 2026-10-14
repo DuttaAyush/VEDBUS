@@ -348,11 +348,14 @@ export default function AboutUsPage() {
           </div>
 
           {/* Legal Venture Callout Box */}
-          <div className="max-w-xl mx-auto p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm text-center space-y-1">
+          <div className="max-w-xl mx-auto p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm text-center space-y-1.5">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500">Legal Entity</span>
             <div className="text-base sm:text-lg font-serif font-bold text-slate-900">
               Legal Venture Name: <span className="text-brand-scarlet">Roshni Tours &amp; Travels</span>
             </div>
+            <p className="text-xs text-slate-700 font-medium">
+              <span className="font-semibold text-slate-900">Office Address:</span> Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
+            </p>
             <p className="text-xs text-slate-500">
               All bookings, operations, and transportation agreements are officially managed under Roshni Tours &amp; Travels.
             </p>

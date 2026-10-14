@@ -51,6 +51,26 @@ export default function SpiritualHero() {
   const [textOpacity, setTextOpacity] = useState(1);
   const [isLoaded, setIsLoaded] = useState(true);
 
+  const getFilteredSpiritualOrigins = () => {
+    const q = fromCity.trim().toLowerCase();
+    const exact = spiritualOrigins.some(c => c.city.toLowerCase() === q);
+    if (!q || exact) return spiritualOrigins;
+    const matches = spiritualOrigins.filter(c => c.city.toLowerCase().includes(q) || c.state.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q));
+    if (matches.length >= 4) return matches;
+    const others = spiritualOrigins.filter(c => !matches.some(m => m.city === c.city));
+    return [...matches, ...others].slice(0, 8);
+  };
+
+  const getFilteredSpiritualDestinations = () => {
+    const q = devsthan.trim().toLowerCase();
+    const exact = spiritualDestinations.some(d => d.name.toLowerCase() === q || d.name.toLowerCase().startsWith(q));
+    if (!q || exact) return spiritualDestinations;
+    const matches = spiritualDestinations.filter(d => d.name.toLowerCase().includes(q) || d.state.toLowerCase().includes(q) || d.badge.toLowerCase().includes(q));
+    if (matches.length >= 4) return matches;
+    const others = spiritualDestinations.filter(d => !matches.some(m => m.name === d.name));
+    return [...matches, ...others].slice(0, 8);
+  };
+
   useEffect(() => {
     setIsLoaded(true);
 
@@ -220,35 +240,33 @@ export default function SpiritualHero() {
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                     <span>Select Boarding City</span>
-                    <span className="text-[9px] text-amber-200/50">Direct Express</span>
+                    <span className="text-[9px] text-amber-200/50">{getFilteredSpiritualOrigins().length} Cities</span>
                   </div>
                   <div className="max-h-48 overflow-y-auto py-1 space-y-0.5 custom-scrollbar">
-                    {spiritualOrigins
-                      .filter(c => c.city.toLowerCase().includes(fromCity.toLowerCase().trim()) || c.state.toLowerCase().includes(fromCity.toLowerCase().trim()))
-                      .map((item) => (
-                        <button
-                          key={item.city}
-                          type="button"
-                          onClick={() => {
-                            setFromCity(item.city);
-                            setIsFromOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
-                            fromCity.toLowerCase() === item.city.toLowerCase()
-                              ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                              : 'text-amber-100 hover:bg-white/10 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px] text-amber-400">location_on</span>
-                            <div>
-                              <span className="block text-xs font-bold leading-none">{item.city}</span>
-                              <span className="text-[10px] text-white/50">{item.desc}</span>
-                            </div>
+                    {getFilteredSpiritualOrigins().map((item) => (
+                      <button
+                        key={item.city}
+                        type="button"
+                        onClick={() => {
+                          setFromCity(item.city);
+                          setIsFromOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                          fromCity.toLowerCase() === item.city.toLowerCase()
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                            : 'text-amber-100 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[16px] text-amber-400">location_on</span>
+                          <div>
+                            <span className="block text-xs font-bold leading-none">{item.city}</span>
+                            <span className="text-[10px] text-white/50">{item.desc}</span>
                           </div>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-amber-200">{item.state}</span>
-                        </button>
-                      ))}
+                        </div>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-amber-200">{item.state}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -298,35 +316,33 @@ export default function SpiritualHero() {
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                     <span>Sacred Teerth Circuits</span>
-                    <span className="text-[9px] text-amber-200/50">VIP Pass Included</span>
+                    <span className="text-[9px] text-amber-200/50">{getFilteredSpiritualDestinations().length} Options</span>
                   </div>
                   <div className="max-h-56 overflow-y-auto py-1 space-y-0.5 custom-scrollbar">
-                    {spiritualDestinations
-                      .filter(d => d.name.toLowerCase().includes(devsthan.toLowerCase().trim()) || d.state.toLowerCase().includes(devsthan.toLowerCase().trim()))
-                      .map((item) => (
-                        <button
-                          key={item.name}
-                          type="button"
-                          onClick={() => {
-                            setDevsthan(item.name);
-                            setIsToOpen(false);
-                          }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
-                            devsthan.toLowerCase() === item.name.toLowerCase()
-                              ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                              : 'text-amber-100 hover:bg-white/10 hover:text-white'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px] text-amber-400">temple_hindu</span>
-                            <div>
-                              <span className="block text-xs font-bold leading-none">{item.name}</span>
-                              <span className="text-[10px] text-amber-300/70">{item.duration} • {item.state}</span>
-                            </div>
+                    {getFilteredSpiritualDestinations().map((item) => (
+                      <button
+                        key={item.name}
+                        type="button"
+                        onClick={() => {
+                          setDevsthan(item.name);
+                          setIsToOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer ${
+                          devsthan.toLowerCase() === item.name.toLowerCase()
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                            : 'text-amber-100 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[16px] text-amber-400">temple_hindu</span>
+                          <div>
+                            <span className="block text-xs font-bold leading-none">{item.name}</span>
+                            <span className="text-[10px] text-amber-300/70">{item.duration} • {item.state}</span>
                           </div>
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">{item.badge}</span>
-                        </button>
-                      ))}
+                        </div>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200">{item.badge}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -363,7 +379,7 @@ export default function SpiritualHero() {
 
             {/* 4. PILGRIMS / DEVOTEES FIELD */}
             <div
-              className="relative md:col-span-1 flex items-center bg-slate-950/60 hover:bg-amber-950/40 rounded-2xl px-3 py-3 border border-amber-500/20 hover:border-amber-400 text-center cursor-pointer transition-all select-none"
+              className={`relative md:col-span-1 flex items-center bg-slate-950/60 hover:bg-amber-950/40 rounded-2xl px-3 py-3 border border-amber-500/20 hover:border-amber-400 text-center cursor-pointer transition-all select-none ${isPassengerOpen ? 'z-[9999]' : 'z-10'}`}
               onClick={() => {
                 setIsPassengerOpen(!isPassengerOpen);
                 setIsFromOpen(false);
@@ -381,55 +397,52 @@ export default function SpiritualHero() {
               {isPassengerOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full right-0 sm:right-auto sm:left-0 mt-2 w-64 bg-slate-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-3 z-50 text-left animate-fadeIn"
+                  aria-label="Devotees Selection Bubble"
+                  className="absolute bottom-full mb-3.5 right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 z-[99999] w-72 sm:w-80 max-w-[calc(100vw-2rem)] bg-white/98 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_rgba(15,23,42,0.35)] border border-slate-200/90 p-4 text-slate-800 animate-in fade-in zoom-in-95 duration-200 text-left"
                 >
-                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 pb-2 border-b border-white/10 flex items-center justify-between">
-                    <span>Number of Devotees</span>
-                    <span className="text-[10px] text-white/50">VIP queue sync</span>
+                  {/* Speech Bubble Arrow Indicator */}
+                  <div className="absolute top-full right-8 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 w-0 h-0 border-x-[10px] border-x-transparent border-t-[10px] border-t-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.08)]" />
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[18px] text-amber-500">
+                        group
+                      </span>
+                      <span className="font-serif text-sm font-bold text-slate-900">Pilgrims &amp; Devotees</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsPassengerOpen(false)}
+                      className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">close</span>
+                    </button>
                   </div>
 
-                  <div className="flex items-center justify-between py-3 border-b border-white/10">
+                  {/* Stepper only */}
+                  <div className="flex items-center justify-between pt-3">
                     <div>
-                      <span className="text-xs font-bold text-white block">Devotees</span>
-                      <span className="text-[10px] text-white/60">Reserved berths</span>
+                      <span className="text-xs font-bold text-slate-900 block">Seats to reserve</span>
+                      <span className="text-[10px] text-slate-500">Reserved sacred berths</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-900 px-2 py-1 rounded-xl border border-white/10">
+                    <div className="flex items-center gap-2 bg-slate-100 px-2 py-1 rounded-xl border border-slate-200">
                       <button
                         type="button"
                         onClick={() => setPassengers(Math.max(1, passengers - 1))}
-                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                        className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 text-slate-900 flex items-center justify-center font-bold text-sm shadow-sm transition-colors cursor-pointer"
                       >
                         -
                       </button>
-                      <span className="font-extrabold text-sm text-amber-300 w-5 text-center">{passengers}</span>
+                      <span className="font-extrabold text-sm text-amber-600 w-6 text-center">{passengers}</span>
                       <button
                         type="button"
-                        onClick={() => setPassengers(Math.min(10, passengers + 1))}
-                        className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                        onClick={() => setPassengers(Math.min(6, passengers + 1))}
+                        className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 text-slate-900 flex items-center justify-center font-bold text-sm shadow-sm transition-colors cursor-pointer"
                       >
                         +
                       </button>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-1.5 pt-2">
-                    {[1, 2, 3, 4, 5, 6].map((num) => (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => {
-                          setPassengers(num);
-                          setIsPassengerOpen(false);
-                        }}
-                        className={`py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                          passengers === num
-                            ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                            : 'bg-white/5 hover:bg-white/15 text-white/80'
-                        }`}
-                      >
-                        {num} {num === 1 ? 'Devotee' : 'Devotees'}
-                      </button>
-                    ))}
                   </div>
                 </div>
               )}

@@ -628,14 +628,14 @@ export default function InternationalPackages() {
                 </div>
                 <div className="flex items-center gap-2">
                   <a
-                    href={`/customize-package/${selectedPkg.id}`}
+                     href={`/customize-package?package=${encodeURIComponent(selectedPkg.id)}`}
                     className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-sm flex items-center gap-1 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[15px]">tune</span>
                     <span>Customize</span>
                   </a>
                   <a
-                    href={`/packages/checkout?package=${selectedPkg.id}`}
+                     href={`/packages/checkout?package=${encodeURIComponent(selectedPkg.id)}`}
                     className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>Book Package</span>

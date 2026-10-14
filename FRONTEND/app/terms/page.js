@@ -57,7 +57,10 @@ export default function TermsPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-bold text-slate-900 font-serif">6. Contact Information</h2>
               <p>
-                For questions regarding these Terms &amp; Conditions, please contact us at <strong>support@yatrabus.in</strong> or via toll-free helpline at <strong>1800-209-9287</strong>.
+                For questions regarding these Terms &amp; Conditions, please contact us at <strong>support@vedbus.in</strong> or via toll-free helpline at <strong>1800-209-9287</strong>.
+              </p>
+              <p className="text-xs text-slate-600">
+                <strong>Office Address:</strong> Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
               </p>
             </section>
           </div>

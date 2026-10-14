@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminShell from "@/components/layout/AdminShell";
 import { adminFetch } from "@/lib/api";
@@ -69,57 +69,6 @@ const PHOTO_CATEGORIES = [
   { id: "amenities", name: "Amenities & Tech" },
 ];
 
-const CURATED_FLEET_PRESETS = [
-  {
-    url: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1200&auto=format&fit=crop",
-    category: "sleeper",
-    categoryName: "Sleeper Berths",
-    caption: "36-Berth Luxury Sleeper Coach (1+2 Layout)",
-    badge: "Flagship Sleeper",
-    isPrimary: true,
-  },
-  {
-    url: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=1200&auto=format&fit=crop",
-    category: "sleeper",
-    categoryName: "Sleeper Berths",
-    caption: "Lower Deck Single Window Berth with UV Tint",
-    badge: "Solo Traveler Choice",
-    isPrimary: false,
-  },
-  {
-    url: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=1200&auto=format&fit=crop",
-    category: "sleeper",
-    categoryName: "Sleeper Berths",
-    caption: "Upper Deck Double Sharing Berth with Reading Console",
-    badge: "Couples & Family",
-    isPrimary: false,
-  },
-  {
-    url: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?q=80&w=1200&auto=format&fit=crop",
-    category: "interiors",
-    categoryName: "Cabin Ambiance",
-    caption: "Ambient Starlight LED Ceiling with Low Noise Acoustic Panels",
-    badge: "Mood Lighting",
-    isPrimary: false,
-  },
-  {
-    url: "https://images.unsplash.com/photo-1557223562-6c77ef16210f?q=80&w=1200&auto=format&fit=crop",
-    category: "exterior",
-    categoryName: "Exterior Fleet",
-    caption: "Aerodynamic Volvo Multi-Axle Exterior Coach",
-    badge: "Euro-6 Luxury",
-    isPrimary: false,
-  },
-  {
-    url: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?q=80&w=1200&auto=format&fit=crop",
-    category: "amenities",
-    categoryName: "Amenities & Tech",
-    caption: "Dedicated 45W Type-C Fast Charger & Bedside Switch",
-    badge: "Fast Charging",
-    isPrimary: false,
-  },
-];
-
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function SectionCard({ icon, title, subtitle, children, rightAction }) {
@@ -148,10 +97,9 @@ function Label({ children, required }) {
   );
 }
 
-export default function EditBusPage() {
-  const params = useParams();
+export default function EditBusPage({ id }) {
   const router = useRouter();
-  const busId = params?.id;
+  const busId = id;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -175,7 +123,6 @@ export default function EditBusPage() {
 
   useEffect(() => {
     if (!busId) return;
-    setIsLoading(true);
     adminFetch(`/api/admin/fleet/${busId}`)
       .then(res => res.json())
       .then(data => {
@@ -268,13 +215,6 @@ export default function EditBusPage() {
       ...p,
       isPrimary: i === index,
     })));
-  };
-
-  const handleLoadCuratedPresets = () => {
-    if (photos.length > 0 && !window.confirm("Append curated 36-seat sleeper luxury photos to this bus?")) {
-      return;
-    }
-    setPhotos(prev => [...prev, ...CURATED_FLEET_PRESETS]);
   };
 
   const handleSave = async (e) => {
@@ -454,20 +394,7 @@ export default function EditBusPage() {
               icon="photo_library"
               title="Bus Photo & Fleet Gallery Manager"
               subtitle={`Manage high-resolution images for this coach (${photos.length} photos assigned). Displayed on Customer /gallery page.`}
-              rightAction={
-                <button
-                  type="button"
-                  onClick={handleLoadCuratedPresets}
-                  style={{
-                    padding: "0.375rem 0.75rem", borderRadius: 6, border: "1px solid #BFDBFE",
-                    backgroundColor: "#EFF6FF", color: "#1D4ED8", fontSize: "0.75rem", fontWeight: 600,
-                    cursor: "pointer", display: "flex", alignItems: "center", gap: "0.375rem",
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 15 }}>add_photo_alternate</span>
-                  Load Curated 36-Seat Photos
-                </button>
-              }
+              rightAction={null}
             >
               {/* Existing Photos Grid */}
               {photos.length === 0 ? (

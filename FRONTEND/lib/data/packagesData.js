@@ -68,8 +68,8 @@ export const allPackagesData = {
       { id: 'ellora-caves', label: 'Ellora Kailasa Temple Guided Excursion', price: 750, selected: false },
     ]
   },
-  'dubai-marina': {
-    id: 'dubai-marina',
+  'dubai-combo': {
+    id: 'dubai-combo',
     title: 'Dubai Desert Safari & Marina Skyline',
     subtitle: 'Dubai • Abu Dhabi • Desert Safari',
     duration: '5 Days / 4 Nights',
@@ -187,8 +187,8 @@ export const allPackagesData = {
       { id: 'river-rafting', label: 'Kullu Beas River Rafting Combo (12 Km)', price: 1100, selected: true },
     ]
   },
-  'corbett-safari': {
-    id: 'corbett-safari',
+  'corbett-nainital': {
+    id: 'corbett-nainital',
     title: 'Jim Corbett National Park & Nainital',
     subtitle: 'Dhikala Tiger Zone • Naini Lake • Bhimtal',
     duration: '4 Days / 3 Nights',

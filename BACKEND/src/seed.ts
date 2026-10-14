@@ -328,49 +328,62 @@ async function main() {
   await prisma.bus.deleteMany({});
   await prisma.tourPackage.deleteMany({});
   await prisma.offer.deleteMany({});
+  await prisma.admin.deleteMany({});
   await prisma.user.deleteMany({});
 
-  console.log('[seed] Creating Users (Super Admin, Sub Admin & Customer)...');
-  const passwordHash = await bcrypt.hash('admin123', 12);
-  const adminUser = await prisma.user.create({
-    data: {
-      name: 'Super Admin',
-      email: 'admin@yatrabus.in',
-      phone: '+919876543210',
-      passwordHash,
-      role: 'SUPER_ADMIN',
-    }
+  console.log('[seed] Creating Admins & Customers...');
+  const defaultPasswordHash = await bcrypt.hash('Password@123', 12);
+
+  await prisma.admin.createMany({
+    data: [
+      {
+        id: 'cf83b6c9-7799-4a9b-8516-21c9403fe5f8',
+        name: 'Super Admin',
+        email: 'admin@yatrabus.in',
+        phone: '+919876543210',
+        passwordHash: defaultPasswordHash,
+        role: 'SUPER_ADMIN',
+        isActive: true,
+      },
+      {
+        name: 'Super Admin',
+        email: 'admin@vedbus.com',
+        phone: '+919999988888',
+        passwordHash: defaultPasswordHash,
+        role: 'SUPER_ADMIN',
+        isActive: true,
+      },
+      {
+        name: 'Operations Manager',
+        email: 'ops@yatrabus.in',
+        phone: '+919876500001',
+        passwordHash: defaultPasswordHash,
+        role: 'ADMIN',
+        isActive: true,
+      },
+    ],
   });
 
-  const superAdminUser = await prisma.user.create({
-    data: {
-      name: 'Super Admin',
-      email: 'superadmin@yatrabus.in',
-      phone: '+919999988888',
-      passwordHash,
-      role: 'SUPER_ADMIN',
-    }
-  });
-
-  const opsAdminUser = await prisma.user.create({
-    data: {
-      name: 'Operations Manager',
-      email: 'ops@yatrabus.in',
-      phone: '+919876500001',
-      passwordHash,
-      role: 'ADMIN',
-    }
-  });
-
-  const customerHash = await bcrypt.hash('customer123', 12);
   const demoCustomer = await prisma.user.create({
     data: {
+      id: 'b9a6911a-6f7c-4654-9843-f31ea1d58523',
       name: 'Rahul Sharma',
-      email: 'customer@yatrabus.in',
+      email: 'rahul.sharma@example.com',
       phone: '+919811122233',
-      passwordHash: customerHash,
+      passwordHash: defaultPasswordHash,
       role: 'USER',
-    }
+    },
+  });
+
+  // Also seed customer@yatrabus.in for backward compatibility
+  await prisma.user.create({
+    data: {
+      name: 'Rahul Sharma (YatraBus)',
+      email: 'customer@yatrabus.in',
+      phone: '+919811122234',
+      passwordHash: defaultPasswordHash,
+      role: 'USER',
+    },
   });
 
   console.log('[seed] Seeding Buses...');
@@ -418,7 +431,7 @@ async function main() {
         if (t.arrHour < t.depHour) arrDate.setDate(arrDate.getDate() + 1);
         arrDate.setHours(t.arrHour, t.arrMin, 0, 0);
 
-        const trip = await prisma.trip.create({
+        await prisma.trip.create({
           data: {
             busId:             createdBuses[t.busIndex].id,
             routeId:           createdRoute.id,
@@ -426,23 +439,11 @@ async function main() {
             arrivalDatetime:   arrDate,
             baseFare:          t.fare,
             status:            'Scheduled',
+            // Keep 2-3 seats administratively blocked by default as requested
+            seatStatuses:      { L3: 'blocked', U4: 'blocked' },
           }
         });
         totalTripsCount++;
-
-        // Add 2 sample bookings so seat availability is realistic
-        if (dayOffset === 0 && t.busIndex === 0) {
-          await prisma.busBooking.create({
-            data: {
-              id: `BK${Date.now()}_1`,
-              userId: demoCustomer.id,
-              tripId: trip.id,
-              seatNumbers: ['L1', 'L2'],
-              totalAmount: t.fare * 2,
-              status: 'Confirmed',
-            }
-          });
-        }
       }
     }
   }

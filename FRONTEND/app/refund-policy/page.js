@@ -63,7 +63,10 @@ export default function RefundPolicyPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-bold text-slate-900 font-serif">6. How to Request a Refund</h2>
               <p>
-                You can initiate cancellations directly under your Customer Profile page (`/profile`), or email our refund desk at <strong>refunds@yatrabus.in</strong> with your Booking ID.
+                You can initiate cancellations directly under your Customer Profile page (`/profile`), or email our refund desk at <strong>refunds@vedbus.in</strong> with your Booking ID.
+              </p>
+              <p className="text-xs text-slate-600">
+                <strong>Office Address:</strong> Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
               </p>
             </section>
           </div>

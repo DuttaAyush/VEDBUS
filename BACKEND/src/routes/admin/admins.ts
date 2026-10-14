@@ -1,262 +1,158 @@
-import { Router, Response } from 'express';
+import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../prisma';
-import { authenticateJWT, isSuperAdmin, AuthRequest } from '../../middleware/auth';
+import { isSuperAdmin, authenticateJWT, AuthRequest } from '../../middleware/auth';
 import { sendSuccess, sendError } from '../../utils/response';
 
 const router = Router();
-
-// In-memory fallback for dev/offline resilience
-let devAdmins: any[] = [
-  {
-    id: 'dev-admin-uuid-001',
-    name: 'Super Admin',
-    email: 'admin@yatrabus.in',
-    phone: '+91 99999 88888',
-    role: 'SUPER_ADMIN',
-    isActive: true,
-    createdAt: new Date('2025-01-01').toISOString(),
-    _count: { busBookings: 14, packageBookings: 6 },
-  },
-  {
-    id: 'dev-admin-uuid-002',
-    name: 'Operations Manager',
-    email: 'ops@yatrabus.in',
-    phone: '+91 98765 00001',
-    role: 'ADMIN',
-    isActive: true,
-    createdAt: new Date('2025-02-15').toISOString(),
-    _count: { busBookings: 8, packageBookings: 3 },
-  },
-  {
-    id: 'dev-admin-uuid-003',
-    name: 'Support Supervisor',
-    email: 'support.lead@yatrabus.in',
-    phone: '+91 98765 00002',
-    role: 'ADMIN',
-    isActive: true,
-    createdAt: new Date('2025-03-01').toISOString(),
-    _count: { busBookings: 4, packageBookings: 2 },
-  },
-];
-
-// All routes here require a valid JWT + SUPER_ADMIN role
 router.use(authenticateJWT, isSuperAdmin);
 
-// ── GET /api/admin/admins ─────────────────────────────────────────
-// List all ADMIN and SUPER_ADMIN users
-router.get('/', async (_req: AuthRequest, res: Response) => {
-  try {
-    const admins = await prisma.admin.findMany({
-      select: {
-        id:        true,
-        name:      true,
-        email:     true,
-        phone:     true,
-        role:      true,
-        isActive:  true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: 'asc' },
+const select = { id: true, name: true, email: true, phone: true, role: true, isActive: true, createdAt: true } as const;
+
+export async function ensureSuperAdminInDb() {
+  const superEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@yatrabus.in').trim().toLowerCase();
+  const superPass = process.env.SUPER_ADMIN_PASSWORD || 'SuperSecretPassword@2026';
+  const existing = await prisma.admin.findUnique({ where: { email: superEmail } });
+  if (!existing) {
+    await prisma.admin.create({
+      data: {
+        name: 'Super Admin',
+        email: superEmail,
+        phone: '+919999988888',
+        passwordHash: await bcrypt.hash(superPass, 12),
+        role: 'SUPER_ADMIN',
+        isActive: true,
+      }
     });
+  } else if (existing.role !== 'SUPER_ADMIN' || !existing.isActive) {
+    await prisma.admin.update({
+      where: { id: existing.id },
+      data: { role: 'SUPER_ADMIN', isActive: true }
+    });
+  }
+}
 
-    if ((!admins || admins.length === 0) && process.env.NODE_ENV !== 'production') {
-      return sendSuccess(res, devAdmins);
-    }
-
+// ── GET /api/admin/admins (Super Admin only) ─────────────────────────
+router.get('/', async (_req, res) => {
+  try {
+    await ensureSuperAdminInDb();
+    const admins = await prisma.admin.findMany({ select, orderBy: { createdAt: 'asc' } });
     return sendSuccess(res, admins);
-  } catch (err: any) {
-    console.warn('[admin/admins GET] Database query failed, using dev fallback:', err.message);
-    if (process.env.NODE_ENV !== 'production') {
-      return sendSuccess(res, devAdmins);
-    }
-    return sendError(res, 'Failed to fetch admin list.', 500);
+  } catch {
+    return sendError(res, 'Failed to fetch admin list.', 503);
   }
 });
 
-// ── POST /api/admin/admins ────────────────────────────────────────
-// Create a new ADMIN account
-router.post('/', async (req: AuthRequest, res: Response) => {
+// ── POST /api/admin/admins (Create Admin - Super Admin only) ─────────
+router.post('/', async (req, res) => {
   try {
     const { name, email, phone, password, role = 'ADMIN' } = req.body;
-
-    if (!name || !email || !phone || !password) {
-      return sendError(res, 'name, email, phone, and password are all required.', 400);
+    if (![name, email, password].every(v => typeof v === 'string' && v.trim())) {
+      return sendError(res, 'Name, email, and password are required.', 400);
     }
     if (password.length < 6) {
       return sendError(res, 'Password must be at least 6 characters.', 400);
     }
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedPhone = typeof phone === 'string' && phone.trim() ? phone.trim() : null;
 
-    try {
-      const existing = await prisma.admin.findFirst({
-        where: { OR: [{ email }, { phone }] },
-      });
-      if (existing) {
-        return sendError(res, 'An account with this email or phone already exists.', 409);
+    const existing = await prisma.admin.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+        ]
       }
-
-      const passwordHash = await bcrypt.hash(password, 12);
-
-      const admin = await prisma.admin.create({
-        data: { name, email, phone, passwordHash, role: (role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN'), isActive: true },
-        select: { id: true, name: true, email: true, phone: true, role: true, isActive: true, createdAt: true },
-      });
-
-      return sendSuccess(res, admin, 'Admin account created successfully.', 201);
-    } catch (dbErr: any) {
-      if (process.env.NODE_ENV !== 'production') {
-        const newAdmin = {
-          id: `dev-admin-uuid-${Date.now()}`,
-          name,
-          email,
-          phone,
-          role: role === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'ADMIN',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          _count: { busBookings: 0, packageBookings: 0 },
-        };
-        devAdmins.push(newAdmin);
-        return sendSuccess(res, newAdmin, 'Admin account created successfully.', 201);
-      }
-      throw dbErr;
+    });
+    if (existing) {
+      return sendError(res, 'An admin account with this email or phone already exists.', 409);
     }
-  } catch (err: any) {
-    console.error('[admin/admins POST]', err);
-    return sendError(res, 'Failed to create admin.', 500);
+
+    const assignedRole = role === 'SUPER_ADMIN' ? 'ADMIN' : (role === 'ADMIN' ? 'ADMIN' : 'ADMIN');
+    const admin = await prisma.admin.create({
+      data: {
+        name: name.trim(),
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        passwordHash: await bcrypt.hash(password, 12),
+        role: assignedRole,
+        isActive: true,
+      },
+      select,
+    });
+    return sendSuccess(res, admin, 'Admin account created successfully.', 201);
+  } catch {
+    return sendError(res, 'Failed to create admin.', 503);
   }
 });
 
-// ── PATCH /api/admin/admins/:id ───────────────────────────────────
-// Edit name, email, phone, and/or reset password for an ADMIN
-router.patch('/:id', async (req: AuthRequest, res: Response) => {
+// ── PATCH /api/admin/admins/:id (Edit Admin / Reset Password) ─────────
+router.patch('/:id', async (req: AuthRequest, res) => {
   try {
     const id = String(req.params.id);
+    const target = await prisma.admin.findUnique({ where: { id } });
+    if (!target) return sendError(res, 'Admin not found.', 404);
+
+    const superEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@yatrabus.in').trim().toLowerCase();
+    const isTargetSuper = target.role === 'SUPER_ADMIN' || target.email.toLowerCase() === superEmail;
+
     const { name, email, phone, password, role } = req.body;
-
-    try {
-      const target = await prisma.admin.findUnique({ where: { id } });
-      if (target) {
-        if (target.role === 'SUPER_ADMIN' && req.user?.id !== target.id) {
-          return sendError(res, 'Super Admin accounts cannot be edited through this panel.', 403);
-        }
-
-        const updateData: any = {};
-        if (name)     updateData.name  = name;
-        if (email)    updateData.email = email;
-        if (phone)    updateData.phone = phone;
-        if (role)     updateData.role  = role;
-        if (password) {
-          if (password.length < 6) return sendError(res, 'Password must be at least 6 characters.', 400);
-          updateData.passwordHash = await bcrypt.hash(password, 12);
-        }
-
-        const updated = await prisma.admin.update({
-          where: { id },
-          data: updateData,
-          select: { id: true, name: true, email: true, phone: true, role: true, isActive: true },
-        });
-
-        return sendSuccess(res, updated, 'Admin updated successfully.');
-      }
-    } catch {}
-
-    // Dev fallback
-    if (process.env.NODE_ENV !== 'production') {
-      const idx = devAdmins.findIndex((a) => a.id === id);
-      if (idx !== -1) {
-        if (name)  devAdmins[idx].name = name;
-        if (email) devAdmins[idx].email = email;
-        if (phone) devAdmins[idx].phone = phone;
-        if (role)  devAdmins[idx].role = role;
-        return sendSuccess(res, devAdmins[idx], 'Admin updated successfully.');
-      }
+    if (password && password.length < 6) {
+      return sendError(res, 'Password must be at least 6 characters.', 400);
     }
 
-    return sendError(res, 'Admin not found.', 404);
-  } catch (err) {
-    console.error('[admin/admins PATCH]', err);
-    return sendError(res, 'Failed to update admin.', 500);
+    if (isTargetSuper && role && role !== 'SUPER_ADMIN') {
+      return sendError(res, 'Super Admin role cannot be demoted.', 403);
+    }
+
+    const updated = await prisma.admin.update({
+      where: { id },
+      data: {
+        ...(name?.trim() ? { name: name.trim() } : {}),
+        ...(!isTargetSuper && email?.trim() ? { email: email.trim().toLowerCase() } : {}),
+        ...(phone !== undefined ? { phone: phone?.trim() || null } : {}),
+        ...(!isTargetSuper && role && ['ADMIN', 'SUPER_ADMIN'].includes(role) ? { role } : {}),
+        ...(password ? { passwordHash: await bcrypt.hash(password, 12), tokenVersion: { increment: 1 } } : {})
+      },
+      select,
+    });
+    return sendSuccess(res, updated, 'Admin updated successfully.');
+  } catch (err: any) {
+    return sendError(res, err.code === 'P2002' ? 'Email or phone is already in use.' : 'Failed to update admin.', err.code === 'P2002' ? 409 : 503);
   }
 });
 
-// ── PATCH /api/admin/admins/:id/toggle ───────────────────────────
-// Toggle isActive (enable / disable the admin account)
-router.patch('/:id/toggle', async (req: AuthRequest, res: Response) => {
+// ── PATCH /api/admin/admins/:id/toggle (Enable/Disable Admin) ─────────
+router.patch('/:id/toggle', async (req, res) => {
   try {
     const id = String(req.params.id);
+    const target = await prisma.admin.findUnique({ where: { id } });
+    if (!target) return sendError(res, 'Admin not found.', 404);
+    if (target.role === 'SUPER_ADMIN') return sendError(res, 'Cannot disable a Super Admin account.', 403);
 
-    try {
-      const target = await prisma.admin.findUnique({ where: { id } });
-      if (target) {
-        if (target.role === 'SUPER_ADMIN') {
-          return sendError(res, 'Cannot disable a Super Admin account.', 403);
-        }
-
-        const updated = await prisma.admin.update({
-          where: { id },
-          data: { isActive: !target.isActive },
-          select: { id: true, name: true, isActive: true },
-        });
-
-        const msg = updated.isActive ? 'Admin account enabled.' : 'Admin account disabled.';
-        return sendSuccess(res, updated, msg);
-      }
-    } catch {}
-
-    // Dev fallback
-    if (process.env.NODE_ENV !== 'production') {
-      const idx = devAdmins.findIndex((a) => a.id === id);
-      if (idx !== -1) {
-        if (devAdmins[idx].role === 'SUPER_ADMIN') {
-          return sendError(res, 'Cannot disable a Super Admin account.', 403);
-        }
-        devAdmins[idx].isActive = !devAdmins[idx].isActive;
-        const msg = devAdmins[idx].isActive ? 'Admin account enabled.' : 'Admin account disabled.';
-        return sendSuccess(res, devAdmins[idx], msg);
-      }
-    }
-
-    return sendError(res, 'Admin not found.', 404);
-  } catch (err) {
-    console.error('[admin/admins/:id/toggle]', err);
-    return sendError(res, 'Failed to toggle admin status.', 500);
+    const updated = await prisma.admin.update({
+      where: { id },
+      data: { isActive: !target.isActive, tokenVersion: { increment: 1 } },
+      select,
+    });
+    return sendSuccess(res, updated, updated.isActive ? 'Admin account enabled.' : 'Admin account disabled.');
+  } catch {
+    return sendError(res, 'Failed to toggle admin status.', 503);
   }
 });
 
-// ── DELETE /api/admin/admins/:id ──────────────────────────────────
-// Permanently delete an ADMIN account
-router.delete('/:id', async (req: AuthRequest, res: Response) => {
+// ── DELETE /api/admin/admins/:id (Delete Admin) ──────────────────────
+router.delete('/:id', async (req, res) => {
   try {
     const id = String(req.params.id);
+    const target = await prisma.admin.findUnique({ where: { id } });
+    if (!target) return sendError(res, 'Admin not found.', 404);
+    if (target.role === 'SUPER_ADMIN') return sendError(res, 'Super Admin accounts cannot be deleted.', 403);
 
-    try {
-      const target = await prisma.admin.findUnique({ where: { id } });
-      if (target) {
-        if (target.role === 'SUPER_ADMIN') {
-          return sendError(res, 'Super Admin accounts cannot be deleted.', 403);
-        }
-
-        await prisma.admin.delete({ where: { id } });
-        return sendSuccess(res, { id }, 'Admin deleted successfully.');
-      }
-    } catch {}
-
-    // Dev fallback
-    if (process.env.NODE_ENV !== 'production') {
-      const idx = devAdmins.findIndex((a) => a.id === id);
-      if (idx !== -1) {
-        if (devAdmins[idx].role === 'SUPER_ADMIN') {
-          return sendError(res, 'Super Admin accounts cannot be deleted.', 403);
-        }
-        devAdmins.splice(idx, 1);
-        return sendSuccess(res, { id }, 'Admin deleted successfully.');
-      }
-    }
-
-    return sendError(res, 'Admin not found.', 404);
-  } catch (err) {
-    console.error('[admin/admins DELETE]', err);
-    return sendError(res, 'Failed to delete admin.', 500);
+    await prisma.admin.delete({ where: { id } });
+    return sendSuccess(res, { id }, 'Admin deleted successfully.');
+  } catch {
+    return sendError(res, 'Failed to delete admin.', 503);
   }
 });
 

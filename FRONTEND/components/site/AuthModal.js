@@ -7,12 +7,6 @@ import { apiFetch } from '@/lib/api';
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState(initialMode); // 'login' or 'signup'
-  const [loginMethod, setLoginMethod] = useState('mobile'); // 'mobile' or 'email'
-
-  // Mobile / OTP state
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [isOtpSent, setIsOtpSent] = useState(false);
 
   // Email / Password login state
   const [loginEmail, setLoginEmail] = useState('');
@@ -54,20 +48,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
 
   if (!isOpen || !mounted) return null;
 
-  const handleOtpChange = (index, value) => {
-    if (value.length > 1) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (errors.otp) {
-      setErrors((prev) => ({ ...prev, otp: '' }));
-    }
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-input-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
-
   const validateMobile = (num) => {
     const clean = (num || '').replace(/\D/g, '');
     if (!clean) return 'Mobile number is required.';
@@ -88,69 +68,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
     if (!pwd) return 'Password is required.';
     if (pwd.length < 6) return 'Password must be at least 6 characters.';
     return '';
-  };
-
-  const handleSendOtp = (e) => {
-    e.preventDefault();
-    const mobileErr = validateMobile(mobileNumber);
-    if (mobileErr) {
-      setErrors((prev) => ({ ...prev, mobile: mobileErr }));
-      return;
-    }
-    setErrors({});
-    setIsOtpSent(true);
-    setSuccessMessage(`OTP sent to +91 ${mobileNumber}. (Use code 123456 or any 6 digits for testing)`);
-  };
-
-  const handleMobileLogin = async (e) => {
-    e.preventDefault();
-    const mobileErr = validateMobile(mobileNumber);
-    if (mobileErr) {
-      setErrors((prev) => ({ ...prev, mobile: mobileErr }));
-      return;
-    }
-    const enteredOtp = otp.join('');
-    if (enteredOtp.length < 6) {
-      setErrors((prev) => ({ ...prev, otp: 'Please enter the complete 6-digit OTP code.' }));
-      return;
-    }
-
-    setErrors({});
-    setIsSubmitting(true);
-    try {
-      const res = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({
-          phone: mobileNumber,
-          password: enteredOtp,
-        }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        const token = data.data?.accessToken || data.accessToken || 'token_' + Date.now();
-        const user = data.data?.user || data.user || {
-          id: 'usr_' + Date.now(),
-          name: `User ${mobileNumber.slice(-4)}`,
-          phone: mobileNumber,
-          email: `${mobileNumber}@yatrabus.in`,
-          role: 'USER',
-        };
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('auth_token', token);
-          localStorage.setItem('auth_user', JSON.stringify(user));
-          window.dispatchEvent(new Event('auth-change'));
-          window.dispatchEvent(new Event('storage'));
-        }
-        setSuccessMessage(`Welcome back, ${user.name || 'Traveller'}! Logging in...`);
-        setTimeout(() => onClose(), 600);
-      } else {
-        setErrors({ general: data.message || 'Verification failed. Please verify your OTP.' });
-      }
-    } catch {
-      setErrors({ general: 'Unable to connect to the server. Please check your connection and try again.' });
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const handleEmailLogin = async (e) => {
@@ -178,13 +95,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        const token = data.data?.accessToken || data.accessToken || 'token_' + Date.now();
-        const user = data.data?.user || data.user || {
-          id: 'usr_' + Date.now(),
-          name: loginEmail.split('@')[0],
-          email: loginEmail.trim(),
-          role: 'USER',
-        };
+        const token = data.data?.accessToken || data.accessToken;
+        const user = data.data?.user || data.user;
+        if (!token || !user) {
+          setErrors({ general: 'The server returned an incomplete login response.' });
+          return;
+        }
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_token', token);
           localStorage.setItem('auth_user', JSON.stringify(user));
@@ -234,14 +150,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        const token = data.data?.accessToken || data.accessToken || 'token_' + Date.now();
-        const user = data.data?.user || data.user || {
-          id: 'usr_' + Date.now(),
-          name: fullName.trim(),
-          email: signupEmail.trim(),
-          phone: signupMobile.trim(),
-          role: 'USER',
-        };
+        const token = data.data?.accessToken || data.accessToken;
+        const user = data.data?.user || data.user;
+        if (!token || !user) {
+          setErrors({ general: 'The server returned an incomplete registration response.' });
+          return;
+        }
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_token', token);
           localStorage.setItem('auth_user', JSON.stringify(user));
@@ -286,7 +200,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           <div>
             <div className="flex items-center justify-between gap-4 mb-3 sm:mb-4">
               <div className="flex items-center gap-2">
-                <img src="/images/logo.png" alt="YatraBus Logo" className="h-7 sm:h-8 w-auto object-contain" />
+                <img src="/images/logo.png" alt="VedBus Logo" className="h-7 sm:h-8 w-auto object-contain" />
               </div>
 
               {/* Mode Toggle Switcher: Log In / Sign Up */}
@@ -323,11 +237,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
             {mode === 'login' ? (
               <>
                 <h2 className="text-xl sm:text-3xl font-serif font-bold text-slate-900">Login to your account</h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  {loginMethod === 'mobile'
-                    ? 'Enter your mobile number to receive a secure login OTP'
-                    : 'Enter your registered email and password to continue'}
-                </p>
+                 <p className="text-xs text-slate-500 mt-1">Enter your registered email and password to continue.</p>
               </>
             ) : (
               <>
@@ -355,133 +265,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
 
           {/* FORM BODY */}
           {mode === 'login' ? (
-            <div className="space-y-4">
-              {/* LOGIN METHOD SUB-TOGGLE: Mobile OTP vs Email & Password */}
-              <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginMethod('mobile');
-                    setErrors({});
-                  }}
-                  className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                    loginMethod === 'mobile'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[16px]">smartphone</span>
-                  <span>Mobile &amp; OTP</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLoginMethod('email');
-                    setErrors({});
-                  }}
-                  className={`py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
-                    loginMethod === 'email'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[16px]">mail</span>
-                  <span>Email &amp; Password</span>
-                </button>
-              </div>
-
-              {loginMethod === 'mobile' ? (
-                /* ── METHOD A: MOBILE & OTP ── */
-                <form onSubmit={isOtpSent ? handleMobileLogin : handleSendOtp} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-700">Mobile Number</label>
-                    <div
-                      className={`flex items-center bg-slate-50 border rounded-2xl p-1.5 focus-within:border-brand-scarlet focus-within:bg-white transition-all ${
-                        errors.mobile ? 'border-red-500 bg-red-50/20' : 'border-slate-200'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 border-r border-slate-200 text-xs font-bold text-slate-800">
-                        <span className="text-base">🇮🇳</span>
-                        <span>+91</span>
-                      </div>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        value={mobileNumber}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setMobileNumber(val);
-                          if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: '' }));
-                        }}
-                        onBlur={() => {
-                          if (mobileNumber && mobileNumber.length < 10) {
-                            setErrors((prev) => ({ ...prev, mobile: 'Mobile number should be 10 digits.' }));
-                          }
-                        }}
-                        placeholder="Enter 10-digit mobile number"
-                        className="w-full bg-transparent px-3 py-1.5 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium"
-                      />
-                    </div>
-                    {/* Error just below mobile input */}
-                    {errors.mobile && <p className="text-red-500 text-xs font-medium mt-1">{errors.mobile}</p>}
-                  </div>
-
-                  {isOtpSent && (
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <label className="font-bold text-slate-700">Verify with OTP</label>
-                        <button
-                          type="button"
-                          onClick={handleSendOtp}
-                          className="font-bold text-brand-scarlet hover:underline"
-                        >
-                          Resend OTP
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-6 gap-2">
-                        {otp.map((digit, idx) => (
-                          <input
-                            key={idx}
-                            id={`otp-input-${idx}`}
-                            type="text"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleOtpChange(idx, e.target.value)}
-                            className="w-full h-10 sm:h-11 text-center font-black text-slate-900 text-base sm:text-lg bg-slate-50 border border-slate-200 rounded-xl focus:border-brand-scarlet focus:bg-white outline-none transition-all"
-                          />
-                        ))}
-                      </div>
-                      {/* Error just below OTP input */}
-                      {errors.otp && <p className="text-red-500 text-xs font-medium mt-1">{errors.otp}</p>}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full min-h-[46px] rounded-2xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-                  >
-                    <span>{isSubmitting ? 'Please wait...' : isOtpSent ? 'Verify & Continue' : 'Send Login OTP'}</span>
-                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                  </button>
-
-                  <div className="text-center pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginMethod('email');
-                        setErrors({});
-                      }}
-                      className="text-xs font-bold text-slate-600 hover:text-brand-scarlet transition-colors"
-                    >
-                      Prefer email? <span className="text-brand-scarlet underline">Login with Email &amp; Password</span>
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                /* ── METHOD B: EMAIL & PASSWORD ── */
-                <form onSubmit={handleEmailLogin} className="space-y-4">
+             <div className="space-y-4">
+                 <form onSubmit={handleEmailLogin} className="space-y-4">
                   {/* Email Input */}
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-700">Email Address</label>
@@ -510,13 +295,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <label className="font-bold text-slate-700">Password</label>
-                      <button
-                        type="button"
-                        onClick={() => alert('Password reset link sent to your registered email.')}
-                        className="text-slate-500 hover:text-brand-scarlet font-semibold"
-                      >
-                        Forgot password?
-                      </button>
+                       <span className="text-slate-400 font-semibold">Password reset by support</span>
                     </div>
                     <div
                       className={`flex items-center bg-slate-50 border rounded-2xl px-3.5 py-2.5 focus-within:border-brand-scarlet focus-within:bg-white transition-all ${
@@ -557,20 +336,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </button>
 
-                  <div className="text-center pt-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLoginMethod('mobile');
-                        setErrors({});
-                      }}
-                      className="text-xs font-bold text-slate-600 hover:text-brand-scarlet transition-colors"
-                    >
-                      Prefer mobile? <span className="text-brand-scarlet underline">Login with Phone &amp; OTP</span>
-                    </button>
-                  </div>
                 </form>
-              )}
 
               {/* Mode Switcher Link */}
               <div className="text-center pt-2 border-t border-slate-100">

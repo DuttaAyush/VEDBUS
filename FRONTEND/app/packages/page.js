@@ -292,7 +292,7 @@ export default function CuratedPackagesMasterPage() {
                             Details
                           </button>
                           <Link
-                            href={`/customize-package/${pkg.id}`}
+                            href={`/customize-package?package=${encodeURIComponent(pkg.id)}`}
                             className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-colors shadow-sm"
                           >
                             Customize
@@ -388,7 +388,7 @@ export default function CuratedPackagesMasterPage() {
                             Details
                           </button>
                           <Link
-                            href={`/customize-package/${pkg.id}`}
+                            href={`/customize-package?package=${encodeURIComponent(pkg.id)}`}
                             className="px-3 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition-colors shadow-sm"
                           >
                             Customize
@@ -484,7 +484,7 @@ export default function CuratedPackagesMasterPage() {
                             Details
                           </button>
                           <Link
-                            href={`/customize-package/${pkg.id}`}
+                            href={`/customize-package?package=${encodeURIComponent(pkg.id)}`}
                             className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-sm"
                           >
                             Customize

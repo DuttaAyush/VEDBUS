@@ -29,8 +29,8 @@ router.get('/', async (req: Request, res: Response) => {
         take: limit,
         orderBy: { createdAt: 'desc' },
         select: {
-          id: true, name: true, email: true, phone: true,
-          role: true, createdAt: true,
+           id: true, name: true, email: true, phone: true,
+           role: true, isActive: true, createdAt: true,
           _count: { select: { busBookings: true, packageBookings: true } },
         },
       }),
@@ -98,9 +98,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // ── PATCH /api/admin/users/:id/status ────────────────────────────
-// Block / unblock a user — stored as role change (USER → blocked via role)
-// NOTE: A dedicated 'isBlocked' field is planned for Phase 2 schema migration.
-// For now we surface this as a 204 acknowledgement stub.
+// Block / unblock a user using the account's persisted active flag.
 router.patch('/:id/status', async (req: Request, res: Response) => {
   try {
     const id     = String(req.params.id);
@@ -113,8 +111,8 @@ router.patch('/:id/status', async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) return sendError(res, 'User not found.', 404);
 
-    // TODO Phase 2: add isBlocked field to User model and use it here
-    return sendSuccess(res, { id, action }, `User ${action}ed. (isBlocked field pending Phase 2 migration.)`);
+    const updated = await prisma.user.update({ where: { id }, data: { isActive: action === 'unblock' }, select: { id: true, isActive: true } });
+    return sendSuccess(res, updated, `User ${action}ed.`);
   } catch (err) {
     console.error('[admin/users/:id/status]', err);
     return sendError(res, 'Failed to update user status.', 500);

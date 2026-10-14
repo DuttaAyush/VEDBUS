@@ -77,8 +77,8 @@ export default function ContactPage() {
                 </div>
                 <div className="min-w-0">
                   <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-300 block">Corporate Email</span>
-                  <a href="mailto:support@yatrabus.com" className="text-sm font-bold text-white hover:text-amber-300 transition-colors truncate block">
-                    support@yatrabus.com
+                  <a href="mailto:support@vedbus.in" className="text-sm font-bold text-white hover:text-amber-300 transition-colors truncate block">
+                    support@vedbus.in
                   </a>
                 </div>
               </div>
@@ -116,11 +116,11 @@ export default function ContactPage() {
               {/* Office 1 */}
               <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm hover:shadow-md transition-all space-y-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 text-[10px] font-extrabold uppercase">
-                  HEADQUARTERS
+                  HEADQUARTERS &amp; REGISTERED OFFICE
                 </span>
-                <h3 className="text-lg font-serif font-bold text-slate-900">Nagpur Central Terminal</h3>
+                <h3 className="text-lg font-serif font-bold text-slate-900">Nagpur Head Office</h3>
                 <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                  Central Fleet House, Opp. Dharampeth College, Chatrapati Square, Nagpur, Maharashtra - 440010
+                  Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
                 </p>
                 <div className="pt-2 text-xs font-bold text-brand-scarlet flex items-center gap-1">
                   <span className="material-symbols-outlined text-[16px]">schedule</span>

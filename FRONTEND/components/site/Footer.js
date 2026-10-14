@@ -8,7 +8,7 @@ export default function Footer() {
           <div>
             <Link href="/">
               <img
-                alt="YatraBus Logo"
+                alt="VedBus Logo"
                 className="h-8 w-auto brightness-0 invert mb-3"
                 src="/images/logo.png"
                 loading="lazy"
@@ -21,6 +21,9 @@ export default function Footer() {
             <div className="text-xs font-bold text-white flex items-center gap-1.5">
               <span className="material-symbols-outlined text-brand-scarlet text-[18px]">support_agent</span>
               24/7 Helpline: 1800-209-9287
+            </div>
+            <div className="mt-3 text-[11px] text-slate-400 leading-relaxed">
+              <span className="font-semibold text-slate-300">Office:</span> Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
             </div>
           </div>
           <div>

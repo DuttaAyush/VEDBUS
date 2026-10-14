@@ -4,161 +4,81 @@ import { authenticateJWT, AuthRequest } from '../middleware/auth';
 import { sendSuccess, sendError } from '../utils/response';
 
 const router = Router();
+const ADDON_PRICES: Record<string, number> = {
+  heli: 3500, 'vip-pass': 999, 'ganga-aarti': 499, oxygen: 650,
+  'private-boat': 1200, 'sugam-darshan': 600, 'ayodhya-guide': 800,
+  'laddu-combo': 200, 'teertham-purohit': 950, 'uphill-suv': 2200,
+  rudrabhishek: 1500, 'shirdi-vip': 500, 'ellora-caves': 750,
+  'burj-prime': 4200, 'abu-dhabi': 2800, 'limo-transfer': 3500,
+  'universal-express': 3200, 'night-safari': 1900, 'batu-caves': 1100,
+  'floating-breakfast': 1400, 'nusa-penida': 2400, 'uluwatu-kecak': 1200,
+  jungfrau: 9500, louvre: 2600, disneyland: 6800,
+  catamaran: 1500, 'water-sports': 1200, scooter: 900,
+  'houseboat-upgrade': 2500, kathakali: 450, 'spice-tour': 750,
+  'rohtang-pass': 1800, paragliding: 2200, 'river-rafting': 1100,
+  'extra-safari': 2800, 'nainital-ropeway': 400, 'jungle-bbq': 850,
+};
+const shape = (p: any) => {
+  const it = typeof p.itinerary === 'object' && p.itinerary ? p.itinerary : {};
+  return { id: p.id, title: p.title, category: p.category, durationDays: p.durationDays, pricePerPerson: Number(p.pricePerPerson), price: `₹${Number(p.pricePerPerson).toLocaleString('en-IN')}`, isActive: p.isActive, ...it };
+};
 
-
-
-// ── GET /api/packages ─────────────────────────────────────────────
-// Public — filterable by category
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { category } = req.query;
-    let packages: any[] = [];
-
-    try {
-      const where: any = { isActive: true };
-      if (category) {
-        const cat = String(category).charAt(0).toUpperCase() + String(category).slice(1).toLowerCase();
-        where.category = cat;
-      }
-      packages = await prisma.tourPackage.findMany({
-        where,
-        orderBy: { pricePerPerson: 'asc' },
-      });
-    } catch {
-      packages = [];
-    }
-
-    const formatted = packages.map((p) => {
-      const it: any = typeof p.itinerary === 'object' && p.itinerary ? p.itinerary : {};
-      return {
-        id: p.id,
-        title: p.title,
-        category: p.category,
-        durationDays: p.durationDays,
-        pricePerPerson: Number(p.pricePerPerson),
-        price: `₹${Number(p.pricePerPerson).toLocaleString('en-IN')}`,
-        isActive: p.isActive,
-        ...it,
-      };
-    });
-
-    return res.status(200).json(formatted);
-  } catch (err) {
-    console.error('[packages GET]', err);
-    return sendError(res, 'Failed to fetch packages.', 500);
-  }
+    const category = req.query.category ? String(req.query.category) : undefined;
+    const where: any = { isActive: true };
+    if (category) where.category = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+    const packages = await prisma.tourPackage.findMany({ where, orderBy: { pricePerPerson: 'asc' } });
+    return res.status(200).json(packages.map(shape));
+  } catch { return sendError(res, 'Failed to fetch packages.', 503); }
 });
 
-// ── GET /api/packages/:id ─────────────────────────────────────────
-// Public — single package detail (supports UUID or slug)
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = String(req.params.id);
-
-    let pkg: any = null;
-    try {
-      pkg = await prisma.tourPackage.findFirst({
-        where: {
-          OR: [
-            { id },
-            // Check if slug id is stored inside itinerary JSONB
-            { itinerary: { path: ['id'], equals: id } },
-            { title: { contains: id, mode: 'insensitive' } }
-          ]
-        }
-      });
-    } catch {
-      // Fallback
-    }
-
+    const pkg = await prisma.tourPackage.findFirst({ where: { OR: [{ id }, { itinerary: { path: ['id'], equals: id } }] } });
     if (!pkg) return sendError(res, 'Package not found.', 404);
-
-    const it: any = typeof pkg.itinerary === 'object' && pkg.itinerary ? pkg.itinerary : {};
-    const result = {
-      id: pkg.id,
-      title: pkg.title,
-      category: pkg.category,
-      durationDays: pkg.durationDays,
-      pricePerPerson: Number(pkg.pricePerPerson),
-      price: pkg.price || `₹${Number(pkg.pricePerPerson).toLocaleString('en-IN')}`,
-      isActive: pkg.isActive ?? true,
-      ...it,
-    };
-
-    return res.status(200).json(result);
-  } catch (err) {
-    console.error('[packages/:id GET]', err);
-    return sendError(res, 'Failed to fetch package.', 500);
-  }
+    return res.status(200).json(shape(pkg));
+  } catch { return sendError(res, 'Failed to fetch package.', 503); }
 });
 
-// ── POST /api/packages/book ───────────────────────────────────────
-// Book a holiday package
 router.post('/book', authenticateJWT, async (req: AuthRequest, res: Response) => {
   try {
-    const { packageId, travelersCount, travelDate, totalAmount } = req.body;
-    const userId = req.user!.id;
-
-    if (!packageId || !travelersCount) {
-      return sendError(res, 'packageId and travelersCount are required.', 400);
-    }
-
-    const bookingId = `PB-${Math.floor(100000 + Math.random() * 900000)}`;
-    const parsedDate = travelDate ? new Date(travelDate) : new Date();
-
-    let booking: any = null;
-    try {
-      // Resolve valid package foreign key
-      let validPackage = await prisma.tourPackage.findFirst({
+    if (req.user!.kind !== 'user') return sendError(res, 'Use a customer account to book.', 403);
+    const { packageId, travelersCount, travelDate, totalAmount, travelers, contact, options, requestKey } = req.body;
+    if (!packageId || !requestKey || !Number.isInteger(Number(travelersCount)) || Number(travelersCount) < 1 || Number(travelersCount) > 10) return sendError(res, 'packageId, requestKey and a valid travelersCount are required.', 400);
+    if (!Array.isArray(travelers) || travelers.length !== Number(travelersCount) || travelers.some((p: any) => !p?.name?.trim() || !Number.isInteger(Number(p.age)) || Number(p.age) < 1 || Number(p.age) > 120)) return sendError(res, 'Valid traveler details are required for every traveler.', 400);
+    if (!contact?.email || !contact?.phone) return sendError(res, 'Contact details are required.', 400);
+    const [pkg, user] = await Promise.all([
+      prisma.tourPackage.findFirst({
         where: {
+          isActive: true,
           OR: [
-            { id: packageId },
-            { title: { contains: packageId, mode: 'insensitive' } },
+            { id: String(packageId) },
+            { itinerary: { path: ['id'], equals: String(packageId) } },
+            { title: { contains: String(packageId), mode: 'insensitive' } },
           ],
         },
-      });
-
-      if (!validPackage) {
-        validPackage = await prisma.tourPackage.findFirst();
-      }
-
-      const validPackageId = validPackage ? validPackage.id : packageId;
-
-      // Resolve valid user foreign key
-      let validUser = await prisma.user.findUnique({ where: { id: userId } });
-      if (!validUser) {
-        validUser = await prisma.user.findFirst();
-      }
-      const validUserId = validUser ? validUser.id : userId;
-
-      const serverAmount = validPackage ? Number(validPackage.pricePerPerson) * (Number(travelersCount) || 1) : Number(totalAmount) || 24499;
-
-      booking = await prisma.packageBooking.create({
-        data: {
-          id: bookingId,
-          userId: validUserId,
-          packageId: validPackageId,
-          travelersCount: Number(travelersCount) || 1,
-          travelDate: isNaN(parsedDate.getTime()) ? new Date() : parsedDate,
-          totalAmount: serverAmount,
-          status: 'Confirmed',
-        },
-      });
-    } catch (err: any) {
-      console.error('[packages/book] DB insert failed:', err.message);
-      return sendError(res, 'Failed to create booking. Please try again.', 500);
-    }
-
-
-    return res.status(201).json({
-      success: true,
-      booking,
-      data: { booking }
-    });
-  } catch (err) {
-    console.error('[packages/book POST]', err);
-    return sendError(res, 'Failed to book package.', 500);
-  }
+      }),
+      prisma.user.findUnique({ where: { id: req.user!.id } }),
+    ]);
+    if (!pkg) return sendError(res, 'This package is no longer available. Please choose another package.', 409);
+    if (!user || !user.isActive) return sendError(res, 'Authenticated user account not found or disabled.', 403);
+    const parsedDate = new Date(travelDate);
+    if (isNaN(parsedDate.getTime()) || parsedDate <= new Date()) return sendError(res, 'A future travel date is required.', 400);
+    const optionData = options || {};
+    const hotelUpgrade = optionData.hotelUpgrade === '5star' ? 9500 : optionData.hotelUpgrade === '4star' ? 4500 : 0;
+    const transportUpgrade = optionData.transportMode === 'private-suv' ? 8000 : optionData.transportMode === 'private-sedan' ? 5000 : 0;
+    const addonTotal = Array.isArray(optionData.selectedAddons)
+      ? optionData.selectedAddons.reduce((sum: number, addon: any) => sum + (ADDON_PRICES[String(addon?.id)] || 0), 0)
+      : 0;
+    const perPerson = Number(pkg.pricePerPerson) + hotelUpgrade + addonTotal;
+    const subtotal = perPerson * Number(travelersCount) + transportUpgrade + (optionData.includeTravelInsurance ? 299 * Number(travelersCount) : 0) + (optionData.includeAirportTransfer ? 999 : 0);
+    const serverAmount = subtotal + Math.round(subtotal * 0.05);
+    if (Math.abs(Number(totalAmount) - serverAmount) > 0.01) return sendError(res, 'Package price changed. Please restart checkout.', 409);
+    const booking = await prisma.packageBooking.create({ data: { id: `PB-${Date.now()}-${Math.floor(Math.random() * 1000)}`, userId: req.user!.id, packageId: pkg.id, travelersCount: Number(travelersCount), travelDate: parsedDate, totalAmount: serverAmount, status: 'Pending', travelers, contact, options: options || {}, requestKey: `${req.user!.id}:${String(requestKey)}` } });
+    return sendSuccess(res, { booking }, 'Booking request saved. Awaiting operator confirmation; no payment collected.', 201);
+  } catch (err: any) { return sendError(res, err.code === 'P2002' ? 'This checkout request has already been submitted.' : 'Failed to create booking.', err.code === 'P2002' ? 409 : 503); }
 });
 
 export default router;

@@ -1,7 +1,13 @@
 import "./globals.css";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata = {
-  title: "YatraBus - India's Dedicated Intercity Bus & Curated Travel Packages",
+  title: "VedBus - India's Dedicated Intercity Bus & Curated Travel Packages",
   description:
     "Book luxury BharatBenz & Volvo sleeper coaches, spiritual yatra packages, international holidays, and curated India travel experiences. Direct fleet operator — 0% convenience markup.",
 };

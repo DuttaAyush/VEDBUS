@@ -57,7 +57,10 @@ export default function PrivacyPolicyPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-bold text-slate-900 font-serif">6. Contact Us</h2>
               <p>
-                For privacy inquiries or data requests, email our Data Protection Officer at <strong>privacy@yatrabus.in</strong>.
+                For privacy inquiries or data requests, email our Data Protection Officer at <strong>privacy@vedbus.in</strong>.
+              </p>
+              <p className="text-xs text-slate-600">
+                <strong>Office Address:</strong> Block No 132, Shriram Tower, Next to N.I.T, Kingsway, Civil Line, Sadar, Nagpur, Maharashtra - 440001
               </p>
             </section>
           </div>

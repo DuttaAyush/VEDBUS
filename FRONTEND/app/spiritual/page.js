@@ -10,7 +10,7 @@ import Testimonials from '@/components/site/Testimonials';
 import SpiritualFAQ from '@/components/spiritual/SpiritualFAQ';
 
 export const metadata = {
-  title: "Spiritual Yatra & Sacred Darshan Booking | YatraBus",
+  title: "Spiritual Yatra & Sacred Darshan Booking | VedBus",
   description: "Book 12 Jyotirlinga, Char Dham, Shirdi Sai Baba, and Ayodhya Ram Mandir spiritual yatras with direct AC sleeper buses, VIP Darshan passes, and pure Satvik meals.",
 };
 
