@@ -336,7 +336,7 @@ export default function DomesticPackages() {
          ========================================================================= */}
       {selectedPkg && (
         <div
-          className={`fixed inset-0 z-50 flex items-end justify-center p-0 bg-slate-950/25 backdrop-blur-[3px] transition-opacity duration-300 ${
+          className={`fixed inset-0 z-50 flex items-end justify-center p-0 bg-slate-950/25 backdrop-blur-[3px] transition-opacity duration-300 overflow-x-hidden ${
             isClosing ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
           onClick={handleCloseSheet}
@@ -349,10 +349,10 @@ export default function DomesticPackages() {
             onScroll={handleScroll}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
-            className={`bg-white rounded-3xl shadow-2xl border border-slate-200/80 transition-all duration-500 ease-out flex flex-col relative overflow-y-auto no-scrollbar pb-[2.5vh] mb-[2.5vh] ${
+            className={`bg-white rounded-3xl shadow-2xl border border-slate-200/80 transition-all duration-500 ease-out flex flex-col relative overflow-y-auto overflow-x-hidden no-scrollbar pb-[2.5vh] mb-[2.5vh] ${
               sheetState === 'collapsed'
-                ? 'w-[90vw] max-w-2xl sm:w-[660px] h-[500px] sm:h-[530px] translate-y-0 shadow-emerald-900/15'
-                : 'w-[80vw] max-w-[80vw] h-[82.5vh] max-h-[82.5vh] shadow-2xl ring-1 ring-slate-900/10'
+                ? 'w-[94vw] sm:w-[90vw] max-w-2xl sm:w-[660px] h-[500px] sm:h-[530px] translate-y-0 shadow-emerald-900/15'
+                : 'w-[94vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] max-w-5xl h-[85vh] sm:h-[82.5vh] max-h-[85vh] sm:max-h-[82.5vh] shadow-2xl ring-1 ring-slate-900/10'
             } ${isClosing ? 'translate-y-full scale-95 opacity-0' : 'translate-y-0 scale-100 opacity-100'}`}
           >
             {/* STICKY PARALLAX HERO IMAGE HEADER */}
@@ -373,29 +373,17 @@ export default function DomesticPackages() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent"></div>
 
               {/* Controls Bar */}
-              <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between text-white">
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-sm ${selectedPkg.badgeColor}`}>
+              <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between text-white gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className={`px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-extrabold uppercase shadow-sm truncate max-w-[170px] sm:max-w-none ${selectedPkg.badgeColor}`}>
                     {selectedPkg.badge}
                   </span>
-                  <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold">
+                  <span className="px-2.5 sm:px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] sm:text-xs font-semibold whitespace-nowrap shrink-0">
                     {selectedPkg.duration}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  {/* Downsize Card button (Commented out as requested)
-                  {sheetState === 'expanded' && (
-                    <button
-                      onClick={handleDownsizeToPeek}
-                      className="px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md flex items-center gap-1 transition-all"
-                      title="Downsize Card"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">south</span>
-                      <span className="hidden sm:inline font-sans">Downsize Card</span>
-                    </button>
-                  )}
-                  */}
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={handleCloseSheet}
                     className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/25 hover:bg-white/40 text-white flex items-center justify-center backdrop-blur-md transition-transform active:scale-90"
@@ -408,7 +396,7 @@ export default function DomesticPackages() {
 
               {/* Title & Subtitle Overlay */}
               <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 z-10 text-white pb-1">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-white tracking-tight leading-tight drop-shadow-md">
+                <h2 className="text-xl sm:text-3xl md:text-4xl font-serif font-bold text-white tracking-tight leading-tight drop-shadow-md">
                   {selectedPkg.title}
                 </h2>
                 <p className="text-xs sm:text-sm text-emerald-200 font-semibold truncate mt-1 drop-shadow">
@@ -418,10 +406,10 @@ export default function DomesticPackages() {
             </div>
 
             {/* CONTENT SHEET BELOW IMAGE */}
-            <div className="relative z-10 bg-white rounded-t-3xl shadow-[0_-10px_25px_rgba(15,23,42,0.12)] border-t border-slate-100 mt-0 p-4 sm:p-8 flex flex-col justify-between">
+            <div className="relative z-10 bg-white rounded-t-3xl shadow-[0_-10px_25px_rgba(15,23,42,0.12)] border-t border-slate-100 mt-0 p-3.5 sm:p-6 md:p-8 flex flex-col justify-between overflow-x-hidden">
               {/* Quick Info Header Bar */}
-              <div className="flex items-center justify-between p-3.5 sm:p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200/80 mb-3 shrink-0">
-                <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200/80 mb-3 gap-2.5 sm:gap-4 shrink-0">
+                <div className="flex items-center justify-between sm:block">
                   <span className="text-[10px] uppercase font-bold text-emerald-800 block tracking-wider">
                     All-Inclusive Holiday Rate
                   </span>
@@ -430,17 +418,17 @@ export default function DomesticPackages() {
                     <span className="text-[11px] font-medium text-slate-500">/ person</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <a
                      href={`/customize-package?package=${encodeURIComponent(selectedPkg.id)}`}
-                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-sm flex items-center gap-1 cursor-pointer"
+                    className="flex-1 sm:flex-none justify-center px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider shadow-sm flex items-center gap-1 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[15px]">tune</span>
                     <span>Customize</span>
                   </a>
                   <a
                      href={`/packages/checkout?package=${encodeURIComponent(selectedPkg.id)}`}
-                    className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
+                    className="flex-1 sm:flex-none justify-center px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>Book Package</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -467,13 +455,13 @@ export default function DomesticPackages() {
               {selectedPkg.itinerary && selectedPkg.itinerary.length > 0 && (
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/60 mb-3 text-xs shrink-0">
                   <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-emerald-700 text-white font-extrabold text-[10px]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="px-2 py-0.5 rounded bg-emerald-700 text-white font-extrabold text-[10px] shrink-0">
                         {selectedPkg.itinerary[0].day}
                       </span>
                       <span className="font-bold text-slate-900 truncate">{selectedPkg.itinerary[0].title}</span>
                     </div>
-                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-100 px-2 py-0.5 rounded shrink-0 ml-1">
                       +{selectedPkg.itinerary.length - 1} More Days
                     </span>
                   </div>
@@ -485,57 +473,61 @@ export default function DomesticPackages() {
               {sheetState === 'collapsed' ? (
                 <div
                   onClick={handleExpandFullWindow}
-                  className="mt-auto pt-2.5 border-t border-slate-100 flex items-center justify-between cursor-pointer group bg-gradient-to-r from-emerald-50 via-emerald-50/50 to-white px-4 py-2 rounded-2xl border border-emerald-200/80 transition-all shadow-sm shrink-0"
+                  className="mt-auto pt-2.5 border-t border-slate-100 flex items-center justify-between cursor-pointer group bg-gradient-to-r from-emerald-50 via-emerald-50/50 to-white px-3 sm:px-4 py-2 rounded-2xl border border-emerald-200/80 transition-all shadow-sm shrink-0 gap-2"
                 >
-                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-                    <span className="material-symbols-outlined text-[18px] text-emerald-600 animate-bounce">
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-bold text-emerald-900 min-w-0">
+                    <span className="material-symbols-outlined text-[16px] sm:text-[18px] text-emerald-600 animate-bounce shrink-0">
                       arrow_upward
                     </span>
-                    <span>Scroll down or tap to expand (80% Width × 82.5% Height)</span>
+                    <span className="hidden sm:inline truncate">Scroll down or tap to expand full itinerary</span>
+                    <span className="sm:hidden truncate">Tap to expand full plan</span>
                   </div>
-                  <span className="px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold group-hover:scale-105 transition-transform shadow-sm">
-                    EXPAND TOUR
+                  <span className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white text-[11px] sm:text-xs font-extrabold group-hover:scale-105 transition-transform shadow-sm shrink-0">
+                    EXPAND
                   </span>
                 </div>
               ) : (
                 /* TABBED SYSTEM FOR DOMESTIC HOLIDAY */
                 <div className="mt-4 pt-4 border-t border-slate-100 space-y-6">
                   {/* Tab Navigation Switcher */}
-                  <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200 gap-1 font-bold text-xs">
+                  <div className="flex items-center p-1 bg-slate-100 rounded-2xl border border-slate-200 gap-1 font-bold text-xs overflow-x-auto no-scrollbar">
                     <button
                       onClick={() => setActiveTab('itinerary')}
-                      className={`flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                      className={`flex-1 min-w-[90px] sm:min-w-0 py-2 px-2 sm:px-3 rounded-xl transition-all flex items-center justify-center gap-1 text-[11px] sm:text-xs whitespace-nowrap sm:whitespace-normal ${
                         activeTab === 'itinerary'
                           ? 'bg-emerald-600 text-white shadow-md'
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                      <span>Day-by-Day Plan ({selectedPkg.itinerary.length} Days)</span>
+                      <span className="material-symbols-outlined text-[15px] sm:text-[16px] shrink-0">calendar_month</span>
+                      <span className="hidden sm:inline">Day-by-Day Plan ({selectedPkg.itinerary.length} Days)</span>
+                      <span className="sm:hidden">Plan ({selectedPkg.itinerary.length}D)</span>
                     </button>
 
                     <button
                       onClick={() => setActiveTab('summary')}
-                      className={`flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                      className={`flex-1 min-w-[90px] sm:min-w-0 py-2 px-2 sm:px-3 rounded-xl transition-all flex items-center justify-center gap-1 text-[11px] sm:text-xs whitespace-nowrap sm:whitespace-normal ${
                         activeTab === 'summary'
                           ? 'bg-emerald-600 text-white shadow-md'
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">hotel</span>
-                      <span>Short Summary &amp; Hotels</span>
+                      <span className="material-symbols-outlined text-[15px] sm:text-[16px] shrink-0">hotel</span>
+                      <span className="hidden sm:inline">Short Summary &amp; Hotels</span>
+                      <span className="sm:hidden">Summary</span>
                     </button>
 
                     <button
                       onClick={() => setActiveTab('inclusions')}
-                      className={`flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                      className={`flex-1 min-w-[90px] sm:min-w-0 py-2 px-2 sm:px-3 rounded-xl transition-all flex items-center justify-center gap-1 text-[11px] sm:text-xs whitespace-nowrap sm:whitespace-normal ${
                         activeTab === 'inclusions'
                           ? 'bg-emerald-600 text-white shadow-md'
                           : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">verified</span>
-                      <span>Inclusions &amp; Bus Transit</span>
+                      <span className="material-symbols-outlined text-[15px] sm:text-[16px] shrink-0">verified</span>
+                      <span className="hidden sm:inline">Inclusions &amp; Bus Transit</span>
+                      <span className="sm:hidden">Inclusions</span>
                     </button>
                   </div>
 

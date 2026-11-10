@@ -794,15 +794,15 @@ function CinemaSeatBookingContent() {
 
       {/* REDBUS GENDER SAFETY MODAL */}
       {genderSafetyModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-pink-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-pink-200 space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto overflow-x-hidden">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[26px]">shield_person</span>
               </div>
-              <div>
-                <h3 className="text-base font-serif font-bold text-slate-900">Female Traveler Safety Policy</h3>
-                <p className="text-xs text-pink-600 font-semibold">Adjacent Berth Protection</p>
+              <div className="min-w-0">
+                <h3 className="text-base font-serif font-bold text-slate-900 truncate">Female Traveler Safety Policy</h3>
+                <p className="text-xs text-pink-600 font-semibold truncate">Adjacent Berth Protection</p>
               </div>
             </div>
 
@@ -813,11 +813,11 @@ function CinemaSeatBookingContent() {
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setGenderSafetyModal({ isOpen: false, seat: null, adjacentSeat: null, message: '' })}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors text-center"
               >
                 Select Another Seat
               </button>
@@ -831,7 +831,7 @@ function CinemaSeatBookingContent() {
                     handleSeatClick(seatToSelect);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold tracking-wide uppercase shadow-md shadow-pink-600/20 transition-all"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold tracking-wide uppercase shadow-md shadow-pink-600/20 transition-all text-center"
               >
                 I am Female • Book Seat
               </button>
@@ -842,8 +842,8 @@ function CinemaSeatBookingContent() {
 
       {/* MISMATCH PASSENGERS COUNT MODAL */}
       {isMismatchModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto overflow-x-hidden">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[26px]">help</span>

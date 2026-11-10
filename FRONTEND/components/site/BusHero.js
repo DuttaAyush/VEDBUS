@@ -74,6 +74,7 @@ export default function BusHero() {
         setIsFromOpen(false);
         setIsToOpen(false);
         setIsPassengerOpen(false);
+        setIsDatePickerOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -83,6 +84,12 @@ export default function BusHero() {
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
+      // Automatically close any open dropdown on scroll
+      setIsFromOpen(false);
+      setIsToOpen(false);
+      setIsPassengerOpen(false);
+      setIsDatePickerOpen(false);
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollY = window.scrollY;
@@ -102,7 +109,6 @@ export default function BusHero() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -119,12 +125,14 @@ export default function BusHero() {
 
   return (
     <section
-      className="relative min-h-[92vh] sm:min-h-screen flex items-center justify-center overflow-hidden pt-2 sm:pt-8 md:pt-10 pb-6 sm:pb-12 md:pb-16 bg-slate-950 sticky top-0 z-0"
+      className={`relative min-h-[92vh] sm:min-h-screen flex items-center justify-center pt-2 sm:pt-8 md:pt-10 pb-6 sm:pb-12 md:pb-16 bg-slate-950 sticky top-0 transition-all ${
+        (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-40' : 'z-0'
+      }`}
       id="heroSearch"
     >
       {/* TAJ MAHAL HERO BACKGROUND IMAGE WITH PARALLAX ZOOM & EXIT FADE */}
       <div
-        className="absolute inset-0 z-0 transition-opacity duration-150"
+        className="absolute inset-0 z-0 transition-opacity duration-150 overflow-hidden pointer-events-none"
         style={{ opacity: bgOpacity }}
       >
         <img
@@ -188,7 +196,12 @@ export default function BusHero() {
         </div>
 
         {/* ULTRA-TRANSPARENT GLASS SEARCH BAR CAPSULE */}
-        <div ref={searchContainerRef} className="w-full max-w-[calc(100vw-1rem)] sm:max-w-6xl mx-auto relative z-30">
+        <div
+          ref={searchContainerRef}
+          className={`w-full max-w-[calc(100vw-1rem)] sm:max-w-6xl mx-auto relative ${
+            (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-[9999]' : 'z-30'
+          }`}
+        >
           <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-full rounded-full p-0.5 sm:p-2 md:py-2 md:pl-4 md:pr-4 bg-white/[0.07] backdrop-blur-md border border-white/15 shadow-2xl relative">
             <form
               onSubmit={(e) => {
@@ -207,7 +220,7 @@ export default function BusHero() {
               className="flex flex-row items-center justify-between w-full"
             >
               {/* 1. FROM FIELD */}
-              <div className="relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3">
+              <div className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 ${isFromOpen ? 'z-[9999]' : ''}`}>
                 <span className="material-symbols-outlined text-amber-300 text-[13px] sm:text-[20px] md:text-[24px] shrink-0">
                   departure_board
                 </span>
@@ -228,7 +241,7 @@ export default function BusHero() {
                       setFromCity(e.target.value);
                       setIsFromOpen(true);
                     }}
-                    className="w-full bg-transparent font-medium text-white text-[10.5px] sm:text-sm md:text-base lg:text-lg outline-none border-0 p-0 focus:ring-0 placeholder-white/40 truncate leading-tight sm:leading-snug block"
+                    className="w-full min-w-0 flex-1 bg-transparent font-medium text-white text-[10.5px] sm:text-sm md:text-base lg:text-lg outline-none border-0 p-0 focus:ring-0 placeholder-white/40 truncate leading-tight sm:leading-snug block"
                     placeholder="From"
                   />
                 </div>
@@ -237,7 +250,7 @@ export default function BusHero() {
                 {isFromOpen && (
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="absolute top-full left-0 mt-3 w-64 sm:w-72 max-w-[calc(100vw-2rem)] bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 text-left animate-fadeIn"
+                    className="absolute top-full left-0 mt-3 w-64 sm:w-72 max-w-[calc(100vw-2rem)] bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-2 z-[99999] text-left animate-fadeIn"
                   >
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                       <span>Select Departure City</span>
@@ -287,7 +300,7 @@ export default function BusHero() {
               </div>
 
               {/* 2. TO FIELD */}
-              <div className="relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3">
+              <div className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 ${isToOpen ? 'z-[9999]' : ''}`}>
                 <span className="material-symbols-outlined text-amber-300 text-[13px] sm:text-[20px] md:text-[24px] shrink-0">
                   pin_drop
                 </span>
@@ -308,7 +321,7 @@ export default function BusHero() {
                       setToCity(e.target.value);
                       setIsToOpen(true);
                     }}
-                    className="w-full bg-transparent font-medium text-white text-[10.5px] sm:text-sm md:text-base lg:text-lg outline-none border-0 p-0 focus:ring-0 placeholder-white/40 truncate leading-tight sm:leading-snug block"
+                    className="w-full min-w-0 flex-1 bg-transparent font-medium text-white text-[10.5px] sm:text-sm md:text-base lg:text-lg outline-none border-0 p-0 focus:ring-0 placeholder-white/40 truncate leading-tight sm:leading-snug block"
                     placeholder="To"
                   />
                 </div>
@@ -317,7 +330,7 @@ export default function BusHero() {
                 {isToOpen && (
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="absolute top-full right-0 sm:right-auto sm:left-0 mt-3 w-64 sm:w-72 max-w-[calc(100vw-2rem)] bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 text-left animate-fadeIn"
+                    className="absolute top-full right-0 sm:right-auto sm:left-0 mt-3 w-64 sm:w-72 max-w-[calc(100vw-2rem)] bg-slate-900/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-2 z-[99999] text-left animate-fadeIn"
                   >
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                       <span>Select Destination City</span>

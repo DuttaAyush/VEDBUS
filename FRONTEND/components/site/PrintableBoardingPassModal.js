@@ -63,7 +63,7 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto animate-fadeIn print:p-0 print:bg-white print:static print:overflow-visible">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn print:p-0 print:bg-white print:static print:overflow-visible">
       {/* PRINT-SPECIFIC CSS RULES */}
       <style jsx global>{`
         @media print {
@@ -94,32 +94,32 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
       `}</style>
 
       {/* MODAL WRAPPER */}
-      <div className="relative w-full max-w-3xl my-auto bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:border-none print:shadow-none">
+      <div className="relative w-full max-w-3xl my-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] print:max-h-none print:border-none print:shadow-none">
         
         {/* TOP MODAL ACTION BAR (Hidden in print) */}
-        <div className="no-print bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between shrink-0 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-amber-400 text-[22px]">confirmation_number</span>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-300 block">Verified Boarding Pass</span>
-              <span className="text-sm font-bold text-white">Ticket #{bookingId}</span>
+        <div className="no-print bg-slate-900 text-white px-4 sm:px-6 py-3 sm:py-3.5 flex items-center justify-between shrink-0 border-b border-slate-800">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <span className="material-symbols-outlined text-amber-400 text-[20px] sm:text-[22px] shrink-0">confirmation_number</span>
+            <div className="min-w-0">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-300 block truncate">Verified Boarding Pass</span>
+              <span className="text-xs sm:text-sm font-bold text-white truncate block">Ticket #{bookingId}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 cursor-pointer active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white text-xs font-bold transition-all shadow-md shadow-red-600/30 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[16px]">print</span>
-              <span>Print / Save PDF</span>
+              <span className="hidden sm:inline">Print / Save PDF</span>
             </button>
 
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 cursor-pointer"
               title="Share Ticket"
             >
               <span className="material-symbols-outlined text-[16px]">share</span>
@@ -138,7 +138,7 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
         </div>
 
         {/* SCROLLABLE PASS BODY */}
-        <div className="overflow-y-auto p-4 sm:p-6 space-y-6 print:overflow-visible print:p-0">
+        <div className="overflow-y-auto overflow-x-hidden p-3 sm:p-6 space-y-4 sm:space-y-6 print:overflow-visible print:p-0">
           
           {/* THE PRINTABLE BOARDING PASS CARD */}
           <div
@@ -147,35 +147,37 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
             className="bg-white rounded-2xl border-2 border-slate-800 text-slate-900 relative shadow-sm overflow-hidden"
           >
             {/* TICKET TOP HEADER */}
-            <div className="bg-slate-900 text-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-slate-800">
+            <div className="bg-slate-900 text-white p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b-2 border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-brand-scarlet text-white flex items-center justify-center font-serif font-black text-2xl shadow-md shrink-0">
-                  YB
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-scarlet text-white flex items-center justify-center font-serif font-black text-xl sm:text-2xl shadow-md shrink-0">
+                  VB
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-serif font-bold text-white tracking-wide">YATRA<span className="text-amber-400">BUS</span></span>
+                    <span className="text-base font-serif font-bold text-white tracking-wide">VED<span className="text-amber-400">BUS</span></span>
                     <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">CONFIRMED</span>
                   </div>
-                  <p className="text-xs text-slate-300 font-medium">{operator}</p>
+                  <p className="text-xs text-slate-300 font-medium truncate max-w-[200px] sm:max-w-none">{operator}</p>
                 </div>
               </div>
 
               {/* TICKET NUMBER & BUS REGISTRATION */}
-              <div className="flex sm:flex-col sm:items-end justify-between items-center text-left sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
-                <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">PNR / TICKET ID</div>
-                <div className="text-lg font-mono font-black text-amber-300 tracking-wider">#{bookingId}</div>
-                <div className="text-[11px] font-mono text-slate-300">Bus Plate: <strong className="text-white">{busPlate}</strong></div>
+              <div className="flex flex-row sm:flex-col sm:items-end justify-between items-center text-left sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800 gap-1">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">PNR / TICKET ID</div>
+                  <div className="text-base sm:text-lg font-mono font-black text-amber-300 tracking-wider">#{bookingId}</div>
+                </div>
+                <div className="text-[11px] font-mono text-slate-300 sm:mt-1">Bus Plate: <strong className="text-white">{busPlate}</strong></div>
               </div>
             </div>
 
             {/* ROUTE HERO BAND */}
-            <div className="bg-slate-50 p-5 border-b border-dashed border-slate-300 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="bg-slate-50 p-4 sm:p-5 border-b border-dashed border-slate-300 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
               {/* Origin */}
-              <div className="flex-1 text-center md:text-left">
+              <div className="w-full md:flex-1 text-center md:text-left min-w-0">
                 <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">BOARDING FROM</span>
-                <span className="text-2xl font-black text-slate-900 block">{from}</span>
-                <span className="text-xs text-slate-600 font-medium block truncate max-w-xs">{fromStation}</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 block truncate">{from}</span>
+                <span className="text-xs text-slate-600 font-medium block truncate max-w-full">{fromStation}</span>
                 <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-red-100 text-brand-scarlet font-bold text-xs">
                   <span className="material-symbols-outlined text-[14px]">schedule</span>
                   <span>{depDate} • {depTime}</span>
@@ -183,7 +185,7 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
               </div>
 
               {/* Journey Duration Divider */}
-              <div className="flex flex-col items-center justify-center px-4 shrink-0">
+              <div className="flex flex-col items-center justify-center px-2 sm:px-4 shrink-0 py-1 md:py-0">
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{duration}</span>
                 <div className="flex items-center gap-2 my-1 text-slate-400">
                   <span className="w-8 border-t-2 border-slate-300 border-dashed" />
@@ -194,10 +196,10 @@ export default function PrintableBoardingPassModal({ isOpen, onClose, ticketData
               </div>
 
               {/* Destination */}
-              <div className="flex-1 text-center md:text-right">
+              <div className="w-full md:flex-1 text-center md:text-right min-w-0">
                 <span className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider block">DROPPING AT</span>
-                <span className="text-2xl font-black text-slate-900 block">{to}</span>
-                <span className="text-xs text-slate-600 font-medium block truncate max-w-xs md:ml-auto">{toStation}</span>
+                <span className="text-xl sm:text-2xl font-black text-slate-900 block truncate">{to}</span>
+                <span className="text-xs text-slate-600 font-medium block truncate max-w-full md:ml-auto">{toStation}</span>
                 <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-200 text-slate-800 font-bold text-xs">
                   <span className="material-symbols-outlined text-[14px]">flag</span>
                   <span>{arrDate} • {arrTime}</span>

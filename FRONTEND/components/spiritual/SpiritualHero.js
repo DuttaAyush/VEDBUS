@@ -76,6 +76,12 @@ export default function SpiritualHero() {
 
     let ticking = false;
     const handleScroll = () => {
+      // Automatically close any open dropdown on scroll
+      setIsFromOpen(false);
+      setIsToOpen(false);
+      setIsPassengerOpen(false);
+      setIsDatePickerOpen(false);
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollY = window.scrollY;
@@ -93,7 +99,6 @@ export default function SpiritualHero() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -106,6 +111,7 @@ export default function SpiritualHero() {
         setIsFromOpen(false);
         setIsToOpen(false);
         setIsPassengerOpen(false);
+        setIsDatePickerOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -142,8 +148,10 @@ export default function SpiritualHero() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pb-20 pt-10 w-full sticky top-0 z-0" id="hero">
-      <div className="absolute inset-0 z-0">
+    <section className={`relative min-h-screen flex items-center justify-center pb-20 pt-10 w-full sticky top-0 transition-all ${
+      (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-40' : 'z-0'
+    }`} id="hero">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <img
           alt="Spiritual Yatra Sacred Darshan Background"
           className="w-full h-full object-cover object-center will-change-transform transition-transform duration-100 ease-out"
@@ -205,11 +213,13 @@ export default function SpiritualHero() {
               ? 'transform 0.1s ease-out, opacity 0.1s ease-out'
               : 'transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s, opacity 1s ease-out 0.5s'
           }}
-          className="bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-3 md:p-4 max-w-7xl mx-auto mb-6 text-left shadow-2xl relative z-30"
+          className={`bg-slate-900/80 backdrop-blur-xl border border-amber-500/30 rounded-3xl p-3 md:p-4 max-w-7xl mx-auto mb-6 text-left shadow-2xl relative ${
+            (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-[9999]' : 'z-30'
+          }`}
         >
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 items-center">
             {/* 1. FROM CITY FIELD */}
-            <div className="relative md:col-span-3 flex items-center bg-slate-950/60 rounded-2xl px-4 py-3 border border-amber-500/20 focus-within:border-amber-400 transition-all">
+            <div className={`relative md:col-span-3 flex items-center bg-slate-950/60 rounded-2xl px-4 py-3 border border-amber-500/20 focus-within:border-amber-400 transition-all ${isFromOpen ? 'z-[9999]' : ''}`}>
               <span className="material-symbols-outlined text-amber-400 mr-3 text-[22px] shrink-0">departure_board</span>
               <div className="flex-1 min-w-0">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-amber-300/80 cursor-pointer">From City</label>
@@ -236,7 +246,7 @@ export default function SpiritualHero() {
               {isFromOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full left-0 mt-2 w-72 bg-slate-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 text-left animate-fadeIn"
+                  className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-slate-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-2 z-[99999] text-left animate-fadeIn"
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                     <span>Select Boarding City</span>
@@ -285,7 +295,7 @@ export default function SpiritualHero() {
             </div>
 
             {/* 2. DEVSTHAN / DESTINATION FIELD */}
-            <div className="relative md:col-span-3 flex items-center bg-slate-950/60 rounded-2xl px-4 py-3 border border-amber-500/20 focus-within:border-amber-400 transition-all">
+            <div className={`relative md:col-span-3 flex items-center bg-slate-950/60 rounded-2xl px-4 py-3 border border-amber-500/20 focus-within:border-amber-400 transition-all ${isToOpen ? 'z-[9999]' : ''}`}>
               <span className="material-symbols-outlined text-amber-400 mr-3 text-[22px] shrink-0">temple_hindu</span>
               <div className="flex-1 min-w-0">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-amber-300/80 cursor-pointer">Select Devsthan / Circuit</label>
@@ -312,7 +322,7 @@ export default function SpiritualHero() {
               {isToOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full left-0 mt-2 w-80 bg-slate-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-2 z-50 text-left animate-fadeIn"
+                  className="absolute top-full left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-slate-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.9)] p-2 z-[99999] text-left animate-fadeIn"
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300/80 px-3 py-1.5 border-b border-white/10 flex items-center justify-between">
                     <span>Sacred Teerth Circuits</span>

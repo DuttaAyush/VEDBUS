@@ -276,14 +276,14 @@ export default function CuratedPackagesMasterPage() {
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-3 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5">
                         <div>
                           <span className="block text-[10px] uppercase font-bold text-slate-400">Starting From</span>
                           <span className="text-lg font-extrabold text-amber-700">{pkg.price}</span>
                           <span className="text-[10px] text-slate-500 font-medium"> / person</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleOpenDetails(pkg)}
@@ -372,14 +372,14 @@ export default function CuratedPackagesMasterPage() {
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-3 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5">
                         <div>
                           <span className="block text-[10px] uppercase font-bold text-slate-400">Starting From</span>
                           <span className="text-lg font-extrabold text-teal-700">{pkg.price}</span>
                           <span className="text-[10px] text-slate-500 font-medium"> / person</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleOpenDetails(pkg)}
@@ -468,14 +468,14 @@ export default function CuratedPackagesMasterPage() {
                         </p>
                       </div>
 
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-3 border-t border-slate-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5">
                         <div>
                           <span className="block text-[10px] uppercase font-bold text-slate-400">Starting From</span>
                           <span className="text-lg font-extrabold text-emerald-700">{pkg.price}</span>
                           <span className="text-[10px] text-slate-500 font-medium"> / person</span>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleOpenDetails(pkg)}

@@ -126,10 +126,10 @@ export default function WhyUs() {
 
         {/* TRUSTED BY PEOPLE SUB-CAPTION LINE BELOW CARDS */}
         <div className="text-center pt-2">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-white/80 text-xs font-semibold text-slate-700 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-white/80 text-[10px] sm:text-xs font-semibold text-slate-700 shadow-sm max-w-full">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
             <span>Trusted by thousands of travellers across Bharat</span>
-            <span className="text-slate-400">•</span>
+            <span className="text-slate-400 hidden sm:inline">•</span>
             <span className="text-brand-scarlet font-bold">Direct Fleet Assurance</span>
           </div>
         </div>

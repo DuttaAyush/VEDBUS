@@ -90,6 +90,14 @@ function SearchContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFrom, initialTo]);
 
+  React.useEffect(() => {
+    const handleScroll = () => {
+      closeAllDropdowns();
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const [isFromOpen, setIsFromOpen] = useState(false);
   const [isToOpen, setIsToOpen] = useState(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -204,7 +212,9 @@ function SearchContent() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans antialiased">
       <Header />
 
-      <div className="bg-white border-b border-slate-200/90 shadow-sm py-3 sm:py-4 px-4 sm:px-6 lg:px-8 sticky top-16 sm:top-18 lg:top-20 z-30">
+      <div className={`bg-white border-b border-slate-200/90 shadow-sm py-3 sm:py-4 px-4 sm:px-6 lg:px-8 sticky top-16 sm:top-18 lg:top-20 transition-all ${
+        (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-[9999]' : 'z-30'
+      }`}>
         <div className="max-w-7xl mx-auto flex flex-col gap-3">
           {/* Compact Mobile Summary Row (< lg) */}
           <div className="flex lg:hidden items-center justify-between gap-2">
@@ -274,7 +284,7 @@ function SearchContent() {
                 </button>
 
                 {isFromOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-fadeIn">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-slate-200 p-2 z-[99999] animate-fadeIn">
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-slate-100">
                       Select Departure City
                     </div>
@@ -323,7 +333,7 @@ function SearchContent() {
                 </button>
 
                 {isToOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-fadeIn">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-slate-200 p-2 z-[99999] animate-fadeIn">
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-slate-100">
                       Select Destination City
                     </div>
@@ -781,16 +791,16 @@ function SearchContent() {
 
       {/* Mobile Filter Drawer / Bottom Sheet */}
       {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50 lg:hidden overflow-hidden">
           <div
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
           />
-          <div className="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col z-50 animate-fadeIn">
+          <div className="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col z-50 animate-fadeIn overflow-hidden">
             <div className="pt-3 pb-1 flex justify-center">
               <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
             </div>
-            <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+            <div className="px-4 sm:px-5 py-3 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px] text-brand-scarlet">tune</span>
                 <h3 className="text-base font-serif font-bold text-slate-900">
@@ -817,14 +827,14 @@ function SearchContent() {
                 <button
                   type="button"
                   onClick={() => setIsMobileFilterOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-5 space-y-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-5 sm:space-y-6">
               {/* Sort Options */}
               <div className="space-y-2.5">
                 <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 block">

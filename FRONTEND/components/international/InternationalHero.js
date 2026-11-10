@@ -50,6 +50,7 @@ export default function InternationalHero() {
         setIsDestinationOpen(false);
         setIsDepartureOpen(false);
         setIsPassengerOpen(false);
+        setIsDatePickerOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -61,6 +62,12 @@ export default function InternationalHero() {
 
     let ticking = false;
     const handleScroll = () => {
+      // Automatically close any open dropdown on scroll
+      setIsDestinationOpen(false);
+      setIsDepartureOpen(false);
+      setIsPassengerOpen(false);
+      setIsDatePickerOpen(false);
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const scrollY = window.scrollY;
@@ -78,7 +85,6 @@ export default function InternationalHero() {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
 
     return () => {
       clearTimeout(timer);
@@ -133,8 +139,10 @@ export default function InternationalHero() {
   return (
     <>
       {/* 1. REFRESHING SUNLIT OCEAN HERO */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pb-24 pt-12 sticky top-0 z-0" id="hero">
-        <div className="absolute inset-0 z-0">
+      <section className={`relative min-h-screen flex items-center justify-center pb-24 pt-12 sticky top-0 transition-all ${
+        (isDestinationOpen || isDepartureOpen || isPassengerOpen || isDatePickerOpen) ? 'z-40' : 'z-0'
+      }`} id="hero">
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <img
             alt="Breathtaking sunlit turquoise ocean and mountains"
             className="w-full h-full object-cover object-center will-change-transform transition-transform duration-100 ease-out"
@@ -212,11 +220,13 @@ export default function InternationalHero() {
       </section>
 
       {/* 2. FLOATING SEARCH BAR */}
-      <div className="relative z-20 mx-auto px-4 sm:px-6 -mt-14 mb-12 max-w-7xl lg:px-8 w-full">
-        <div ref={searchContainerRef} className="bg-white rounded-3xl shadow-2xl p-3 md:p-4 border border-slate-200/80 relative z-30">
+      <div className={`relative mx-auto px-4 sm:px-6 -mt-14 mb-12 max-w-7xl lg:px-8 w-full transition-all ${
+        (isDestinationOpen || isDepartureOpen || isPassengerOpen || isDatePickerOpen) ? 'z-[9999]' : 'z-20'
+      }`}>
+        <div ref={searchContainerRef} className={`bg-white rounded-3xl shadow-2xl p-3 md:p-4 border border-slate-200/80 relative ${(isDestinationOpen || isDepartureOpen || isPassengerOpen || isDatePickerOpen) ? 'z-[9999]' : 'z-30'}`}>
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             {/* 1. DESTINATION / PACKAGE SELECTOR */}
-            <div className="relative md:col-span-4 flex items-center bg-slate-50 rounded-2xl px-3.5 py-2.5 border border-slate-200 focus-within:border-teal-600 transition-colors">
+            <div className={`relative md:col-span-4 flex items-center bg-slate-50 rounded-2xl px-3.5 py-2.5 border border-slate-200 focus-within:border-teal-600 transition-colors ${isDestinationOpen ? 'z-[9999]' : ''}`}>
               <span className="material-symbols-outlined text-teal-600 text-[20px] mr-2.5 shrink-0">flight_takeoff</span>
               <div className="flex-1 min-w-0 text-left">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 cursor-pointer">Curated Package / Destination</label>
@@ -242,7 +252,7 @@ export default function InternationalHero() {
               {isDestinationOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full left-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-200 p-2 z-50 text-left animate-fadeIn"
+                  className="absolute top-full left-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.3)] border border-slate-200 p-2 z-[99999] text-left animate-fadeIn"
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-teal-700 px-3 py-1.5 border-b border-slate-100 flex items-center justify-between">
                     <span>Available International Tours</span>
@@ -280,7 +290,7 @@ export default function InternationalHero() {
             </div>
 
             {/* 2. DEPARTURE AIRPORT */}
-            <div className="relative md:col-span-3 flex items-center bg-slate-50 rounded-2xl px-3.5 py-2.5 border border-slate-200 focus-within:border-teal-600 transition-colors">
+            <div className={`relative md:col-span-3 flex items-center bg-slate-50 rounded-2xl px-3.5 py-2.5 border border-slate-200 focus-within:border-teal-600 transition-colors ${isDepartureOpen ? 'z-[9999]' : ''}`}>
               <span className="material-symbols-outlined text-teal-600 text-[20px] mr-2.5 shrink-0">connecting_airports</span>
               <div className="flex-1 min-w-0 text-left">
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 cursor-pointer">Departure Hub</label>
@@ -305,7 +315,7 @@ export default function InternationalHero() {
               {isDepartureOpen && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-200 p-2 z-50 text-left animate-fadeIn"
+                  className="absolute top-full left-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.3)] border border-slate-200 p-2 z-[99999] text-left animate-fadeIn"
                 >
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-teal-700 px-3 py-1.5 border-b border-slate-100">
                     Direct International Flights

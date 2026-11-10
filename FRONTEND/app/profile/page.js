@@ -1286,20 +1286,20 @@ export default function CustomerProfilePage() {
 
       {/* SIMULATED LIVE GPS BUS TRACKING MODAL */}
       {isGpsModalOpen && selectedTrackBus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
-          <div className="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 text-white border border-slate-800 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
+          <div className="bg-slate-900 rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-6 text-white border border-slate-800 shadow-2xl space-y-4 my-auto overflow-x-hidden">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div>
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block">
+              <div className="min-w-0 pr-2">
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block truncate">
                   🟢 LIVE GPS BUS FEED
                 </span>
-                <h3 className="text-xl font-serif font-bold text-white mt-0.5">
+                <h3 className="text-lg sm:text-xl font-serif font-bold text-white mt-0.5 truncate">
                   {selectedTrackBus.operator} ({selectedTrackBus.busPlate})
                 </h3>
               </div>
               <button
                 onClick={() => setIsGpsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center shrink-0 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -1321,12 +1321,12 @@ export default function CustomerProfilePage() {
               </div>
 
               {/* Status Overlay Box */}
-              <div className="absolute bottom-3 left-3 right-3 p-3 rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur-md flex items-center justify-between text-xs">
-                <div>
+              <div className="absolute bottom-3 left-3 right-3 p-3 rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur-md flex items-center justify-between gap-3 text-xs">
+                <div className="min-w-0 flex-1">
                   <span className="text-slate-400 block text-[10px]">CURRENT LOCATION</span>
-                  <span className="font-bold text-white">{selectedTrackBus.currentLocation}</span>
+                  <span className="font-bold text-white truncate block">{selectedTrackBus.currentLocation}</span>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <span className="text-slate-400 block text-[10px]">CURRENT SPEED</span>
                   <span className="font-mono font-bold text-emerald-400">{selectedTrackBus.speed}</span>
                 </div>
@@ -1356,15 +1356,15 @@ export default function CustomerProfilePage() {
 
       {/* ADD / EDIT PASSENGER MODAL */}
       {isPassengerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-800 shadow-2xl space-y-5 border border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 text-slate-800 shadow-2xl space-y-4 sm:space-y-5 border border-slate-100 my-auto overflow-x-hidden">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-xl font-serif font-bold text-slate-900">
+              <h3 className="text-lg sm:text-xl font-serif font-bold text-slate-900">
                 {editingPassenger ? 'Edit Passenger Details' : 'Add New Passenger'}
               </h3>
               <button
                 onClick={() => setIsPassengerModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -1454,20 +1454,20 @@ export default function CustomerProfilePage() {
 
       {/* MANAGE USER ACCOUNT MODAL */}
       {isAccountModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-800 shadow-2xl space-y-5 border border-slate-100 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 text-slate-800 shadow-2xl space-y-4 sm:space-y-5 border border-slate-100 relative my-auto overflow-x-hidden">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-red-50 text-brand-scarlet flex items-center justify-center border border-red-200 shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 text-brand-scarlet flex items-center justify-center border border-red-200 shadow-xs shrink-0">
                   <span className="material-symbols-outlined text-[22px]">manage_accounts</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-serif font-bold text-slate-900 leading-tight">
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-slate-900 leading-tight truncate">
                     Manage User Account
                   </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
+                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate">
                     Edit credentials &amp; personal information
                   </p>
                 </div>
@@ -1475,7 +1475,7 @@ export default function CustomerProfilePage() {
               <button
                 type="button"
                 onClick={() => setIsAccountModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
