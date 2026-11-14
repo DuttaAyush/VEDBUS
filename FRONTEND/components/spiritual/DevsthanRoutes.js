@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function DevsthanRoutes() {
   return (
     <section className="w-full py-16 bg-[#FDFBF7]" id="sacredRoutes">
@@ -63,9 +65,23 @@ export default function DevsthanRoutes() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3 border-t border-slate-100 gap-3">
               <span className="text-xs text-slate-500">Includes: VIP Aarti Pass • 3★ Stay • Satvik Breakfast</span>
-              <button className="px-5 py-2.5 rounded-xl bg-brand-scarlet text-white hover:bg-brand-hover font-bold text-xs shadow-md transition-all">SELECT YATRA / BUS</button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/select-seats?busId=shirdi-express&operator=Shirdi%20Sai%20Devsthan%20Express&busPlate=MH-14-BT-3321&busType=BharatBenz%20AC%20Sleeper%20(2%2B1)&price=550&from=Pune&to=Shirdi&depTime=22:00&arrTime=03:30&depLocation=Swargate%20/%20Wakad&arrLocation=Shirdi%20Gate%202&date=Tomorrow,%2024%20Oct&passengers=2"
+                  className="px-4 py-2.5 rounded-xl bg-brand-scarlet text-white hover:bg-brand-hover font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">event_seat</span>
+                  <span>SELECT SEATS</span>
+                </Link>
+                <Link
+                  href="/customize-package?package=shirdi-express"
+                  className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs transition-colors flex items-center justify-center"
+                >
+                  Full Yatra
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -113,9 +129,23 @@ export default function DevsthanRoutes() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between pt-3 border-t border-slate-100 gap-3">
               <span className="text-xs text-slate-500">Includes: Rudrabhishek Priest • 3★ Stay • Pure Satvik Meals</span>
-              <button className="px-5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-brand-scarlet font-bold text-xs shadow-md transition-all">SELECT YATRA / BUS</button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Link
+                  href="/select-seats?busId=maharashtra-5jyotirlinga&operator=Trimbakeshwar%20Jyotirlinga%20Express&busPlate=MH-31-AP-4921&busType=Multi-Axle%20Volvo%20B11R%20AC%20Sleeper&price=950&from=Nagpur&to=Nashik&depTime=19:30&arrTime=05:45&depLocation=Dharampeth,%20Nagpur&arrLocation=Nashik%20/%20Trimbak&date=Tomorrow,%2024%20Oct&passengers=2"
+                  className="px-4 py-2.5 rounded-xl bg-brand-scarlet text-white hover:bg-brand-hover font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">event_seat</span>
+                  <span>SELECT SEATS</span>
+                </Link>
+                <Link
+                  href="/customize-package?package=maharashtra-5jyotirlinga"
+                  className="px-3.5 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs transition-colors flex items-center justify-center"
+                >
+                  Full Yatra
+                </Link>
+              </div>
             </div>
           </div>
         </div>

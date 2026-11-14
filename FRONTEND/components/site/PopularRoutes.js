@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
 
 const popularRoutesData = [
   {
@@ -315,13 +316,13 @@ export default function PopularRoutes({ onOpenSeatDrawer, rotating = true }) {
                   <span className={`font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs ${r.statusBg}`}>{r.statusText}</span>
                   <span className="hidden sm:inline text-slate-400 text-xs">• {r.perk}</span>
                 </div>
-                <a
-                  href="/select-seats"
+                <Link
+                  href={`/select-seats?busId=${r.id}&operator=${encodeURIComponent(r.route + ' Express')}&busPlate=${encodeURIComponent(r.plate)}&busType=${encodeURIComponent(r.busType)}&price=${parseInt(r.price.replace(/[^\d]/g, '')) || 700}&from=${encodeURIComponent((r.route.split('⇄')[0] || 'Nagpur').trim())}&to=${encodeURIComponent((r.route.split('⇄')[1] || 'Pune').trim())}&depTime=${encodeURIComponent(r.depTime)}&arrTime=${encodeURIComponent(r.arrTime)}&depLocation=${encodeURIComponent(r.depStation)}&arrLocation=${encodeURIComponent(r.arrStation)}&date=Tomorrow,%2024%20Oct&passengers=2`}
                   className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-brand-scarlet text-white hover:bg-brand-hover font-bold text-xs flex items-center gap-1 sm:gap-1.5 shadow-sm transition-all shrink-0 cursor-pointer"
                 >
                   <span>Select Seats</span>
                   <span className="material-symbols-outlined text-[14px] sm:text-[16px]">event_seat</span>
-                </a>
+                </Link>
               </div>
             </div>
           ))}

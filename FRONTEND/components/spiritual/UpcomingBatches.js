@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function UpcomingBatches() {
   return (
     <section className="w-full py-16 bg-[#FFFDF9] border-t border-amber-200/70" id="upcomingDepartures">
@@ -45,7 +47,13 @@ export default function UpcomingBatches() {
                 <span className="text-2xl font-extrabold text-slate-900">₹2,899</span>
                 <span className="text-[10px] text-slate-500"> /devotee</span>
               </div>
-              <button className="px-4 py-2.5 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs shadow-md transition-all">Reserve Seat</button>
+              <Link
+                href="/select-seats?busId=batch-shirdi-1&operator=Shirdi%20Kakad%20Aarti%20Express&busPlate=MH-14-BT-3321&busType=BharatBenz%20AC%20Sleeper%20(2%2B1)&price=2899&from=Pune&to=Shirdi&depTime=21:30&arrTime=04:30&depLocation=Pune%20Swargate&arrLocation=Shirdi%20Gate%202&date=Tuesday,%2026%20Nov&passengers=2"
+                className="px-4 py-2.5 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+              >
+                <span className="material-symbols-outlined text-[15px]">event_seat</span>
+                <span>SELECT SEATS</span>
+              </Link>
             </div>
           </div>
 
@@ -74,7 +82,13 @@ export default function UpcomingBatches() {
                 <span className="text-2xl font-extrabold text-slate-900">₹11,499</span>
                 <span className="text-[10px] text-slate-500"> /devotee</span>
               </div>
-              <button className="px-4 py-2.5 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs shadow-md transition-all">Reserve Seat</button>
+              <Link
+                href="/select-seats?busId=batch-jyotirlinga-2&operator=Maharashtra%205%20Jyotirlinga%20Express&busPlate=MH-12-RN-9908&busType=Volvo%20Multi-Axle%20Sleeper&price=11499&from=Mumbai&to=Trimbakeshwar&depTime=05:45&arrTime=13:30&depLocation=Mumbai%20Dadar&arrLocation=Trimbakeshwar&date=Monday,%2002%20Dec&passengers=2"
+                className="px-4 py-2.5 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+              >
+                <span className="material-symbols-outlined text-[15px]">event_seat</span>
+                <span>SELECT SEATS</span>
+              </Link>
             </div>
           </div>
 
@@ -103,7 +117,13 @@ export default function UpcomingBatches() {
                 <span className="text-2xl font-extrabold text-slate-900">₹6,499</span>
                 <span className="text-[10px] text-slate-500"> /devotee</span>
               </div>
-              <button className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-brand-scarlet text-white font-bold text-xs shadow-md transition-all">Reserve Seat</button>
+              <Link
+                href="/select-seats?busId=batch-kashi-3&operator=Kashi%20Ayodhya%20Corridor%20Express&busPlate=UP-65-AX-7714&busType=Volvo%20B11R%20Multi-Axle%20Sleeper&price=6499&from=Varanasi&to=Ayodhya&depTime=07:00&arrTime=12:30&depLocation=Varanasi%20Cantt&arrLocation=Ayodhya%20Dham&date=Wednesday,%2010%20Dec&passengers=2"
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-brand-scarlet text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+              >
+                <span className="material-symbols-outlined text-[15px]">event_seat</span>
+                <span>SELECT SEATS</span>
+              </Link>
             </div>
           </div>
         </div>

@@ -1,6 +1,11 @@
+'use client';
+
 import React from 'react';
 
 export default function IndiaLocalBlueprint() {
+  const handleDownload = () => {
+    if (typeof window !== 'undefined') window.print();
+  };
   return (
     <section className="py-16 bg-slate-50 border-t border-slate-200/60" data-purpose="detailed-itinerary" id="itinerary">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -11,7 +16,11 @@ export default function IndiaLocalBlueprint() {
             <p className="text-slate-500 text-xs mt-1">Experience seamless private transit, verified regional dining, and curated beachside moments.</p>
           </div>
           <div>
-            <button className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition">
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-md transition cursor-pointer"
+            >
               <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
               </svg>

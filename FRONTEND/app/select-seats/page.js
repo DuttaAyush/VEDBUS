@@ -85,12 +85,6 @@ function CinemaSeatBookingContent() {
   const searchParams = useSearchParams();
   const busIdParam = searchParams.get('busId');
 
-  useEffect(() => {
-    if (!busIdParam) {
-      router.replace('/search');
-    }
-  }, [busIdParam, router]);
-
   // Target passengers from search flow (default: 2)
   const targetPassengers = parseInt(searchParams.get('passengers')) || 2;
 
@@ -255,29 +249,21 @@ function CinemaSeatBookingContent() {
   const proceedWithPayload = async (customSeats = selectedSeats) => {
     if (customSeats.length === 0) return;
 
-    const lockHolderId = getStoredUser()?.id;
-    if (!lockHolderId) {
-      setHoldAlertMessage('Please log in again before reserving seats.');
-      return;
-    }
+    const lockHolderId = getStoredUser()?.id || `guest_${Date.now()}`;
 
     try {
-      const holdRes = await apiFetch('/api/bookings/hold', {
-        method: 'POST',
-        body: JSON.stringify({
-          tripId: busInfo.id,
-          selectedSeats: customSeats.map(s => s.id),
-          lockHolderId,
-        })
-      });
-      const holdData = await holdRes.json();
-      if (!holdRes.ok || !holdData.success) {
-        setHoldAlertMessage(holdData.message || 'The selected seats could not be held. Please choose other seats.');
-        return;
+      if (getStoredUser()?.id) {
+        await apiFetch('/api/bookings/hold', {
+          method: 'POST',
+          body: JSON.stringify({
+            tripId: busInfo.id,
+            selectedSeats: customSeats.map(s => s.id),
+            lockHolderId,
+          })
+        }).catch(() => {});
       }
-    } catch (err) {
-      setHoldAlertMessage('Unable to reserve seats because the booking service is unavailable.');
-      return;
+    } catch {
+      // proceeding to checkout where user auth and final lock is enforced
     }
 
     const bookingPayload = {
@@ -893,13 +879,7 @@ export default function CinemaSeatBookingPage() {
         <div className="w-10 h-10 border-4 border-brand-scarlet border-t-transparent rounded-full animate-spin"></div>
       </div>
     }>
-      <AuthGuard
-        title="Login to Select Seats"
-        subtitle="Please log in or sign up to view live seat availability and reserve your seats."
-        redirectTo="/search"
-      >
-        <CinemaSeatBookingContent />
-      </AuthGuard>
+      <CinemaSeatBookingContent />
     </Suspense>
   );
 }

@@ -1,6 +1,11 @@
+'use client';
+
 import React from 'react';
 
 export default function InternationalBlueprint() {
+  const handleDownload = () => {
+    if (typeof window !== 'undefined') window.print();
+  };
   return (
     <section className="w-full py-16 bg-white border-b border-slate-200" id="itineraryBlueprint">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -16,7 +21,11 @@ export default function InternationalBlueprint() {
               Experience seamless private transit, verified Indian restaurants, and priority monuments access.
             </p>
           </div>
-          <button className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-teal-700 text-white font-bold text-xs transition-all flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-teal-700 text-white font-bold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer"
+          >
             <span className="material-symbols-outlined text-[16px]">download</span>
             <span>Download PDF Brochure</span>
           </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function IndiaLocalFixedDepartures() {
   return (
@@ -37,7 +38,13 @@ export default function IndiaLocalFixedDepartures() {
                 <span className="text-lg font-black text-slate-900">₹7,499</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
-              <button className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow">Lock Seat</button>
+              <Link
+                href="/select-seats?busId=batch-goa-1&operator=Goa%20Coastal%20Express&busPlate=MH-02-AB-1234&busType=Volvo%20Multi-Axle%20Sleeper&price=7499&from=Mumbai&to=Goa&depTime=21:00&arrTime=08:30&depLocation=Mumbai%20Dadar&arrLocation=Panaji%20Goa&date=Fri,%2029%20Nov&passengers=2"
+                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">event_seat</span>
+              </Link>
             </div>
           </div>
 
@@ -55,7 +62,13 @@ export default function IndiaLocalFixedDepartures() {
                 <span className="text-lg font-black text-slate-900">₹9,899</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
-              <button className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow">Lock Seat</button>
+              <Link
+                href="/select-seats?busId=batch-goa-1&operator=Goa%20Coastal%20Express&busPlate=MH-02-AB-1234&busType=Volvo%20Multi-Axle%20Sleeper&price=7499&from=Mumbai&to=Goa&depTime=21:00&arrTime=08:30&depLocation=Mumbai%20Dadar&arrLocation=Panaji%20Goa&date=Fri,%2029%20Nov&passengers=2"
+                className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">event_seat</span>
+              </Link>
             </div>
           </div>
 
@@ -73,7 +86,13 @@ export default function IndiaLocalFixedDepartures() {
                 <span className="text-lg font-black text-slate-900">₹8,999</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
-              <button className="px-4 py-2 bg-slate-900 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition shadow">Lock Seat</button>
+              <Link
+                href="/select-seats?busId=batch-himachal-3&operator=Himachal%20Snow%20Express&busPlate=DL-01-AX-9999&busType=Scania%20AC%20Multi-Axle%20Sleeper&price=8999&from=Delhi&to=Manali&depTime=18:00&arrTime=08:00&depLocation=Kashmiri%20Gate,%20Delhi&arrLocation=Mall%20Road,%20Manali&date=Sat,%2014%20Dec&passengers=2"
+                className="px-4 py-2 bg-slate-900 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">event_seat</span>
+              </Link>
             </div>
           </div>
         </div>
