@@ -5,76 +5,76 @@ import PackageDetailModal from '@/components/site/PackageDetailModal';
 
 const yatraPackages = [
   {
-    id: 'chardham',
-    category: 'chardham',
-    title: 'Char Dham Yatra & Haridwar Special',
-    duration: '10 Days / 9 Nights',
-    destinations: 'Kedarnath • Badrinath • Gangotri • Yamunotri',
-    image: '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_9.jpg',
-    badge: 'VIP Darshan & Helicopter Assist',
-    description: 'Complete Himalayan circuit with 2x2 BharatBenz AC Pushback transit, verified warm Himalayan stays, hot Satvik meals, and medical oxygen kit onboard.',
-    tags: ['Deluxe Stays', 'Pure Satvik Food', 'Har Ki Pauri Aarti'],
-    price: '₹24,499'
-  },
-  {
-    id: 'maharashtra-5jyotirlinga',
-    category: 'jyotirlinga maharashtra',
-    title: 'Maharashtra 5 Jyotirlinga Darshan Circuit',
-    duration: '7 Days / 6 Nights',
-    destinations: 'Trimbak • Bhimashankar • Grishneshwar • Aundha • Parli',
-    image: '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_6.jpg',
-    badge: 'Complete Maharashtra Shiv Teerth',
-    description: 'Holy circumambulation covering all five sacred Jyotirlingas in Maharashtra with Shirdi Sai Baba darshan included. Pre-booked Rudrabhishek slots.',
-    tags: ['Direct AC Sleeper', 'Pundit Escort', 'VIP Abhishek'],
-    price: '₹11,499'
-  },
-  {
-    id: 'kashi-ayodhya',
-    category: 'jyotirlinga ayodhya',
-    title: 'Kashi Vishwanath & Ayodhya Ram Mandir',
+    id: 'ayodhya-yatra',
+    category: 'ayodhya north',
+    title: 'Ayodhya – Shri Ram Janmabhoomi Yatra',
     duration: '4 Days / 3 Nights',
-    destinations: 'Ayodhya • Varanasi • Prayagraj Sangam',
-    image: '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_10.jpg',
-    badge: 'Ram Lalla & Kashi Corridor Pass',
-    description: 'Experience grand Ram Mandir darshan in Ayodhya, holy Triveni Sangam snan in Prayagraj, and private reserved boat for evening Varanasi Ganga Aarti.',
-    tags: ['3★ AC Hotel', 'Ganga Boat Included', 'Fast-track Mandir Entry'],
-    price: '₹6,499'
+    destinations: 'Ram Lalla Mandir • Hanuman Garhi • Saryu River',
+    image: '/images/ayodhya_ram_mandir.jpg',
+    badge: 'VIP Ram Lalla & Saryu Aarti Pass',
+    description: 'Direct pilgrimage from Nagpur to Ayodhya Dham. Experience guided darshan of Ram Lalla, Hanuman Garhi, Kanak Bhawan, and the divine evening Saryu Maha Aarti at Ram Ki Paidi.',
+    tags: ['3★ AC Hotel', 'Saryu River Aarti', 'Ram Lalla Darshan'],
+    price: '₹54,999'
   },
   {
-    id: 'tirupati-south',
+    id: 'varanasi-kashi',
+    category: 'jyotirlinga north',
+    title: 'Varanasi – Kashi Vishwanath Darshan',
+    duration: '4 Days / 3 Nights',
+    destinations: 'Kashi Vishwanath • Dashashwamedh Ghat • Annapurna Mandir',
+    image: '/images/varanasi_kashi_aarti.jpg',
+    badge: 'Sugam Darshan & Boat Aarti Pass',
+    description: 'Complete sacred pilgrimage from Nagpur to Kashi. Includes AC Sleeper coach transit, verified stays near Vishwanath Corridor, morning Subah-e-Banaras boat ride, and reserved evening Ganga Aarti.',
+    tags: ['Ganga Boat Included', 'Sugam Darshan', 'Satvik Banarasi Food'],
+    price: '₹54,999'
+  },
+  {
+    id: 'tirupati-yatra',
     category: 'south',
-    title: 'Tirupati Balaji & Meenakshi Amman',
-    duration: '5 Days / 4 Nights',
-    destinations: 'Tirupati • Madurai • Rameshwaram',
-    image: '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_11.jpg',
-    badge: '₹300 Seeghra Darshan & Laddu Prasadam',
-    description: 'Pre-booked Tirumala special entry darshan, tonsure assistance, holy snan at 22 teerthams of Rameshwaram, and Madurai Meenakshi temple guide.',
-    tags: ['VIP Laddu Combo', 'Uphill AC Transit', 'South Satvik Meals'],
-    price: '₹8,950'
+    title: 'Tirupati Balaji Darshan Yatra',
+    duration: '6 Days / 5 Nights',
+    destinations: 'Tirumala Balaji • Padmavathi Temple • Kapil Teertham',
+    image: '/images/tirupati_balaji.jpg',
+    badge: 'Special Entry ₹300 Darshan Included',
+    description: 'Comfortable multi-axle AC coach yatra ex-Nagpur. Features pre-booked ₹300 Seeghra Darshan pass, guaranteed 2 original Srivari Laddus per passenger, and dedicated uphill transit to Tirumala Hills.',
+    tags: ['₹300 Seeghra Pass', '2 Srivari Laddus', 'Uphill AC Transit'],
+    price: '₹56,999'
   },
   {
-    id: 'shirdi-express',
-    category: 'maharashtra',
-    title: 'Shirdi Sai Baba & Shani Shingnapur Express',
-    duration: '2 Days / 1 Night',
-    destinations: 'Shirdi Samadhi • Dwarkamai • Shani Shingnapur',
-    image: '/images/yatra_dedicated_spiritual_yatra_sacred_darshan_booking_refined_2.jpg',
-    badge: 'Samadhi Mandir Kakad Aarti Pass',
-    description: 'Short devotional getaway: Guaranteed morning Kakad Aarti entry pass, 100m walking-distance hotel from Gate No 2, and oil puja at Shani Shingnapur.',
-    tags: ['Hotel Gate 2', 'Breakfast + Dinner', 'Early 6 AM Check-in'],
-    price: '₹2,899'
-  },
-  {
-    id: 'somnath-dwarka',
+    id: 'somnath-yatra',
     category: 'jyotirlinga',
-    title: 'Gujarat Somnath-Dwarka & Nageshwar',
-    duration: '4 Days / 3 Nights',
-    destinations: 'Somnath • Dwarka • Bet Dwarka • Nageshwar',
-    image: '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_12.jpg',
-    badge: 'Sound & Light Show + Dhwajarohan Assist',
-    description: 'Somnath Jyotirlinga sea temple darshan with evening light show, Bet Dwarka ferry ride, Nageshwar Jyotirlinga Abhishek, and comfortable AC transit.',
-    tags: ['Seafront Hotel', 'Gujarati Satvik Thali', 'Ferry Pass Included'],
-    price: '₹5,850'
+    title: 'Somnath & Dwarka Coastal Circuit',
+    duration: '7 Days / 6 Nights',
+    destinations: 'Somnath Jyotirlinga • Dwarkadhish • Bet Dwarka • Porbandar',
+    image: '/images/somnath_dwarka.jpg',
+    badge: 'Sound & Light Show + Ferry Included',
+    description: 'Arabian seaside pilgrimage from Nagpur to Saurashtra. Attend Somnath Temple evening laser show, Bet Dwarka island ferry cruise, Nageshwar Jyotirlinga Abhishek, and Porbandar Kirti Mandir.',
+    tags: ['Seafront Stay', 'Gujarati Satvik Thali', 'Bet Dwarka Ferry'],
+    price: '₹52,499'
+  },
+  {
+    id: 'vaishnodevi-yatra',
+    category: 'himalayas north',
+    title: 'Maa Vaishno Devi Katra Yatra',
+    duration: '8 Days / 7 Nights',
+    destinations: 'Maa Vaishno Devi Bhawan • Katra • Ardhkuwari • Bhairon Ghati',
+    image: '/images/vaishno_devi.jpg',
+    badge: 'Yatra RFID Pass & Trek Assist',
+    description: 'Holy Himalayan journey from Nagpur to Katra base camp. Features AC Sleeper coach travel with dual drivers, hotel stay in Katra, RFID tracking pass assistance, and battery car / pony coordination.',
+    tags: ['Katra 3★ Stay', 'RFID Registration', 'Pony / Helicopter Assist'],
+    price: '₹64,999'
+  },
+  {
+    id: 'haridwar-rishikesh-yatra',
+    category: 'himalayas north',
+    title: 'Haridwar – Rishikesh Ganga Darshan Yatra',
+    duration: '6 Days / 5 Nights',
+    destinations: 'Har Ki Pauri • Mansa Devi • Ram Jhula • Parmarth Niketan',
+    image: '/images/haridwar_rishikesh.jpg',
+    badge: 'Reserved Ganga Aarti & Cable Car',
+    description: 'Rejuvenating spiritual tour connecting Nagpur to Haridwar and Rishikesh. Features riverside stays, reserved Har Ki Pauri Ganga Aarti access, Mansa Devi ropeway tickets, and Parmarth Niketan evening Aarti.',
+    tags: ['Riverside Hotel', 'Ropeway Cable Car', 'Pure Satvik Dining'],
+    price: '₹74,999'
   }
 ];
 
@@ -110,10 +110,9 @@ export default function YatraCatalog() {
             {[
               { label: 'All Sacred Circuits', key: 'all' },
               { label: '12 Jyotirlingas', key: 'jyotirlinga' },
-              { label: 'Shirdi & Maharashtra', key: 'maharashtra' },
-              { label: 'Char Dham & Himalayas', key: 'chardham' },
-              { label: 'South Divya Desam', key: 'south' },
               { label: 'Ayodhya & North Devsthan', key: 'ayodhya' },
+              { label: 'Himalayas & Sacred Rivers', key: 'himalayas' },
+              { label: 'South Divya Desam', key: 'south' },
             ].map(btn => (
               <button
                 key={btn.key}

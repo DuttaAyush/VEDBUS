@@ -35,11 +35,11 @@ export default function IndiaLocalFixedDepartures() {
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-slate-400 uppercase font-bold block">Batch Fare</span>
-                <span className="text-lg font-black text-slate-900">₹7,499</span>
+                <span className="text-lg font-black text-slate-900">₹51,999</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
               <Link
-                href="/select-seats?busId=batch-goa-1&operator=Goa%20Coastal%20Express&busPlate=MH-02-AB-1234&busType=Volvo%20Multi-Axle%20Sleeper&price=7499&from=Mumbai&to=Goa&depTime=21:00&arrTime=08:30&depLocation=Mumbai%20Dadar&arrLocation=Panaji%20Goa&date=Fri,%2029%20Nov&passengers=2"
+                href="/select-seats?busId=batch-goa-1&operator=Goa%20Coastal%20Express&busPlate=MH-02-AB-1234&busType=Volvo%20Multi-Axle%20Sleeper&price=51999&from=Mumbai&to=Goa&depTime=21:00&arrTime=08:30&depLocation=Mumbai%20Dadar&arrLocation=Panaji%20Goa&date=Fri,%2029%20Nov&passengers=2"
                 className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
               >
                 <span>Lock Seat</span>
@@ -59,11 +59,11 @@ export default function IndiaLocalFixedDepartures() {
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-slate-400 uppercase font-bold block">Batch Fare</span>
-                <span className="text-lg font-black text-slate-900">₹9,899</span>
+                <span className="text-lg font-black text-slate-900">₹58,500</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
               <Link
-                href="/select-seats?busId=batch-goa-1&operator=Goa%20Coastal%20Express&busPlate=MH-02-AB-1234&busType=Volvo%20Multi-Axle%20Sleeper&price=7499&from=Mumbai&to=Goa&depTime=21:00&arrTime=08:30&depLocation=Mumbai%20Dadar&arrLocation=Panaji%20Goa&date=Fri,%2029%20Nov&passengers=2"
+                href="/select-seats?busId=batch-kerala-2&operator=Kerala%20Backwaters%20Express&busPlate=KL-07-CD-5678&busType=Volvo%20Multi-Axle%20Sleeper&price=58500&from=Bengaluru&to=Alleppey&depTime=20:00&arrTime=08:00&depLocation=Bengaluru&arrLocation=Alleppey&date=Fri,%2006%20Dec&passengers=2"
                 className="px-4 py-2 bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
               >
                 <span>Lock Seat</span>
@@ -83,11 +83,11 @@ export default function IndiaLocalFixedDepartures() {
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
               <div>
                 <span className="text-[10px] text-slate-400 uppercase font-bold block">Batch Fare</span>
-                <span className="text-lg font-black text-slate-900">₹8,999</span>
+                <span className="text-lg font-black text-slate-900">₹54,999</span>
                 <span className="text-xs text-slate-500"> / person</span>
               </div>
               <Link
-                href="/select-seats?busId=batch-himachal-3&operator=Himachal%20Snow%20Express&busPlate=DL-01-AX-9999&busType=Scania%20AC%20Multi-Axle%20Sleeper&price=8999&from=Delhi&to=Manali&depTime=18:00&arrTime=08:00&depLocation=Kashmiri%20Gate,%20Delhi&arrLocation=Mall%20Road,%20Manali&date=Sat,%2014%20Dec&passengers=2"
+                href="/select-seats?busId=batch-himachal-3&operator=Himachal%20Snow%20Express&busPlate=DL-01-AX-9999&busType=Scania%20AC%20Multi-Axle%20Sleeper&price=54999&from=Delhi&to=Manali&depTime=18:00&arrTime=08:00&depLocation=Kashmiri%20Gate,%20Delhi&arrLocation=Mall%20Road,%20Manali&date=Sat,%2014%20Dec&passengers=2"
                 className="px-4 py-2 bg-slate-900 hover:bg-teal-700 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1 cursor-pointer"
               >
                 <span>Lock Seat</span>

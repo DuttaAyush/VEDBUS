@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function FixedDepartures() {
   return (
@@ -39,11 +40,15 @@ export default function FixedDepartures() {
             <div className="flex items-center justify-between pt-3 border-t border-slate-200">
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">BATCH FARE</span>
-                <span className="font-extrabold text-slate-900 text-sm">₹58,999 / person</span>
+                <span className="font-extrabold text-slate-900 text-sm">₹1,44,999 / person</span>
               </div>
-              <button className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all">
-                Lock Seat
-              </button>
+              <Link
+                href="/customize-package?package=dubai-dunes"
+                className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </Link>
             </div>
           </div>
 
@@ -59,11 +64,15 @@ export default function FixedDepartures() {
             <div className="flex items-center justify-between pt-3 border-t border-slate-200">
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">BATCH FARE</span>
-                <span className="font-extrabold text-slate-900 text-sm">₹44,999 / person</span>
+                <span className="font-extrabold text-slate-900 text-sm">₹1,39,999 / person</span>
               </div>
-              <button className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all">
-                Lock Seat
-              </button>
+              <Link
+                href="/customize-package?package=bali-escape"
+                className="px-4 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </Link>
             </div>
           </div>
 
@@ -79,11 +88,15 @@ export default function FixedDepartures() {
             <div className="flex items-center justify-between pt-3 border-t border-slate-200">
               <div className="text-xs">
                 <span className="text-slate-400 block text-[10px]">BATCH FARE</span>
-                <span className="font-extrabold text-slate-900 text-sm">₹1,49,999 / person</span>
+                <span className="font-extrabold text-slate-900 text-sm">₹2,24,999 / person</span>
               </div>
-              <button className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all">
-                Lock Seat
-              </button>
+              <Link
+                href="/customize-package?package=europe-wonders"
+                className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-teal-700 text-white font-bold text-xs shadow-sm active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Lock Seat</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </Link>
             </div>
           </div>
         </div>

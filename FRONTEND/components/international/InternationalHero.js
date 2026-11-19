@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
 
 const internationalPackagesList = [
-  { id: 'dubai-safari', title: 'Dubai Desert Safari & Marina Skyline', duration: '5 Days / 4 Nights', price: '₹48,999', badge: 'Best Seller', highlight: 'Burj Khalifa • Desert Camp • Marina Cruise' },
-  { id: 'dubai-luxury', title: 'Dubai Luxury Dunes & Atlantis Aquaventure', duration: '6 Days / 5 Nights', price: '₹54,999', badge: 'Luxury Stays', highlight: 'Atlantis Palm • Private Yacht • Safari' },
-  { id: 'singapore-wonders', title: 'Singapore Wonders & Sentosa Island', duration: '5 Days / 4 Nights', price: '₹62,500', badge: 'Family Favorite', highlight: 'Universal Studios • Marina Bay • Cable Car' },
-  { id: 'thailand-bangkok', title: 'Thailand Bangkok & Pattaya Beach Resort', duration: '5 Days / 4 Nights', price: '₹36,999', badge: 'Island Tour', highlight: 'Coral Island • Chao Phraya Dinner Cruise' },
-  { id: 'bali-paradise', title: 'Bali Tropical Paradise & Ubud Swing', duration: '6 Days / 5 Nights', price: '₹42,500', badge: 'Couples & Honeymoon', highlight: 'Kintamani Volcano • Tanah Lot Sunset' },
-  { id: 'vietnam-scenic', title: 'Vietnam Scenic Da Nang & Halong Bay Cruise', duration: '6 Days / 5 Nights', price: '₹45,999', badge: 'UNESCO Heritage', highlight: 'Golden Bridge • Halong Overnight Luxury Cruise' },
-  { id: 'europe-swiss', title: 'Europe Grand Swiss Alps & Paris Tour', duration: '8 Days / 7 Nights', price: '₹1,45,000', badge: 'Grand European', highlight: 'Mt Titlis • Eiffel Tower • Seine River Cruise' },
-  { id: 'maldives-luxury', title: 'Maldives Luxury Overwater Pool Villa', duration: '4 Days / 3 Nights', price: '₹78,500', badge: 'All-Inclusive', highlight: 'Seaplane Transfer • Snorkeling Safari • Private Dining' },
-  { id: 'malaysia-kl', title: 'Malaysia Kuala Lumpur & Genting Highlands', duration: '4 Days / 3 Nights', price: '₹34,999', badge: 'City & Casino', highlight: 'Batu Caves • Cable Car • Petronas Towers' },
+  { id: 'dubai-safari', title: 'Dubai Desert Safari & Marina Skyline', duration: '5 Days / 4 Nights', price: '₹1,44,999', badge: 'Best Seller', highlight: 'Burj Khalifa • Desert Camp • Marina Cruise' },
+  { id: 'dubai-luxury', title: 'Dubai Luxury Dunes & Atlantis Aquaventure', duration: '6 Days / 5 Nights', price: '₹1,89,999', badge: 'Luxury Stays', highlight: 'Atlantis Palm • Private Yacht • Safari' },
+  { id: 'singapore-wonders', title: 'Singapore Wonders & Sentosa Island', duration: '5 Days / 4 Nights', price: '₹1,62,500', badge: 'Family Favorite', highlight: 'Universal Studios • Marina Bay • Cable Car' },
+  { id: 'thailand-bangkok', title: 'Thailand Bangkok & Pattaya Beach Resort', duration: '5 Days / 4 Nights', price: '₹1,36,999', badge: 'Island Tour', highlight: 'Coral Island • Chao Phraya Dinner Cruise' },
+  { id: 'bali-paradise', title: 'Bali Tropical Paradise & Ubud Swing', duration: '6 Days / 5 Nights', price: '₹1,39,999', badge: 'Couples & Honeymoon', highlight: 'Kintamani Volcano • Tanah Lot Sunset' },
+  { id: 'vietnam-scenic', title: 'Vietnam Scenic Da Nang & Halong Bay Cruise', duration: '6 Days / 5 Nights', price: '₹1,45,999', badge: 'UNESCO Heritage', highlight: 'Golden Bridge • Halong Overnight Luxury Cruise' },
+  { id: 'europe-swiss', title: 'Europe Grand Swiss Alps & Paris Tour', duration: '8 Days / 7 Nights', price: '₹2,24,999', badge: 'Grand European', highlight: 'Mt Titlis • Eiffel Tower • Seine River Cruise' },
+  { id: 'maldives-luxury', title: 'Maldives Luxury Overwater Pool Villa', duration: '4 Days / 3 Nights', price: '₹1,78,500', badge: 'All-Inclusive', highlight: 'Seaplane Transfer • Snorkeling Safari • Private Dining' },
+  { id: 'malaysia-kl', title: 'Malaysia Kuala Lumpur & Genting Highlands', duration: '4 Days / 3 Nights', price: '₹1,34,999', badge: 'City & Casino', highlight: 'Batu Caves • Cable Car • Petronas Towers' },
 ];
 
 const internationalDepartureAirports = [

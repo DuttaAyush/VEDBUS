@@ -13,7 +13,7 @@ const packagesData = [
     title: 'Dubai Desert Safari & Marina Skyline',
     desc: 'Burj Khalifa entry, desert dune safari, Marina dhow dinner cruise, and comfortable city transfers.',
     tag: '5★ Marriott Stay • Daily Indian Meals',
-    price: '₹58,999'
+    price: '₹1,44,999'
   },
   {
     id: 'bali-escape',
@@ -24,7 +24,7 @@ const packagesData = [
     title: 'Bali & Southeast Asia Island Odyssey',
     desc: 'Ubud private pool villa, Tegalalang rice terraces swing, Uluwatu sunset temple & water sports.',
     tag: 'Private Pool Villa • Pure Veg / Jain',
-    price: '₹44,999'
+    price: '₹1,39,999'
   },
   {
     id: 'europe-wonders',
@@ -35,7 +35,7 @@ const packagesData = [
     title: 'Grand Wonders of Europe: Swiss Alps & Paris',
     desc: 'Eiffel Tower 2nd Level, Mt. Titlis Rotair Cable Car, Rhine Falls cruise, and scenic Interlaken trains.',
     tag: 'Premium 4★ Hotels • Hindi Tour Manager',
-    price: '₹1,49,999'
+    price: '₹2,24,999'
   },
   {
     id: 'thailand-holiday',
@@ -46,7 +46,7 @@ const packagesData = [
     title: 'Thailand Bangkok & Pattaya Beach Resort',
     desc: 'Coral Island speedboat tour, Pattaya beach resort, Bangkok temple visits, and a guided city experience.',
     tag: 'Speedboat Coral Island Tour',
-    price: '₹36,999'
+    price: '₹1,36,999'
   }
 ];
 

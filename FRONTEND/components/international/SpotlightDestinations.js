@@ -12,7 +12,7 @@ const destinationsData = [
     reviews: '918',
     tag: 'Best Seller',
     tagBg: 'bg-[#EA384D] text-white',
-    price: '₹44,999',
+    price: '₹1,39,999',
     priceLabel: 'STARTING FROM',
     description: 'Private pool villa in Seminyak, rice terrace jungle swing, and Mount Batur sunrise breakfast.',
     image: '/images/yatra_international_holiday_travel_packages_2.jpg'
@@ -25,7 +25,7 @@ const destinationsData = [
     reviews: '1,420',
     tag: 'Top Recommended',
     tagBg: 'bg-[#0D9488] text-white',
-    price: '₹89,999',
+    price: '₹1,89,999',
     priceLabel: 'ALL-INCLUSIVE FLIGHTS + STAY',
     description: 'Whitewashed clifftop villas, private catamaran sunset cruise, and Aegean Mediterranean dining.',
     image: '/images/yatra_international_holiday_travel_packages_3.jpg'
@@ -38,7 +38,7 @@ const destinationsData = [
     reviews: '1,240',
     tag: 'Quick Visa 24H',
     tagBg: 'bg-[#F59E0B] text-slate-950',
-    price: '₹48,999',
+    price: '₹1,89,999',
     priceLabel: 'STARTING FROM',
     description: 'Burj Khalifa 124th floor VIP access, red dunes 4x4 safari with BBQ dinner, and luxury Marina yacht tour.',
     image: '/images/yatra_international_holiday_travel_packages_5.jpg'
@@ -51,7 +51,7 @@ const destinationsData = [
     reviews: '1,105',
     tag: 'Family Favorite',
     tagBg: 'bg-indigo-600 text-white',
-    price: '₹64,999',
+    price: '₹1,62,500',
     priceLabel: 'FLIGHTS + STAY INCLUDED',
     description: 'Marina Bay Sands sky park, Universal Studios Sentosa, and Genting Cable Car highland getaway.',
     image: '/images/yatra_international_holiday_travel_packages_1.jpg'
@@ -64,7 +64,7 @@ const destinationsData = [
     reviews: '860',
     tag: 'Premium Luxury',
     tagBg: 'bg-purple-600 text-white',
-    price: '₹1,39,999',
+    price: '₹2,24,999',
     priceLabel: 'ALL-INCLUSIVE GRAND TOUR',
     description: 'Mt. Titlis cable car, Eiffel Tower dinner cruise, and panoramic Glacier Express train ride.',
     image: '/images/yatra_international_holiday_travel_packages_3.jpg'
@@ -77,7 +77,7 @@ const destinationsData = [
     reviews: '2,050',
     tag: 'Trending Now',
     tagBg: 'bg-rose-600 text-white',
-    price: '₹34,999',
+    price: '₹1,36,999',
     priceLabel: 'STARTING FROM',
     description: 'Phi Phi Island speed boat tour, James Bond Island canoeing, and luxury beachfront resort stay.',
     image: '/images/yatra_international_holiday_travel_packages_2.jpg'

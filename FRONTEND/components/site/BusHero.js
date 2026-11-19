@@ -24,6 +24,9 @@ const popularCities = [
 export default function BusHero() {
   const router = useRouter();
   const searchContainerRef = useRef(null);
+  const heroBackgroundRef = useRef(null);
+  const heroContentRef = useRef(null);
+  const openPopoverRef = useRef(false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isFromOpen, setIsFromOpen] = useState(false);
   const [isToOpen, setIsToOpen] = useState(false);
@@ -38,10 +41,6 @@ export default function BusHero() {
   }));
   const [fromCity, setFromCity] = useState('Nagpur');
   const [toCity, setToCity] = useState('Pune');
-  const [scrollScale, setScrollScale] = useState(1);
-  const [textY, setTextY] = useState(0);
-  const [textOpacity, setTextOpacity] = useState(1);
-  const [bgOpacity, setBgOpacity] = useState(1);
 
   const getFilteredFromCities = () => {
     const q = fromCity.trim().toLowerCase();
@@ -82,13 +81,20 @@ export default function BusHero() {
   }, []);
 
   useEffect(() => {
+    openPopoverRef.current = isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen;
+  }, [isFromOpen, isToOpen, isDatePickerOpen, isPassengerOpen]);
+
+  useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
-      // Automatically close any open dropdown on scroll
-      setIsFromOpen(false);
-      setIsToOpen(false);
-      setIsPassengerOpen(false);
-      setIsDatePickerOpen(false);
+      // Close an open popover once, without scheduling React work on every scroll frame.
+      if (openPopoverRef.current) {
+        openPopoverRef.current = false;
+        setIsFromOpen(false);
+        setIsToOpen(false);
+        setIsPassengerOpen(false);
+        setIsDatePickerOpen(false);
+      }
 
       if (!ticking) {
         window.requestAnimationFrame(() => {
@@ -98,10 +104,15 @@ export default function BusHero() {
           const calculatedOpacity = Math.max(1 - Math.max(scrollY, 0) / 450, 0);
           const calculatedBgOpacity = Math.max(1 - Math.max(scrollY - 500, 0) / 400, 0);
 
-          setScrollScale(calculatedScale);
-          setTextY(calculatedY);
-          setTextOpacity(calculatedOpacity);
-          setBgOpacity(calculatedBgOpacity);
+          if (heroBackgroundRef.current) {
+            heroBackgroundRef.current.style.setProperty('--hero-scale', String(calculatedScale));
+            heroBackgroundRef.current.style.setProperty('--hero-background-opacity', String(calculatedBgOpacity));
+          }
+          if (heroContentRef.current) {
+            heroContentRef.current.style.setProperty('--hero-content-y', `${calculatedY}px`);
+            heroContentRef.current.style.setProperty('--hero-content-opacity', String(calculatedOpacity));
+            heroContentRef.current.style.pointerEvents = calculatedOpacity < 0.05 ? 'none' : 'auto';
+          }
           ticking = false;
         });
         ticking = true;
@@ -125,20 +136,21 @@ export default function BusHero() {
 
   return (
     <section
-      className={`relative min-h-[92vh] sm:min-h-screen flex items-center justify-center pt-2 sm:pt-8 md:pt-10 pb-6 sm:pb-12 md:pb-16 bg-slate-950 sticky top-0 transition-all ${
+      className={`relative isolate min-h-[calc(100svh-4rem)] sm:min-h-[calc(100svh-4.5rem)] lg:min-h-[calc(100svh-5rem)] flex items-center justify-center pt-8 sm:pt-8 md:pt-10 pb-8 sm:pb-12 md:pb-16 bg-slate-950 sticky top-0 transition-all ${
         (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-40' : 'z-0'
       }`}
       id="heroSearch"
     >
       {/* TAJ MAHAL HERO BACKGROUND IMAGE WITH PARALLAX ZOOM & EXIT FADE */}
       <div
+        ref={heroBackgroundRef}
         className="absolute inset-0 z-0 transition-opacity duration-150 overflow-hidden pointer-events-none"
-        style={{ opacity: bgOpacity }}
+        style={{ opacity: 'var(--hero-background-opacity, 1)' }}
       >
         <img
           alt="Ancient Indian Taj Mahal bathed in golden sunrise light"
           className="w-full h-full object-cover object-center will-change-transform transition-transform duration-100 ease-out"
-          style={{ transform: `scale(${scrollScale})` }}
+          style={{ transform: 'scale(var(--hero-scale, 1))' }}
           src="/images/domestic-hero.jpg"
           fetchPriority="high"
           loading="eager"
@@ -150,12 +162,12 @@ export default function BusHero() {
 
       {/* MAIN CONTENT CONTAINER */}
       <div
-        className="w-full max-w-[1700px] mx-auto px-2 sm:px-6 lg:px-8 xl:px-12 relative z-10 space-y-3 sm:space-y-8 md:space-y-10"
+        ref={heroContentRef}
+        className="w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10 space-y-6 sm:space-y-8 md:space-y-10"
         style={{
-          transform: `translateY(${textY}px)`,
-          opacity: textOpacity,
-          pointerEvents: textOpacity < 0.05 ? 'none' : 'auto',
-          transition: textY > 0 ? 'transform 0.1s ease-out, opacity 0.1s ease-out' : undefined,
+          transform: 'translateY(var(--hero-content-y, 0px))',
+          opacity: 'var(--hero-content-opacity, 1)',
+          transition: 'transform 0.1s ease-out, opacity 0.1s ease-out',
         }}
       >
         {/* LEFT-ALIGNED HERO TEXT CONTENT */}
@@ -202,7 +214,7 @@ export default function BusHero() {
             (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-[9999]' : 'z-30'
           }`}
         >
-          <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-full rounded-full p-0.5 sm:p-2 md:py-2 md:pl-4 md:pr-4 bg-white/[0.07] backdrop-blur-md border border-white/15 shadow-2xl relative">
+          <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-full rounded-3xl sm:rounded-full p-2 sm:p-2 md:py-2 md:pl-4 md:pr-4 bg-slate-950/45 sm:bg-white/[0.07] backdrop-blur-xl border border-white/15 shadow-2xl relative">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -217,10 +229,10 @@ export default function BusHero() {
                 });
                 router.push(`/search?${params.toString()}`);
               }}
-              className="flex flex-row items-center justify-between w-full"
+              className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-center sm:justify-between sm:gap-0 w-full"
             >
               {/* 1. FROM FIELD */}
-              <div className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 ${isFromOpen ? 'z-[9999]' : ''}`}>
+              <div className={`relative flex-1 min-w-0 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-2.5 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-2 md:px-3 lg:px-4 sm:py-2 md:py-2.5 flex items-center gap-2 sm:gap-2 md:gap-3 ${isFromOpen ? 'z-[9999]' : ''}`}>
                 <span className="material-symbols-outlined text-amber-300 text-[13px] sm:text-[20px] md:text-[24px] shrink-0">
                   departure_board
                 </span>
@@ -284,10 +296,19 @@ export default function BusHero() {
                     </div>
                   </div>
                 )}
+
+                <button
+                  type="button"
+                  onClick={handleSwap}
+                  aria-label="Swap departure and destination"
+                  className="sm:hidden absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-brand-scarlet border border-white/30 flex items-center justify-center text-white shadow-lg"
+                >
+                  <span className="material-symbols-outlined text-[17px]">swap_horiz</span>
+                </button>
               </div>
 
               {/* CENTER DIVIDER LINE & SWAP ARROW */}
-              <div className="flex items-center justify-center relative shrink-0 w-4 sm:w-6 md:w-8 self-stretch">
+              <div className="hidden sm:flex items-center justify-center relative shrink-0 w-4 sm:w-6 md:w-8 self-stretch">
                 <div className="h-3 sm:h-5 md:h-6 w-[1px] bg-white/20 pointer-events-none" />
                 <button
                   type="button"
@@ -300,7 +321,7 @@ export default function BusHero() {
               </div>
 
               {/* 2. TO FIELD */}
-              <div className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 ${isToOpen ? 'z-[9999]' : ''}`}>
+              <div className={`relative flex-1 min-w-0 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-2.5 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-2 md:px-3 lg:px-4 sm:py-2 md:py-2.5 flex items-center gap-2 sm:gap-2 md:gap-3 ${isToOpen ? 'z-[9999]' : ''}`}>
                 <span className="material-symbols-outlined text-amber-300 text-[13px] sm:text-[20px] md:text-[24px] shrink-0">
                   pin_drop
                 </span>
@@ -367,11 +388,11 @@ export default function BusHero() {
               </div>
 
               {/* DIVIDER */}
-              <div className="h-3.5 sm:h-5 md:h-6 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-1" />
+              <div className="hidden sm:block h-3.5 sm:h-5 md:h-6 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-1" />
 
               {/* 3. DATE OF JOURNEY FIELD */}
               <div
-                className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 cursor-pointer hover:bg-white/5 rounded-full transition-all ${
+                className={`relative flex-1 min-w-0 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-2.5 sm:rounded-full sm:border-0 sm:bg-transparent sm:px-2 md:px-3 lg:px-4 sm:py-2 md:py-2.5 flex items-center gap-2 sm:gap-2 md:gap-3 cursor-pointer hover:bg-white/10 sm:hover:bg-white/5 transition-all ${
                   isDatePickerOpen ? 'z-[9999]' : 'z-10'
                 }`}
                 onClick={() => {
@@ -407,11 +428,11 @@ export default function BusHero() {
               </div>
 
               {/* DIVIDER */}
-              <div className="h-3.5 sm:h-5 md:h-6 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-1" />
+              <div className="hidden sm:block h-3.5 sm:h-5 md:h-6 w-[1px] bg-white/20 shrink-0 mx-0.5 sm:mx-1" />
 
               {/* 4. PASSENGERS FIELD */}
               <div
-                className={`relative flex-1 min-w-0 px-0.5 sm:px-2 md:px-3 lg:px-4 py-1 sm:py-2 md:py-2.5 flex items-center gap-1 sm:gap-2 md:gap-3 cursor-pointer hover:bg-white/5 rounded-full transition-all select-none ${
+                className={`relative flex-1 min-w-0 rounded-2xl border border-white/10 bg-white/[0.07] px-2.5 py-2.5 sm:rounded-full sm:border-0 sm:bg-transparent sm:px-2 md:px-3 lg:px-4 sm:py-2 md:py-2.5 flex items-center gap-2 sm:gap-2 md:gap-3 cursor-pointer hover:bg-white/10 sm:hover:bg-white/5 transition-all select-none ${
                   isPassengerOpen ? 'z-[9999]' : 'z-10'
                 }`}
                 onClick={() => {
@@ -491,15 +512,15 @@ export default function BusHero() {
               </div>
 
               {/* 5. SEARCH BUTTON */}
-              <div className="shrink-0 flex-shrink-0 p-0.5 sm:p-1">
+              <div className="col-span-2 sm:col-auto shrink-0 flex-shrink-0 pt-1 sm:p-1">
                 <button
                   type="submit"
                   aria-label="Search buses"
-                  className="w-7 h-7 sm:w-9 sm:h-9 md:w-auto md:px-7 md:py-3.5 rounded-full bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center md:gap-2 shadow-lg md:shadow-xl md:shadow-red-600/35 hover:scale-[1.03] active:scale-95 cursor-pointer shrink-0 flex-shrink-0"
+                  className="w-full h-11 sm:w-9 sm:h-9 md:w-auto md:px-7 md:py-3.5 rounded-2xl sm:rounded-full bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg md:shadow-xl md:shadow-red-600/35 hover:scale-[1.03] active:scale-95 cursor-pointer shrink-0 flex-shrink-0"
                   title="Search buses"
                 >
                   <span className="material-symbols-outlined text-[15px] sm:text-[18px] md:text-[20px]">search</span>
-                  <span className="hidden md:inline">SEARCH</span>
+                  <span className="sm:hidden md:inline">SEARCH</span>
                 </button>
               </div>
             </form>

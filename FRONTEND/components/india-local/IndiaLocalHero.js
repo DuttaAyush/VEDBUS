@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
 
 const domesticPackagesList = [
-  { id: 'himachal-manali', title: 'Himachal & Manali Mountain Escape', duration: '5 Days / 4 Nights', price: '₹9,499', badge: 'Hill Station', highlight: 'Rohtang Pass • Solang Valley • Kasol' },
-  { id: 'kerala-backwaters', title: 'Kerala Backwaters & Munnar Hills', duration: '6 Days / 5 Nights', price: '₹12,850', badge: 'Serene Nature', highlight: 'Alleppey Houseboat • Tea Gardens • Kochi' },
-  { id: 'goa-beach', title: 'Goa Beachfront Villa & Catamaran Cruise', duration: '4 Days / 3 Nights', price: '₹7,999', badge: 'Coastal Getaway', highlight: 'Baga & Calangute • Mandovi Cruise • Old Goa' },
-  { id: 'jim-corbett', title: 'Jim Corbett & Nainital Lake Paradise', duration: '4 Days / 3 Nights', price: '₹6,999', badge: 'Wildlife Safari', highlight: 'Jeep Safari • Naini Lake Boating • Viewpoint' },
-  { id: 'kashmir-paradise', title: 'Kashmir Valley & Dal Lake Shikara', duration: '6 Days / 5 Nights', price: '₹14,499', badge: 'Paradise on Earth', highlight: 'Srinagar Houseboat • Gulmarg Gondola • Pahalgam' },
-  { id: 'rajasthan-royal', title: 'Royal Rajasthan Jaipur & Udaipur Forts', duration: '6 Days / 5 Nights', price: '₹11,999', badge: 'Heritage & Palaces', highlight: 'Amber Fort • Lake Pichola • Desert Culture' },
-  { id: 'andaman-island', title: 'Andaman Radhanagar Beach & Scuba', duration: '5 Days / 4 Nights', price: '₹19,999', badge: 'Island Paradise', highlight: 'Havelock Island • Cellular Jail • Water Sports' },
-  { id: 'meghalaya-hills', title: 'Meghalaya Living Roots & Shillong Hills', duration: '5 Days / 4 Nights', price: '₹13,500', badge: 'Hidden Gem', highlight: 'Cherrapunji Waterfalls • Dawki River • Mawlynnong' },
+  { id: 'himachal-manali', title: 'Himachal & Manali Mountain Escape', duration: '5 Days / 4 Nights', price: '₹54,999', badge: 'Hill Station', highlight: 'Rohtang Pass • Solang Valley • Kasol' },
+  { id: 'kerala-backwaters', title: 'Kerala Backwaters & Munnar Hills', duration: '6 Days / 5 Nights', price: '₹58,500', badge: 'Serene Nature', highlight: 'Alleppey Houseboat • Tea Gardens • Kochi' },
+  { id: 'goa-beach', title: 'Goa Beachfront Villa & Catamaran Cruise', duration: '4 Days / 3 Nights', price: '₹51,999', badge: 'Coastal Getaway', highlight: 'Baga & Calangute • Mandovi Cruise • Old Goa' },
+  { id: 'jim-corbett', title: 'Jim Corbett & Nainital Lake Paradise', duration: '4 Days / 3 Nights', price: '₹52,499', badge: 'Wildlife Safari', highlight: 'Jeep Safari • Naini Lake Boating • Viewpoint' },
+  { id: 'kashmir-paradise', title: 'Kashmir Valley & Dal Lake Shikara', duration: '6 Days / 5 Nights', price: '₹54,999', badge: 'Paradise on Earth', highlight: 'Srinagar Houseboat • Gulmarg Gondola • Pahalgam' },
+  { id: 'rajasthan-royal', title: 'Royal Rajasthan Jaipur & Udaipur Forts', duration: '6 Days / 5 Nights', price: '₹52,499', badge: 'Heritage & Palaces', highlight: 'Amber Fort • Lake Pichola • Desert Culture' },
+  { id: 'andaman-island', title: 'Andaman Radhanagar Beach & Scuba', duration: '5 Days / 4 Nights', price: '₹64,999', badge: 'Island Paradise', highlight: 'Havelock Island • Cellular Jail • Water Sports' },
+  { id: 'meghalaya-hills', title: 'Meghalaya Living Roots & Shillong Hills', duration: '5 Days / 4 Nights', price: '₹52,499', badge: 'Hidden Gem', highlight: 'Cherrapunji Waterfalls • Dawki River • Mawlynnong' },
 ];
 
 const domesticDepartureCities = [

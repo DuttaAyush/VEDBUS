@@ -5,52 +5,76 @@ import PackageDetailModal from '@/components/site/PackageDetailModal';
 
 const domesticPackagesData = [
   {
-    id: 'goa-coastal',
-    category: 'coastal',
-    image: '/images/yatra_india_local_holiday_travel_packages_5.jpg',
-    duration: '4 Nights / 5 Days',
-    subtitle: 'Luxury Bus / Flight + Cab',
-    title: 'Goa Luxury Coastal & Heritage Villa',
-    desc: 'Candolim beachside resort, private cab for North/South Goa, Spice plantation tour with Goan buffet lunch.',
-    tag1: '4★ Heritage Villa',
-    tag2: 'Daily Breakfast & Dinner',
-    price: '₹7,499'
+    id: 'statue-of-unity',
+    category: 'heritage modern',
+    image: '/images/statue_of_unity.jpg',
+    duration: '5 Days / 4 Nights',
+    subtitle: 'AC Tourist Coach ex-Nagpur',
+    title: 'Statue of Unity & Sardar Sarovar',
+    desc: 'World’s tallest statue with 153m viewing gallery elevator pass, Sardar Sarovar Dam, Valley of Flowers, and evening high-tech laser show.',
+    tag1: 'Viewing Gallery Pass',
+    tag2: 'Grand Laser Show',
+    price: '₹51,999'
   },
   {
-    id: 'kerala-backwaters',
+    id: 'jaipur-heritage',
     category: 'heritage',
-    image: '/images/yatra_india_local_holiday_travel_packages_6.jpg',
-    duration: '5 Nights / 6 Days',
-    subtitle: 'Houseboat + AC Sedan',
-    title: 'Kerala Backwaters & Munnar Tea Trails',
-    desc: 'Alleppey luxury houseboat overnight cruise, tea plantations in Munnar, Kathakali dance cultural show.',
-    tag1: 'Private Houseboat',
-    tag2: 'Pure Veg / Jain Chef',
-    price: '₹11,899'
+    image: '/images/jaipur_hawa_mahal.jpg',
+    duration: '5 Days / 4 Nights',
+    subtitle: 'AC Highway Coach ex-Nagpur',
+    title: 'Jaipur – Royal Pink City Heritage',
+    desc: 'Amer Fort, royal City Palace, Hawa Mahal, Jantar Mantar, and an authentic cultural village evening with royal dining at Chokhi Dhani.',
+    tag1: '4★ Heritage Hotel',
+    tag2: 'Chokhi Dhani Feast',
+    price: '₹52,499'
   },
   {
-    id: 'himachal-manali',
-    category: 'hills',
-    image: '/images/yatra_india_local_holiday_travel_packages_7.jpg',
-    duration: '6 Nights / 7 Days',
-    subtitle: 'Volvo AC Sleeper + Cab',
-    title: 'Himachal Snow Valley & Rohtang Pass',
-    desc: 'Delhi/Chandigarh Volvo semi-sleeper transit, Beas river valley cottage, Solang snow sports, Manikaran hot springs.',
-    tag1: 'Heated Chalet',
-    tag2: 'All Meals Included',
-    price: '₹10,499'
+    id: 'kashmir-paradise',
+    category: 'hills nature',
+    image: '/images/kashmir_dal_lake.jpg',
+    duration: '9 Days / 8 Nights',
+    subtitle: 'AC Sleeper + Valley SUV',
+    title: 'Srinagar & Kashmir Valley Paradise',
+    desc: 'Heritage Dal Lake houseboat, sunset Shikara cruise, Gulmarg Gondola snow point ride, and Pahalgam Lidder River valley pine trails.',
+    tag1: 'Dal Lake Houseboat',
+    tag2: 'Gulmarg Gondola',
+    price: '₹54,999'
   },
   {
-    id: 'corbett-nainital',
-    category: 'heritage',
-    image: '/images/yatra_india_local_holiday_travel_packages_8.jpg',
-    duration: '5 Nights / 6 Days',
-    subtitle: 'BharatBenz AC Coach',
-    title: 'Jim Corbett National Park & Nainital',
-    desc: 'Open 4x4 jeep safari in Corbett, Naini Lake boating, and a comfortable hill-station stay with guided local sightseeing.',
-    tag1: '4★ Heritage Hotels',
-    tag2: 'Guided Excursions',
-    price: '₹8,999'
+    id: 'munnar-kerala',
+    category: 'hills nature',
+    image: '/images/munnar_tea_gardens.jpg',
+    duration: '8 Days / 7 Nights',
+    subtitle: 'AC Tourist Coach ex-Nagpur',
+    title: 'Munnar & Kerala Green Trails',
+    desc: 'Tea estate resort stay in Munnar, Eravikulam National Park (Nilgiri Tahr), spice plantation tour, and traditional Kathakali show.',
+    tag1: 'Tea Estate Resort',
+    tag2: 'Spice Garden Tour',
+    price: '₹58,500'
+  },
+  {
+    id: 'kaziranga-wildlife',
+    category: 'wildlife nature',
+    image: '/images/kaziranga_rhino.jpg',
+    duration: '10 Days / 9 Nights',
+    subtitle: 'Overland Highway Coach',
+    title: 'Kaziranga National Park Wildlife Safari',
+    desc: 'Assam wilderness adventure: Open 4x4 jeep safari in Bagori / Kohora zones to spot the endangered one-horned rhinoceros and wild elephants.',
+    tag1: 'Rhino Jeep Safari',
+    tag2: 'Jungle Eco Resort',
+    price: '₹52,499'
+  },
+  {
+    id: 'ladakh-adventure',
+    category: 'hills adventure',
+    image: '/images/ladakh_pangong.jpg',
+    duration: '12 Days / 11 Nights',
+    subtitle: 'Expedition Coach + High-Altitude 4x4',
+    title: 'Leh – Ladakh Himalayan Expedition',
+    desc: 'High-altitude adventure across Khardung La pass, Nubra Valley Hunder sand dunes, and double-humped camel rides with Pangong Tso lake stay.',
+    tag1: 'Pangong Lake Stay',
+    tag2: 'Khardung La Pass',
+    price: '₹74,999'
   }
 ];
 
@@ -94,13 +118,13 @@ export default function IndiaLocalCatalog() {
             </button>
             <button
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer ${
-                activeFilter === 'coastal'
+                activeFilter === 'heritage'
                   ? 'bg-slate-900 text-white shadow-sm'
                   : 'bg-white hover:bg-slate-200 text-slate-700 border-slate-200'
               }`}
-              onClick={() => setActiveFilter('coastal')}
+              onClick={() => setActiveFilter('heritage')}
             >
-              Beach &amp; Coastal
+              Heritage &amp; Monuments
             </button>
             <button
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer ${
@@ -110,23 +134,23 @@ export default function IndiaLocalCatalog() {
               }`}
               onClick={() => setActiveFilter('hills')}
             >
-              Hill Stations
+              Hill Stations &amp; Valleys
             </button>
             <button
               className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer ${
-                activeFilter === 'heritage'
+                activeFilter === 'wildlife'
                   ? 'bg-slate-900 text-white shadow-sm'
                   : 'bg-white hover:bg-slate-200 text-slate-700 border-slate-200'
               }`}
-              onClick={() => setActiveFilter('heritage')}
+              onClick={() => setActiveFilter('wildlife')}
             >
-              Heritage &amp; Backwaters
+              Wildlife &amp; Nature
             </button>
           </div>
         </div>
 
         {/* Packages Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPackages.map((pkg) => (
             <div
               key={pkg.id}
