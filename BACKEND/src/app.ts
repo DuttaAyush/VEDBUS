@@ -24,26 +24,61 @@ export const app = express();
 // ── Security headers ──────────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS — only allow known origins ──────────────────────────────
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  process.env.ADMIN_URL || 'http://localhost:3001',
-  'http://127.0.0.1:3001',
-];
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, server-to-server) or localhost
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: origin ${origin} not allowed.`));
-      }
-    },
-    credentials: true,
-  })
-);
+// ── CORS — dynamic & flexible origin handling ─────────────────────
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+  ...(process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim()) : []),
+].filter(Boolean) as string[];
+
+const normalizeOrigin = (urlStr: string) => urlStr.replace(/\/+$/, '').toLowerCase();
+
+const isAllowedOrigin = (origin: string | undefined): boolean => {
+  // Allow requests without Origin (e.g. server-to-server, curl, Postman, mobile native apps)
+  if (!origin) return true;
+
+  const cleanOrigin = normalizeOrigin(origin);
+
+  // Always allow localhost & 127.0.0.1 on any port
+  if (cleanOrigin.startsWith('http://localhost') || cleanOrigin.startsWith('http://127.0.0.1')) return true;
+
+  // Allow production domain and any subdomains (e.g. vedbus.com, www.vedbus.com, admin.vedbus.com, api.vedbus.com)
+  const domainPattern = /^https?:\/\/([a-z0-9-]+\.)*vedbus\.com(:[0-9]+)?$/i;
+  if (domainPattern.test(origin)) return true;
+
+  // Allow vedantabus domains if used
+  const vedantaPattern = /^https?:\/\/([a-z0-9-]+\.)*vedantabus\.(com|co\.in)(:[0-9]+)?$/i;
+  if (vedantaPattern.test(origin)) return true;
+
+  // Explicitly configured origins (from env vars)
+  if (configuredOrigins.some((allowed) => cleanOrigin === normalizeOrigin(allowed) || cleanOrigin.startsWith(normalizeOrigin(allowed)))) {
+    return true;
+  }
+
+  // In development mode, allow intranet / local network IPs and dev hosts automatically
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+
+  return false;
+};
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Set-Cookie'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ── Rate limiting ─────────────────────────────────────────────────
 // Skip rate limiting for local development and test environments
