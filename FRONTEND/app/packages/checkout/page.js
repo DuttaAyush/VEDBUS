@@ -8,7 +8,7 @@ import Footer from '@/components/site/Footer';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { apiFetch } from '@/lib/api';
 import { getStoredUser } from '@/lib/auth';
-import { normalizePackageRecord } from '@/lib/packages';
+import { getLocalPackage, resolvePackage, canonicalPackageId } from '@/lib/packages';
 
 function tomorrowDate() {
   const date = new Date();
@@ -19,8 +19,10 @@ function tomorrowDate() {
 function PackageCheckoutContent() {
   const searchParams = useSearchParams();
   const requestedPackageId = searchParams.get('package') || '';
-  const [pkg, setPkg] = useState(null);
-  const [loading, setLoading] = useState(Boolean(requestedPackageId));
+  const canonicalId = canonicalPackageId(requestedPackageId);
+  const initialLocalPkg = getLocalPackage(canonicalId);
+  const [pkg, setPkg] = useState(initialLocalPkg);
+  const [loading, setLoading] = useState(!initialLocalPkg);
   const [error, setError] = useState('');
   const [travelDate, setTravelDate] = useState('');
   const [travelerCount, setTravelerCount] = useState(1);
@@ -36,52 +38,50 @@ function PackageCheckoutContent() {
   const requestKeyRef = useRef(null);
 
   useEffect(() => {
-    if (!requestedPackageId) {
-      setLoading(false);
-      setError('No package was selected.');
-      return;
+    let cancelled = false;
+    const initial = getLocalPackage(canonicalId);
+    if (initial) {
+      setPkg(initial);
+      const user = getStoredUser();
+      if (user?.email) setContactEmail(user.email);
+      if (user?.phone) setContactPhone(user.phone);
+
+      let pending = null;
+      try {
+        pending = JSON.parse(sessionStorage.getItem('pending_package') || 'null');
+      } catch {
+        pending = null;
+      }
+      const pendingMatches =
+        pending &&
+        (pending.packageId === initial.id ||
+          pending.pkgId === initial.slug ||
+          pending.pkgId === canonicalId ||
+          pending.pkgId === requestedPackageId);
+      const count = pendingMatches ? Math.max(1, Math.min(10, Number(pending.travelerCount) || 1)) : 1;
+      setTravelerCount(count);
+      setTravelers(
+        pendingMatches && Array.isArray(pending.travelers) && pending.travelers.length === count
+          ? pending.travelers
+          : Array.from({ length: count }, () => ({ name: '', age: '', gender: 'other' }))
+      );
+      if (pendingMatches) {
+        setTravelDate(pending.travelDate || '');
+        setHotelUpgrade(pending.hotelTier || '3star');
+        setTransportMode(pending.transportMode || 'coach');
+        if (Array.isArray(pending.selectedAddons)) {
+          setSelectedAddons(pending.selectedAddons);
+        }
+      }
     }
 
-    let cancelled = false;
-    apiFetch(`/api/packages/${encodeURIComponent(requestedPackageId)}`)
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok || data?.success === false) throw new Error(data?.message || 'This package is no longer available.');
-        return normalizePackageRecord(data, requestedPackageId);
-      })
+    resolvePackage(canonicalId)
       .then((livePackage) => {
-        if (cancelled) return;
-        if (!livePackage.id || !livePackage.title || livePackage.basePrice <= 0) {
-          setError('This package is no longer available for booking.');
-          return;
-        }
+        if (cancelled || !livePackage) return;
         setPkg(livePackage);
-        const user = getStoredUser();
-        if (user?.email) setContactEmail(user.email);
-        if (user?.phone) setContactPhone(user.phone);
-
-        let pending = null;
-        try {
-          pending = JSON.parse(sessionStorage.getItem('pending_package') || 'null');
-        } catch {
-          pending = null;
-        }
-        const pendingMatches = pending && (pending.packageId === livePackage.id || pending.pkgId === livePackage.slug || pending.pkgId === requestedPackageId);
-        const count = pendingMatches ? Math.max(1, Math.min(10, Number(pending.travelerCount) || 1)) : 1;
-        setTravelerCount(count);
-        setTravelers(pendingMatches && Array.isArray(pending.travelers) && pending.travelers.length === count
-          ? pending.travelers
-          : Array.from({ length: count }, () => ({ name: '', age: '', gender: 'other' })));
-        if (pendingMatches) {
-          setTravelDate(pending.travelDate || '');
-          setHotelUpgrade(pending.hotelTier || '3star');
-          setTransportMode(pending.transportMode || 'coach');
-          const ids = new Set(Array.isArray(pending.selectedAddons) ? pending.selectedAddons.map((addon) => addon.id) : []);
-          setSelectedAddons(livePackage.addons.filter((addon) => ids.has(addon.id)));
-        }
       })
-      .catch((fetchError) => {
-        if (!cancelled) setError(fetchError.message || 'Unable to load this package.');
+      .catch(() => {
+        // Local package is already active
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -90,7 +90,7 @@ function PackageCheckoutContent() {
     return () => {
       cancelled = true;
     };
-  }, [requestedPackageId]);
+  }, [canonicalId, requestedPackageId]);
 
   const hotelCost = hotelUpgrade === '5star' ? 9500 : hotelUpgrade === '4star' ? 4500 : 0;
   const transportCost = transportMode === 'private-suv' ? 8000 : transportMode === 'private-sedan' ? 5000 : 0;
@@ -132,7 +132,7 @@ function PackageCheckoutContent() {
       const response = await apiFetch('/api/packages/book', {
         method: 'POST',
         body: JSON.stringify({
-          packageId: pkg.id,
+          packageId: pkg.dbId || pkg.dbSlug || pkg.id,
           travelersCount: travelerCount,
           travelDate,
           travelers: travelers.map((traveler) => ({ name: traveler.name.trim(), age: Number(traveler.age), gender: traveler.gender })),
