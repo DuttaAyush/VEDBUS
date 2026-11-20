@@ -6,14 +6,16 @@ export default function Footer() {
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-800">
           <div>
-            <Link href="/">
-              <img
-                alt="YatraBus Logo"
-                className="h-8 w-auto brightness-0 invert mb-3"
-                src="/images/logo.png"
-                loading="lazy"
-                decoding="async"
-              />
+            <Link href="/" className="inline-block mb-3">
+              <div className="px-2.5 py-1 bg-white/95 rounded-xl border border-white/20 shadow-sm inline-flex items-center justify-center">
+                <img
+                  alt="YatraBus Logo"
+                  className="h-6 w-auto object-contain"
+                  src="/images/logo.png"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
               India&apos;s dedicated bus reservation and curated tour booking network. Fast, reliable, and verified comfort.
