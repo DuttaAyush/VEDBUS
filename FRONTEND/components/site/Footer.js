@@ -2,13 +2,13 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-slate-950 text-slate-400 py-12 border-t border-slate-800">
+    <footer className="w-full bg-slate-950 text-slate-400 py-12 border-t border-slate-800 relative z-20">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-slate-800">
           <div>
             <Link href="/">
               <img
-                alt="VedBus Logo"
+                alt="YatraBus Logo"
                 className="h-8 w-auto brightness-0 invert mb-3"
                 src="/images/logo.png"
                 loading="lazy"

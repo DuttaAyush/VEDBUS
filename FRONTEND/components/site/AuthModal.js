@@ -332,7 +332,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                     disabled={isSubmitting}
                     className="w-full min-h-[46px] rounded-2xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
-                    <span>{isSubmitting ? 'Logging in...' : 'Log In with Email'}</span>
+                    <span>{isSubmitting ? 'Logging in...' : 'Log In'}</span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </button>
 

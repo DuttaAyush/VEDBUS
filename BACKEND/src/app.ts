@@ -78,7 +78,6 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // ── Rate limiting ─────────────────────────────────────────────────
 // Skip rate limiting for local development and test environments
