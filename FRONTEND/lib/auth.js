@@ -1,3 +1,5 @@
+import { API_BASE_URL } from './api';
+
 // Authentication Helpers
 
 export function getStoredUser() {
@@ -36,7 +38,7 @@ export function openAuthModal(mode = 'login') {
 
 export async function logoutUser(redirectTo = '/') {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/logout`, {
+    await fetch(`${API_BASE_URL}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
     });
