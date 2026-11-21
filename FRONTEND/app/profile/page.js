@@ -127,36 +127,74 @@ export default function CustomerProfilePage() {
       setUpcomingTrips([]);
     }
 
-    // Load user saved passengers
+    // Load user saved passengers (Self Only by default, automatically using registered name/phone with no fake family members)
     const passengersKey = localUser?.id ? `saved_passengers_${localUser.id}` : (localUser?.phone ? `saved_passengers_${localUser.phone}` : 'saved_passengers');
     if (typeof window !== 'undefined') {
       try {
+        const defaultSelf = [
+          {
+            id: 'sp_self',
+            name: localUser?.name || 'Registered Customer',
+            phone: localUser?.phone || '',
+            age: 30,
+            gender: 'Male',
+            relation: 'Self',
+          },
+        ];
+
         const storedP = localStorage.getItem(passengersKey) || localStorage.getItem('saved_passengers');
         if (storedP) {
           const parsedP = JSON.parse(storedP);
           if (Array.isArray(parsedP) && parsedP.length > 0) {
-            setSavedPassengers(parsedP);
+            // Strip out legacy mock/fake family members
+            const fakeIds = new Set(['sp2', 'sp3', 'sp4']);
+            const fakeNames = new Set(['Sneha Patel', 'Aarav Patel', 'Suresh Patel']);
+            const filtered = parsedP.filter((p) => !fakeIds.has(p.id) && !fakeNames.has(p.name));
+
+            // Sync Self passenger with registered user details
+            const selfIdx = filtered.findIndex((p) => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
+            if (selfIdx >= 0) {
+              filtered[selfIdx] = {
+                ...filtered[selfIdx],
+                id: filtered[selfIdx].id || 'sp_self',
+                name: localUser?.name || (filtered[selfIdx].name !== 'Rajesh Patel' ? filtered[selfIdx].name : 'Registered Customer'),
+                phone: localUser?.phone || filtered[selfIdx].phone || '',
+                relation: 'Self',
+              };
+            } else if (localUser?.name || localUser?.phone) {
+              filtered.unshift({
+                id: 'sp_self',
+                name: localUser?.name || 'Registered Customer',
+                phone: localUser?.phone || '',
+                age: 30,
+                gender: 'Male',
+                relation: 'Self',
+              });
+            }
+
+            const finalList = filtered.length > 0 ? filtered : defaultSelf;
+            setSavedPassengers(finalList);
+            localStorage.setItem(passengersKey, JSON.stringify(finalList));
           } else {
-            const defaults = [
-              { id: 'sp1', name: localUser?.name || 'Rajesh Patel', age: 34, gender: 'Male', relation: 'Self' },
-              { id: 'sp2', name: 'Sneha Patel', age: 31, gender: 'Female', relation: 'Spouse' },
-              { id: 'sp3', name: 'Aarav Patel', age: 8, gender: 'Male', relation: 'Child' },
-              { id: 'sp4', name: 'Suresh Patel', age: 62, gender: 'Male', relation: 'Father' },
-            ];
-            setSavedPassengers(defaults);
-            localStorage.setItem(passengersKey, JSON.stringify(defaults));
+            setSavedPassengers(defaultSelf);
+            localStorage.setItem(passengersKey, JSON.stringify(defaultSelf));
           }
         } else {
-          const defaults = [
-            { id: 'sp1', name: localUser?.name || 'Rajesh Patel', age: 34, gender: 'Male', relation: 'Self' },
-            { id: 'sp2', name: 'Sneha Patel', age: 31, gender: 'Female', relation: 'Spouse' },
-            { id: 'sp3', name: 'Aarav Patel', age: 8, gender: 'Male', relation: 'Child' },
-            { id: 'sp4', name: 'Suresh Patel', age: 62, gender: 'Male', relation: 'Father' },
-          ];
-          setSavedPassengers(defaults);
-          localStorage.setItem(passengersKey, JSON.stringify(defaults));
+          setSavedPassengers(defaultSelf);
+          localStorage.setItem(passengersKey, JSON.stringify(defaultSelf));
         }
-      } catch {}
+      } catch {
+        setSavedPassengers([
+          {
+            id: 'sp_self',
+            name: localUser?.name || 'Registered Customer',
+            phone: localUser?.phone || '',
+            age: 30,
+            gender: 'Male',
+            relation: 'Self',
+          },
+        ]);
+      }
     }
 
     // Fetch user profile from DB
@@ -164,7 +202,46 @@ export default function CustomerProfilePage() {
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && (data.data || data.name)) {
-          setUserProfile(data.data || data);
+          const profile = data.data || data;
+          setUserProfile(profile);
+
+          // Update Self passenger with authoritative registered DB name/phone
+          if (profile.name || profile.phone) {
+            setSavedPassengers((prev) => {
+              const hasSelf = prev.some((p) => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
+              let updated;
+              if (hasSelf) {
+                updated = prev.map((p) =>
+                  p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1'
+                    ? {
+                        ...p,
+                        name: profile.name || p.name,
+                        phone: profile.phone || p.phone || '',
+                        relation: 'Self',
+                      }
+                    : p
+                );
+              } else {
+                updated = [
+                  {
+                    id: 'sp_self',
+                    name: profile.name || 'Registered Customer',
+                    phone: profile.phone || '',
+                    age: 30,
+                    gender: 'Male',
+                    relation: 'Self',
+                  },
+                  ...prev,
+                ];
+              }
+              if (typeof window !== 'undefined') {
+                try {
+                  localStorage.setItem(passengersKey, JSON.stringify(updated));
+                } catch {}
+              }
+              return updated;
+            });
+          }
         }
       })
       .catch(() => {});
@@ -245,9 +322,10 @@ export default function CustomerProfilePage() {
   const [editingPassenger, setEditingPassenger] = useState(null);
   const [passengerFormData, setPassengerFormData] = useState({
     name: '',
+    phone: '',
     age: '',
     gender: 'Male',
-    relation: 'Family',
+    relation: 'Self',
   });
 
   // Manage Account Modal State
@@ -347,7 +425,7 @@ export default function CustomerProfilePage() {
 
   const openAddPassengerModal = () => {
     setEditingPassenger(null);
-    setPassengerFormData({ name: '', age: '', gender: 'Male', relation: 'Family' });
+    setPassengerFormData({ name: '', phone: '', age: '', gender: 'Male', relation: 'Family' });
     setIsPassengerModalOpen(true);
   };
 
@@ -355,6 +433,7 @@ export default function CustomerProfilePage() {
     setEditingPassenger(passenger);
     setPassengerFormData({
       name: passenger.name,
+      phone: passenger.phone || '',
       age: passenger.age.toString(),
       gender: passenger.gender,
       relation: passenger.relation,
@@ -408,9 +487,10 @@ export default function CustomerProfilePage() {
           ? {
               ...p,
               name: passengerFormData.name.trim(),
+              phone: (passengerFormData.phone || '').trim(),
               age: parseInt(passengerFormData.age, 10),
               gender: passengerFormData.gender,
-              relation: passengerFormData.relation.trim(),
+              relation: passengerFormData.relation.trim() || 'Self',
             }
           : p
       );
@@ -420,9 +500,10 @@ export default function CustomerProfilePage() {
       const newPassenger = {
         id: newId,
         name: passengerFormData.name.trim(),
+        phone: (passengerFormData.phone || '').trim(),
         age: parseInt(passengerFormData.age, 10),
         gender: passengerFormData.gender,
-        relation: passengerFormData.relation.trim() || 'Traveler',
+        relation: passengerFormData.relation.trim() || 'Family',
       };
       updated = [...savedPassengers, newPassenger];
       setSavedPassengers(updated);
@@ -1232,7 +1313,7 @@ export default function CustomerProfilePage() {
                             </span>
                           </div>
                           <p className="text-xs font-medium text-slate-500">
-                            {p.gender} • {p.age} Years Old • ID Verified
+                            {p.gender} • {p.age} Years Old{p.phone ? ` • 📞 ${p.phone}` : ''} • ID Verified
                           </p>
                         </div>
                       </div>
@@ -1418,18 +1499,33 @@ export default function CustomerProfilePage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Relation / Tag *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={passengerFormData.relation}
-                  onChange={(e) => setPassengerFormData({ ...passengerFormData, relation: e.target.value })}
-                  placeholder="e.g. Self, Spouse, Father, Friend"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Mobile Number (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    value={passengerFormData.phone || ''}
+                    onChange={(e) => setPassengerFormData({ ...passengerFormData, phone: e.target.value })}
+                    placeholder="e.g. +91 98765 43210"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Relation / Tag *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={passengerFormData.relation}
+                    onChange={(e) => setPassengerFormData({ ...passengerFormData, relation: e.target.value })}
+                    placeholder="e.g. Self, Spouse, Father, Friend"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-3">

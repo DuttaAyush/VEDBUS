@@ -3,19 +3,22 @@ import { Prisma } from '@prisma/client';
 export function bookingError(message: string, statusCode = 400) {
   return Object.assign(new Error(message), { statusCode });
 }
-export function seatLayout(trip: any) {
+export function seatLayout(trip: any, bookedSeats: string[] = []) {
   const count = trip.bus.totalSeats;
   const sleeper = (trip.bus.busStyle || trip.bus.type).toLowerCase().includes('sleeper');
   const lowerCount = sleeper ? Math.ceil(count / 2) : count;
   const config = (trip.seatPricingConfig || {}) as Record<string, number>;
   const statuses = (trip.seatStatuses || {}) as Record<string, string>;
+  const bookedSet = new Set(bookedSeats);
   return Array.from({ length: count }, (_, i) => {
     const upper = i >= lowerCount;
     const n = upper ? i - lowerCount + 1 : i + 1;
     const id = `${upper ? 'U' : 'L'}${n}`;
     const tier = upper ? config._tier_upper : config._tier_lower;
     const price = Number(config[id] ?? tier ?? trip.baseFare);
-    return { id, name: id, deck: upper ? 'upper' : 'lower', price, status: statuses[id] || 'available', type: sleeper ? 'sleeper' : 'seater' };
+    const isBooked = bookedSet.has(id);
+    const status = isBooked ? 'sold' : (statuses[id] || 'available');
+    return { id, name: id, deck: upper ? 'upper' : 'lower', price, status, type: sleeper ? 'sleeper' : 'seater' };
   });
 }
 export function selectedSeatIds(input: unknown): string[] {

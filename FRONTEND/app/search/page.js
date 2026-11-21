@@ -7,6 +7,7 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
 import { apiFetch } from '@/lib/api';
+import { getRelativeDate } from '@/lib/dates';
 
 const popularCities = [
   'Nagpur',
@@ -25,7 +26,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const initialFrom = searchParams.get('from') || 'Nagpur';
   const initialTo = searchParams.get('to') || 'Pune';
-  const initialDate = searchParams.get('dateLabel') || searchParams.get('date') || 'Tomorrow, 24 Oct';
+  const initialDate = searchParams.get('dateLabel') || searchParams.get('date') || getRelativeDate(0).mainText;
   const initialDateValue = searchParams.get('date') || '';
 
   const [buses, setBuses] = useState([]);

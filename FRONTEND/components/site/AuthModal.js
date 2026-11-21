@@ -104,6 +104,42 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_token', token);
           localStorage.setItem('auth_user', JSON.stringify(user));
+
+          // Automatically save only the logged-in user as "Self" using registered name/phone
+          const passengersKey = user.id ? `saved_passengers_${user.id}` : (user.phone ? `saved_passengers_${user.phone}` : 'saved_passengers');
+          try {
+            const existingRaw = localStorage.getItem(passengersKey);
+            let passengerList = [];
+            if (existingRaw) {
+              const parsed = JSON.parse(existingRaw);
+              if (Array.isArray(parsed)) {
+                const fakeIds = new Set(['sp2', 'sp3', 'sp4']);
+                const fakeNames = new Set(['Sneha Patel', 'Aarav Patel', 'Suresh Patel']);
+                passengerList = parsed.filter(p => !fakeIds.has(p.id) && !fakeNames.has(p.name));
+              }
+            }
+            const selfIdx = passengerList.findIndex(p => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
+            if (selfIdx >= 0) {
+              passengerList[selfIdx] = {
+                ...passengerList[selfIdx],
+                id: passengerList[selfIdx].id || 'sp_self',
+                name: user.name || passengerList[selfIdx].name,
+                phone: user.phone || passengerList[selfIdx].phone || '',
+                relation: 'Self',
+              };
+            } else {
+              passengerList.unshift({
+                id: 'sp_self',
+                name: user.name || 'Registered Customer',
+                phone: user.phone || '',
+                age: 30,
+                gender: 'Male',
+                relation: 'Self',
+              });
+            }
+            localStorage.setItem(passengersKey, JSON.stringify(passengerList));
+          } catch {}
+
           window.dispatchEvent(new Event('auth-change'));
           window.dispatchEvent(new Event('storage'));
         }
@@ -159,6 +195,42 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         if (typeof window !== 'undefined') {
           localStorage.setItem('auth_token', token);
           localStorage.setItem('auth_user', JSON.stringify(user));
+
+          // Automatically save only the logged-in user as "Self" using registered name/phone
+          const passengersKey = user.id ? `saved_passengers_${user.id}` : (user.phone ? `saved_passengers_${user.phone}` : 'saved_passengers');
+          try {
+            const existingRaw = localStorage.getItem(passengersKey);
+            let passengerList = [];
+            if (existingRaw) {
+              const parsed = JSON.parse(existingRaw);
+              if (Array.isArray(parsed)) {
+                const fakeIds = new Set(['sp2', 'sp3', 'sp4']);
+                const fakeNames = new Set(['Sneha Patel', 'Aarav Patel', 'Suresh Patel']);
+                passengerList = parsed.filter(p => !fakeIds.has(p.id) && !fakeNames.has(p.name));
+              }
+            }
+            const selfIdx = passengerList.findIndex(p => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
+            if (selfIdx >= 0) {
+              passengerList[selfIdx] = {
+                ...passengerList[selfIdx],
+                id: passengerList[selfIdx].id || 'sp_self',
+                name: user.name || passengerList[selfIdx].name,
+                phone: user.phone || passengerList[selfIdx].phone || '',
+                relation: 'Self',
+              };
+            } else {
+              passengerList.unshift({
+                id: 'sp_self',
+                name: user.name || 'Registered Customer',
+                phone: user.phone || '',
+                age: 30,
+                gender: 'Male',
+                relation: 'Self',
+              });
+            }
+            localStorage.setItem(passengersKey, JSON.stringify(passengerList));
+          } catch {}
+
           window.dispatchEvent(new Event('auth-change'));
           window.dispatchEvent(new Event('storage'));
         }

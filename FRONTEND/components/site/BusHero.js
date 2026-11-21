@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
+import { getRelativeDate } from '@/lib/dates';
 
 const popularCities = [
   { city: 'Nagpur', state: 'Maharashtra', tag: 'Direct Fleet' },
@@ -32,13 +33,7 @@ export default function BusHero() {
   const [isToOpen, setIsToOpen] = useState(false);
   const [isPassengerOpen, setIsPassengerOpen] = useState(false);
   const [passengers, setPassengers] = useState(2);
-  const initialJourneyDate = new Date();
-  initialJourneyDate.setDate(initialJourneyDate.getDate() + 1);
-  const [selectedDate, setSelectedDate] = useState(() => ({
-    mainText: `Tomorrow, ${initialJourneyDate.getDate()} ${initialJourneyDate.toLocaleDateString('en-US', { month: 'short' })}`,
-    subText: initialJourneyDate.toLocaleDateString('en-US', { weekday: 'long' }),
-    date: initialJourneyDate.toISOString().slice(0, 10),
-  }));
+  const [selectedDate, setSelectedDate] = useState(() => getRelativeDate(0));
   const [fromCity, setFromCity] = useState('Nagpur');
   const [toCity, setToCity] = useState('Pune');
 

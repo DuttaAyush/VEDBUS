@@ -44,12 +44,55 @@ function CheckoutContent() {
         return;
       }
       setBookingData(parsed);
-      setPassengers(parsed.selectedSeats.map((seat) => ({ seat: seat.id || seat.name, name: '', age: '', gender: 'other' })));
       const key = user?.id ? `saved_passengers_${user.id}` : user?.phone ? `saved_passengers_${user.phone}` : '';
-      if (key) {
-        const saved = JSON.parse(localStorage.getItem(key) || '[]');
-        if (Array.isArray(saved)) setSavedPassengers(saved);
+      let savedList = [];
+      if (key && typeof window !== 'undefined') {
+        try {
+          const rawSaved = localStorage.getItem(key) || localStorage.getItem('saved_passengers');
+          if (rawSaved) {
+            const parsedSaved = JSON.parse(rawSaved);
+            if (Array.isArray(parsedSaved)) {
+              const fakeIds = new Set(['sp2', 'sp3', 'sp4']);
+              const fakeNames = new Set(['Sneha Patel', 'Aarav Patel', 'Suresh Patel']);
+              savedList = parsedSaved.filter((p) => !fakeIds.has(p.id) && !fakeNames.has(p.name));
+            }
+          }
+        } catch {}
       }
+
+      if (savedList.length === 0 && user) {
+        savedList = [
+          {
+            id: 'sp_self',
+            name: user.name || '',
+            phone: user.phone || '',
+            age: 30,
+            gender: 'Male',
+            relation: 'Self',
+          },
+        ];
+        if (key && typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(key, JSON.stringify(savedList));
+          } catch {}
+        }
+      }
+      setSavedPassengers(savedList);
+
+      const selfProfile = savedList.find((p) => p.relation === 'Self') || savedList[0];
+      setPassengers(
+        parsed.selectedSeats.map((seat, idx) => {
+          if (idx === 0 && (user?.name || selfProfile?.name)) {
+            return {
+              seat: seat.id || seat.name,
+              name: user?.name || selfProfile?.name || '',
+              age: selfProfile?.age ? String(selfProfile.age) : '30',
+              gender: selfProfile?.gender ? selfProfile.gender.toLowerCase() : 'male',
+            };
+          }
+          return { seat: seat.id || seat.name, name: '', age: '', gender: 'other' };
+        })
+      );
     } catch {
       setError('The seat selection session could not be read. Search again to start a new booking.');
     } finally {
@@ -152,7 +195,70 @@ function CheckoutContent() {
 
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4"><h2 className="text-base font-serif font-bold text-slate-900">Contact details</h2><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><label className="text-xs font-bold text-slate-600">Email *<input type="email" value={contactEmail} onChange={(event) => setContactEmail(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" /></label><label className="text-xs font-bold text-slate-600">Phone *<input type="tel" value={contactPhone} onChange={(event) => setContactPhone(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" /></label></div></div>
 
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4"><div className="flex items-center justify-between"><h2 className="text-base font-serif font-bold text-slate-900">Passenger details</h2>{savedPassengers.length > 0 && <span className="text-[11px] text-slate-500">Saved profiles available per passenger</span>}</div>{passengers.map((passenger, index) => <div key={passenger.seat} className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200"><span className="sm:col-span-12 text-xs font-bold text-brand-scarlet">Passenger {index + 1} · Seat {passenger.seat}</span><label className="sm:col-span-6 text-[11px] font-bold text-slate-600">Full name *<input value={passenger.name} onChange={(event) => updatePassenger(index, 'name', event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" /></label><label className="sm:col-span-3 text-[11px] font-bold text-slate-600">Age *<input type="number" min="1" max="120" value={passenger.age} onChange={(event) => updatePassenger(index, 'age', event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm" /></label><label className="sm:col-span-3 text-[11px] font-bold text-slate-600">Gender<select value={passenger.gender} onChange={(event) => updatePassenger(index, 'gender', event.target.value)} className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></label></div>)}</div>
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-serif font-bold text-slate-900">Passenger details</h2>
+                {savedPassengers.length > 0 && <span className="text-[11px] text-slate-500">Saved profile available</span>}
+              </div>
+              {passengers.map((passenger, index) => (
+                <div key={passenger.seat} className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="sm:col-span-12 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs font-bold text-brand-scarlet">Passenger {index + 1} · Seat {passenger.seat}</span>
+                    {savedPassengers.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] text-slate-400">Autofill:</span>
+                        {savedPassengers.map((sp) => (
+                          <button
+                            key={sp.id}
+                            type="button"
+                            onClick={() => {
+                              updatePassenger(index, 'name', sp.name);
+                              updatePassenger(index, 'age', sp.age ? String(sp.age) : '30');
+                              updatePassenger(index, 'gender', sp.gender ? sp.gender.toLowerCase() : 'other');
+                            }}
+                            className="px-2.5 py-0.5 rounded-lg bg-white border border-slate-200 hover:border-brand-scarlet text-[11px] font-bold text-slate-700 hover:text-brand-scarlet transition-all shadow-2xs"
+                          >
+                            {sp.relation || 'Self'}: {sp.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <label className="sm:col-span-6 text-[11px] font-bold text-slate-600">
+                    Full name *
+                    <input
+                      value={passenger.name}
+                      onChange={(event) => updatePassenger(index, 'name', event.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                      placeholder="e.g. Rahul Sharma"
+                    />
+                  </label>
+                  <label className="sm:col-span-3 text-[11px] font-bold text-slate-600">
+                    Age *
+                    <input
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={passenger.age}
+                      onChange={(event) => updatePassenger(index, 'age', event.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                    />
+                  </label>
+                  <label className="sm:col-span-3 text-[11px] font-bold text-slate-600">
+                    Gender
+                    <select
+                      value={passenger.gender}
+                      onChange={(event) => updatePassenger(index, 'gender', event.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white"
+                    >
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </label>
+                </div>
+              ))}
+            </div>
 
             <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-3"><h2 className="text-base font-serif font-bold text-slate-900">Optional services</h2><label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs"><span className="flex items-center gap-2"><input type="checkbox" checked={includeSatvikMeal} onChange={(event) => setIncludeSatvikMeal(event.target.checked)} /> Meal service</span><strong>+₹149 / person</strong></label><label className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs"><span className="flex items-center gap-2"><input type="checkbox" checked={includeCabPickup} onChange={(event) => setIncludeCabPickup(event.target.checked)} /> Cab pickup</span><strong>+₹199 total</strong></label><p className="text-[11px] text-slate-500">Insurance is not offered because the current provider integration does not support it.</p></div>
 

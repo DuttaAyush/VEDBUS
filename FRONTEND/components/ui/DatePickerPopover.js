@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { SHORT_DAYS, MONTH_NAMES, formatLocalDate, parseDateString } from '@/lib/dates';
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
-
-const SHORT_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const getTodayIST = () => {
+  const now = new Date();
+  const istOffset = 330; // +5:30 in minutes
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const istDate = new Date(utcMs + istOffset * 60000);
+  return new Date(istDate.getFullYear(), istDate.getMonth(), istDate.getDate(), 0, 0, 0, 0);
+};
 
 export default function DatePickerPopover({
   isOpen,
@@ -19,12 +21,22 @@ export default function DatePickerPopover({
   defaultPosition = 'top',
   align = 'center'
 }) {
-  const [viewDate, setViewDate] = useState(() => new Date());
-  const [activeDate, setActiveDate] = useState(() => new Date());
+  const [viewDate, setViewDate] = useState(() => getTodayIST());
+  const [activeDate, setActiveDate] = useState(() => getTodayIST());
   const [computedPosition, setComputedPosition] = useState(
     position === 'auto' ? defaultPosition : position
   );
   const popoverRef = useRef(null);
+
+  // Sync viewDate and activeDate with selectedDate prop when popover opens or prop changes
+  useEffect(() => {
+    if (!isOpen) return;
+    const parsed = parseDateString(selectedDate);
+    if (parsed) {
+      setActiveDate(parsed);
+      setViewDate(new Date(parsed.getFullYear(), parsed.getMonth(), 1));
+    }
+  }, [isOpen, selectedDate]);
 
   // Dynamic auto positioning based on available viewport space
   useEffect(() => {
@@ -111,8 +123,7 @@ export default function DatePickerPopover({
     setViewDate(new Date(currentYear, currentMonth + 1, 1));
   };
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayIST();
 
   const formatDateOutput = (d) => {
     const isToday = d.toDateString() === today.toDateString();
@@ -120,7 +131,6 @@ export default function DatePickerPopover({
     tomorrow.setDate(today.getDate() + 1);
     const isTomorrow = d.toDateString() === tomorrow.toDateString();
 
-    const dayName = SHORT_DAYS[d.getDay()];
     const fullDayName = d.toLocaleDateString('en-US', { weekday: 'long' });
     const dayNum = d.getDate();
     const monthShort = d.toLocaleDateString('en-US', { month: 'short' });
@@ -132,8 +142,8 @@ export default function DatePickerPopover({
     return {
       mainText: `${labelPrefix}${dayNum} ${monthShort}`,
       subText: fullDayName,
-     rawDate: d,
-     date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      rawDate: d,
+      date: formatLocalDate(d)
     };
   };
 
@@ -224,40 +234,57 @@ export default function DatePickerPopover({
       </div>
 
       {/* Quick Choice Chips */}
-      <div className="flex flex-wrap gap-1.5 my-3">
-        <button
-          type="button"
-          onClick={(e) => handleShortcutClick(e, 0)}
-          className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-        >
-          Today
-        </button>
-        <button
-          type="button"
-          onClick={(e) => handleShortcutClick(e, 1)}
-          className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${currentTheme.badgeBg}`}
-        >
-          Tomorrow
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            const day = today.getDay();
-            const diff = (6 - day + 7) % 7 || 7;
-            handleShortcutClick(e, diff);
-          }}
-          className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-        >
-          Saturday
-        </button>
-        <button
-          type="button"
-          onClick={(e) => handleShortcutClick(e, 7)}
-          className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-        >
-          Next Week
-        </button>
-      </div>
+      {(() => {
+        const tomorrowObj = new Date(today);
+        tomorrowObj.setDate(today.getDate() + 1);
+        const isTodaySelected = Boolean(activeDate && activeDate.toDateString() === today.toDateString());
+        const isTomorrowSelected = Boolean(activeDate && activeDate.toDateString() === tomorrowObj.toDateString());
+
+        return (
+          <div className="flex flex-wrap gap-1.5 my-3">
+            <button
+              type="button"
+              onClick={(e) => handleShortcutClick(e, 0)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors ${
+                isTodaySelected
+                  ? `border ${currentTheme.badgeBg}`
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleShortcutClick(e, 1)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors ${
+                isTomorrowSelected
+                  ? `border ${currentTheme.badgeBg}`
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Tomorrow
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                const day = today.getDay();
+                const diff = (6 - day + 7) % 7 || 7;
+                handleShortcutClick(e, diff);
+              }}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              Saturday
+            </button>
+            <button
+              type="button"
+              onClick={(e) => handleShortcutClick(e, 7)}
+              className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              Next Week
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Month Navigator */}
       <div className="flex items-center justify-between my-1 px-1">

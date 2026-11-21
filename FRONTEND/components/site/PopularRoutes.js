@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { getRelativeDate } from '@/lib/dates';
 
 const popularRoutesData = [
   {
@@ -317,7 +318,7 @@ export default function PopularRoutes({ onOpenSeatDrawer, rotating = true }) {
                   <span className="hidden sm:inline text-slate-400 text-xs">• {r.perk}</span>
                 </div>
                 <Link
-                  href={`/select-seats?busId=${r.id}&operator=${encodeURIComponent(r.route + ' Express')}&busPlate=${encodeURIComponent(r.plate)}&busType=${encodeURIComponent(r.busType)}&price=${parseInt(r.price.replace(/[^\d]/g, '')) || 700}&from=${encodeURIComponent((r.route.split('⇄')[0] || 'Nagpur').trim())}&to=${encodeURIComponent((r.route.split('⇄')[1] || 'Pune').trim())}&depTime=${encodeURIComponent(r.depTime)}&arrTime=${encodeURIComponent(r.arrTime)}&depLocation=${encodeURIComponent(r.depStation)}&arrLocation=${encodeURIComponent(r.arrStation)}&date=Tomorrow,%2024%20Oct&passengers=2`}
+                  href={`/select-seats?busId=${r.id}&operator=${encodeURIComponent(r.route + ' Express')}&busPlate=${encodeURIComponent(r.plate)}&busType=${encodeURIComponent(r.busType)}&price=${parseInt(r.price.replace(/[^\d]/g, '')) || 700}&from=${encodeURIComponent((r.route.split('⇄')[0] || 'Nagpur').trim())}&to=${encodeURIComponent((r.route.split('⇄')[1] || 'Pune').trim())}&depTime=${encodeURIComponent(r.depTime)}&arrTime=${encodeURIComponent(r.arrTime)}&depLocation=${encodeURIComponent(r.depStation)}&arrLocation=${encodeURIComponent(r.arrStation)}&date=${encodeURIComponent(getRelativeDate(0).mainText)}&passengers=2`}
                   className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-brand-scarlet text-white hover:bg-brand-hover font-bold text-xs flex items-center gap-1 sm:gap-1.5 shadow-sm transition-all shrink-0 cursor-pointer"
                 >
                   <span>Select Seats</span>

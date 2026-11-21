@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
+import { getRelativeDate } from '@/lib/dates';
 
 const spiritualOrigins = [
   { city: 'Nagpur', state: 'Maharashtra', desc: 'Direct AC Sleeper' },
@@ -42,10 +43,10 @@ export default function SpiritualHero() {
   const [isToOpen, setIsToOpen] = useState(false);
   const [isPassengerOpen, setIsPassengerOpen] = useState(false);
   const [passengers, setPassengers] = useState(2);
-  const [selectedDate, setSelectedDate] = useState({
-    mainText: 'Tomorrow, 24 Oct',
+  const [selectedDate, setSelectedDate] = useState(() => ({
+    mainText: getRelativeDate(0).mainText,
     subText: 'Festival Special'
-  });
+  }));
   const [scrollScale, setScrollScale] = useState(1);
   const [textY, setTextY] = useState(0);
   const [textOpacity, setTextOpacity] = useState(1);
@@ -140,7 +141,7 @@ export default function SpiritualHero() {
     const params = new URLSearchParams({
       from: fromCity.trim() || 'Nagpur',
       to: destination,
-      date: selectedDate?.mainText || 'Tomorrow, 24 Oct',
+      date: selectedDate?.mainText || getRelativeDate(0).mainText,
       passengers: String(passengers),
       category: 'Spiritual',
     });

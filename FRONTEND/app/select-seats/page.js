@@ -8,6 +8,7 @@ import Footer from '@/components/site/Footer';
 import { apiFetch } from '@/lib/api';
 import AuthGuard from '@/components/auth/AuthGuard';
 import { getStoredUser } from '@/lib/auth';
+import { getRelativeDate } from '@/lib/dates';
 
 // ── 36-Seat RedBus-Style Sleeper Layout Definition ──────────────────────────
 // Lower Deck: 18 Seats (L1 to L18) - 1+2 Sleeper Configuration
@@ -97,7 +98,7 @@ function CinemaSeatBookingContent() {
     price: parseInt(searchParams.get('price')) || 700,
     from: searchParams.get('from') || 'Nagpur',
     to: searchParams.get('to') || 'Pune',
-    date: searchParams.get('date') || 'Tomorrow, 24 Oct',
+    date: searchParams.get('date') || getRelativeDate(0).mainText,
     depTime: searchParams.get('depTime') || '20:30',
     arrTime: searchParams.get('arrTime') || '07:00',
     depLocation: searchParams.get('depLocation') || 'Nagpur',

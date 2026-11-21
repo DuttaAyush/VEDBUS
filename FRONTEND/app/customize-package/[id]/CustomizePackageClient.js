@@ -6,11 +6,12 @@ import Link from 'next/link';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import { getLocalPackage, resolvePackage, canonicalPackageId } from '@/lib/packages';
+import { formatLocalDate, getTodayIST } from '@/lib/dates';
 
 function tomorrowDate() {
-  const date = new Date();
+  const date = getTodayIST();
   date.setDate(date.getDate() + 1);
-  return date.toISOString().slice(0, 10);
+  return formatLocalDate(date);
 }
 
 export default function CustomizePackageClient({ params }) {
