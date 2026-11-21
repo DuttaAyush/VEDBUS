@@ -7,8 +7,6 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import { apiFetch } from '@/lib/api';
 import AuthGuard from '@/components/auth/AuthGuard';
-import { getStoredUser } from '@/lib/auth';
-import { getRelativeDate } from '@/lib/dates';
 
 // ── 36-Seat RedBus-Style Sleeper Layout Definition ──────────────────────────
 // Lower Deck: 18 Seats (L1 to L18) - 1+2 Sleeper Configuration
@@ -86,6 +84,9 @@ function CinemaSeatBookingContent() {
   const searchParams = useSearchParams();
   const busIdParam = searchParams.get('busId');
 
+  // Fallback gracefully to default coach if direct link or route without busIdParam
+  // (Prevents jarring unexpected redirects back to search)
+
   // Target passengers from search flow (default: 2)
   const targetPassengers = parseInt(searchParams.get('passengers')) || 2;
 
@@ -98,7 +99,7 @@ function CinemaSeatBookingContent() {
     price: parseInt(searchParams.get('price')) || 700,
     from: searchParams.get('from') || 'Nagpur',
     to: searchParams.get('to') || 'Pune',
-    date: searchParams.get('date') || getRelativeDate(0).mainText,
+    date: searchParams.get('date') || 'Tomorrow, 24 Oct',
     depTime: searchParams.get('depTime') || '20:30',
     arrTime: searchParams.get('arrTime') || '07:00',
     depLocation: searchParams.get('depLocation') || 'Nagpur',
@@ -109,6 +110,8 @@ function CinemaSeatBookingContent() {
   const [mobileActiveDeck, setMobileActiveDeck] = useState('lower'); // 'lower' | 'upper' for mobile deck tab switcher
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookedSeatIds, setBookedSeatIds] = useState([]);
+  const [seatPricingConfig, setSeatPricingConfig] = useState({});
+  const [seatStatuses, setSeatStatuses] = useState({});
   const [holdAlertMessage, setHoldAlertMessage] = useState('');
   
   // Gender safety modal & warnings
@@ -128,12 +131,18 @@ function CinemaSeatBookingContent() {
   // Fetch real-time booked seats from API for this bus and trip
   useEffect(() => {
     if (!busIdParam) return;
-    apiFetch(`/api/bookings/seats?busId=${busInfo.id}&date=${encodeURIComponent(busInfo.date)}`)
+    apiFetch(`/api/bookings/seats?tripId=${busInfo.id}&busId=${busInfo.id}&date=${encodeURIComponent(busInfo.date)}`)
       .then(res => res.json())
       .then(data => {
         const seats = data.bookedSeats || data.data?.bookedSeats;
         if (Array.isArray(seats)) {
           setBookedSeatIds(seats);
+        }
+        if (data.data?.seatPricingConfig) {
+          setSeatPricingConfig(data.data.seatPricingConfig);
+        }
+        if (data.data?.seatStatuses) {
+          setSeatStatuses(data.data.seatStatuses);
         }
       })
       .catch(() => {});
@@ -152,10 +161,30 @@ function CinemaSeatBookingContent() {
 
   // Helper to get status of a seat
   const getSeatStatus = (seat) => {
-    if (bookedSeatIds.includes(seat.id) || bookedSeatIds.includes(`BK_${seat.id}`) || seat.status === 'sold' || seat.status === 'booked') {
+    if (bookedSeatIds.includes(seat.id) || bookedSeatIds.includes(`BK_${seat.id}`)) {
       return 'booked';
     }
-    return seat.defaultStatus;
+    const adminStatus = seatStatuses[seat.id];
+    if (adminStatus === 'blocked') {
+      return 'booked';
+    }
+    if (adminStatus === 'ladies') {
+      return 'sold_female';
+    }
+    return seat.defaultStatus || 'available';
+  };
+
+  const getSeatPrice = (seat) => {
+    if (seatPricingConfig[seat.id]) {
+      return Number(seatPricingConfig[seat.id]);
+    }
+    if (seat.deck === 'upper' && seatPricingConfig._tier_upper) {
+      return Number(seatPricingConfig._tier_upper);
+    }
+    if (seat.deck === 'lower' && seatPricingConfig._tier_lower) {
+      return Number(seatPricingConfig._tier_lower);
+    }
+    return busInfo.price || 700;
   };
 
   // Find partner in double sharing pair
@@ -223,7 +252,7 @@ function CinemaSeatBookingContent() {
     const newSeatObj = {
       id: seat.id,
       name: seat.name,
-       price: busInfo.price,
+      price: getSeatPrice(seat),
       isWindow: seat.isWindow,
       deck: seat.deck,
       type: seat.type,
@@ -250,21 +279,28 @@ function CinemaSeatBookingContent() {
   const proceedWithPayload = async (customSeats = selectedSeats) => {
     if (customSeats.length === 0) return;
 
-    const lockHolderId = getStoredUser()?.id || `guest_${Date.now()}`;
+    let lockHolderId = 'holder_guest';
+    if (typeof window !== 'undefined') {
+      lockHolderId = localStorage.getItem('lock_holder_id') || `holder_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      localStorage.setItem('lock_holder_id', lockHolderId);
+    }
 
     try {
-      if (getStoredUser()?.id) {
-        await apiFetch('/api/bookings/hold', {
-          method: 'POST',
-          body: JSON.stringify({
-            tripId: busInfo.id,
-            selectedSeats: customSeats.map(s => s.id),
-            lockHolderId,
-          })
-        }).catch(() => {});
+      const holdRes = await apiFetch('/api/bookings/hold', {
+        method: 'POST',
+        body: JSON.stringify({
+          tripId: busInfo.id,
+          selectedSeats: customSeats.map(s => s.id),
+          lockHolderId,
+        })
+      });
+      if (holdRes.status === 409) {
+        const holdData = await holdRes.json();
+        setHoldAlertMessage(holdData.message || 'One or more selected seats were recently reserved. Please choose other seats.');
+        return;
       }
-    } catch {
-      // proceeding to checkout where user auth and final lock is enforced
+    } catch (err) {
+      console.warn('Seat hold network notice:', err);
     }
 
     const bookingPayload = {
@@ -288,7 +324,6 @@ function CinemaSeatBookingContent() {
       baseFare: customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0),
       taxes: Math.round(customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0) * 0.05),
       totalAmount: Math.round(customSeats.reduce((acc, s) => acc + (s?.price || busInfo.price), 0) * 1.05),
-      requestKey: `bus-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     };
 
     if (typeof window !== 'undefined') {
@@ -343,7 +378,7 @@ function CinemaSeatBookingContent() {
             {/* Pillow Bar Indicator at bottom */}
             <div className="w-[28px] h-[6px] rounded-full bg-blue-200"></div>
           </div>
-          <span className="text-[11px] font-black text-blue-700 mt-1">₹{seat.price}</span>
+          <span className="text-[11px] font-black text-blue-700 mt-1">₹{getSeatPrice(seat)}</span>
         </button>
       );
     }
@@ -387,7 +422,7 @@ function CinemaSeatBookingContent() {
         type="button"
         onClick={() => handleSeatClick(seat)}
         className="group flex flex-col items-center cursor-pointer transition-transform hover:-translate-y-0.5 active:scale-95 select-none"
-        title={`Seat ${seat.name} - ₹${seat.price} ${adjacentIsSoldFemale ? '(Adjacent to Female)' : '(Available)'}`}
+        title={`Seat ${seat.name} - ₹${getSeatPrice(seat)} ${adjacentIsSoldFemale ? '(Adjacent to Female)' : '(Available)'}`}
       >
         <div className={`w-[48px] sm:w-[54px] h-[96px] sm:h-[106px] rounded-2xl bg-white border-2 ${
           adjacentIsSoldFemale ? 'border-pink-400 hover:border-pink-500' : 'border-[#16A34A] hover:border-[#15803D]'
@@ -404,7 +439,7 @@ function CinemaSeatBookingContent() {
           <div className={`w-[30px] h-[6px] rounded-full ${adjacentIsSoldFemale ? 'bg-pink-200' : 'bg-[#BBF7D0]'}`}></div>
         </div>
         <span className="text-[11px] font-black text-slate-900 mt-1 group-hover:text-emerald-700 transition-colors">
-          ₹{seat.price}
+          ₹{getSeatPrice(seat)}
         </span>
       </button>
     );
@@ -781,15 +816,15 @@ function CinemaSeatBookingContent() {
 
       {/* REDBUS GENDER SAFETY MODAL */}
       {genderSafetyModal.isOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-pink-200 space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto overflow-x-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-pink-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[26px]">shield_person</span>
               </div>
-              <div className="min-w-0">
-                <h3 className="text-base font-serif font-bold text-slate-900 truncate">Female Traveler Safety Policy</h3>
-                <p className="text-xs text-pink-600 font-semibold truncate">Adjacent Berth Protection</p>
+              <div>
+                <h3 className="text-base font-serif font-bold text-slate-900">Female Traveler Safety Policy</h3>
+                <p className="text-xs text-pink-600 font-semibold">Adjacent Berth Protection</p>
               </div>
             </div>
 
@@ -800,11 +835,11 @@ function CinemaSeatBookingContent() {
               </p>
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setGenderSafetyModal({ isOpen: false, seat: null, adjacentSeat: null, message: '' })}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors text-center"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-100 transition-colors"
               >
                 Select Another Seat
               </button>
@@ -818,7 +853,7 @@ function CinemaSeatBookingContent() {
                     handleSeatClick(seatToSelect);
                   }
                 }}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold tracking-wide uppercase shadow-md shadow-pink-600/20 transition-all text-center"
+                className="px-5 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold tracking-wide uppercase shadow-md shadow-pink-600/20 transition-all"
               >
                 I am Female • Book Seat
               </button>
@@ -829,8 +864,8 @@ function CinemaSeatBookingContent() {
 
       {/* MISMATCH PASSENGERS COUNT MODAL */}
       {isMismatchModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto overflow-x-hidden">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto overflow-x-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-[26px]">help</span>
@@ -880,7 +915,13 @@ export default function CinemaSeatBookingPage() {
         <div className="w-10 h-10 border-4 border-brand-scarlet border-t-transparent rounded-full animate-spin"></div>
       </div>
     }>
-      <CinemaSeatBookingContent />
+      <AuthGuard
+        title="Login to Select Seats"
+        subtitle="Please log in or sign up to view live seat availability and reserve your seats."
+        redirectTo="/search"
+      >
+        <CinemaSeatBookingContent />
+      </AuthGuard>
     </Suspense>
   );
 }
