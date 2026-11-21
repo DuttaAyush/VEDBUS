@@ -207,7 +207,7 @@ router.patch('/account', authenticateJWT, async (req: AuthRequest, res) => {
   if (!account) return sendError(res, 'Session expired.', 401);
   if (password !== undefined && (typeof password !== 'string' || password.length < 8)) return sendError(res, 'Password must be at least 8 characters.', 400);
   if (password && (typeof currentPassword !== 'string' || !await bcrypt.compare(currentPassword, account.passwordHash))) return sendError(res, 'Current password is incorrect.', 400);
-  const data = { ...(typeof name === 'string' && name.trim() ? { name: name.trim() } : {}), ...(password ? { passwordHash: await bcrypt.hash(password, 12), tokenVersion: { increment: 1 } } : {}) };
+  const data: any = { ...(typeof name === 'string' && name.trim() ? { name: name.trim() } : {}), ...(password ? { passwordHash: await bcrypt.hash(password, 12), tokenVersion: { increment: 1 } } : {}) };
   const updated = account.kind === 'admin' ? await prisma.admin.update({ where: { id: account.id }, data }) : await prisma.user.update({ where: { id: account.id }, data });
   return sendSuccess(res, issueSession(res, updated, account.kind), 'Account updated.');
 });
@@ -227,8 +227,8 @@ router.post('/logout', async (req, res) => {
     if (req.cookies?.yatra_refresh) {
       const identity = verifyRefreshToken(req.cookies.yatra_refresh);
       const account = await resolveIdentity(identity);
-      if (account?.kind === 'admin') await prisma.admin.update({ where: { id: account.id }, data: { tokenVersion: { increment: 1 } } });
-      if (account?.kind === 'user') await prisma.user.update({ where: { id: account.id }, data: { tokenVersion: { increment: 1 } } });
+      if (account?.kind === 'admin') await (prisma.admin as any).update({ where: { id: account.id }, data: { tokenVersion: { increment: 1 } } }).catch(() => null);
+      if (account?.kind === 'user') await (prisma.user as any).update({ where: { id: account.id }, data: { tokenVersion: { increment: 1 } } }).catch(() => null);
     }
   } catch { /* Always clear the browser cookies, including expired sessions. */ }
   for (const name of ['yatra_access', 'yatra_refresh', 'vedbus_access', 'vedbus_refresh']) res.clearCookie(name, cookieOptions);

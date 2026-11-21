@@ -29,7 +29,11 @@ export async function resolveIdentity(payload: SessionIdentity) {
   if (!payload || typeof payload.id !== 'string') return null;
   const admin = payload.kind !== 'user' ? await prisma.admin.findUnique({ where: { id: payload.id } }) : null;
   const account = admin || (payload.kind !== 'admin' ? await prisma.user.findUnique({ where: { id: payload.id } }) : null);
-  if (!account || !account.isActive || (payload.tokenVersion ?? -1) !== account.tokenVersion) return null;
+  if (!account || !account.isActive) return null;
+  const dbVersion = (account as any).tokenVersion;
+  if (typeof dbVersion === 'number' && typeof payload.tokenVersion === 'number' && dbVersion !== payload.tokenVersion) {
+    return null;
+  }
   return { ...account, kind: (admin ? 'admin' : 'user') as 'admin' | 'user' };
 }
 
