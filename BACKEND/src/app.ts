@@ -120,11 +120,14 @@ app.use(cookieParser());
 // ── Health check — used by Railway/Render/uptime monitors ─────────
 app.get('/health', async (_req: Request, res: Response) => {
   let dbStatus = 'disconnected';
+  let dbError: string | null = null;
   try {
     await prisma.$queryRaw`SELECT 1`;
     dbStatus = 'connected';
-  } catch {
+  } catch (err: any) {
     dbStatus = 'unreachable';
+    dbError = err?.message || String(err);
+    console.error('[health] Database check failed:', err?.message || err);
   }
 
   const { getSeatLockEngineStatus } = await import('./utils/seatLock');
@@ -133,6 +136,7 @@ app.get('/health', async (_req: Request, res: Response) => {
     status: 'ok',
     service: 'yatrabus-api',
     database: dbStatus,
+    ...(dbError && { databaseError: dbError }),
     seatLock: getSeatLockEngineStatus(),
     timestamp: new Date().toISOString(),
     env: process.env.NODE_ENV || 'development',

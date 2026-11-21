@@ -118,8 +118,9 @@ router.get('/', async (req: Request, res: Response) => {
     if (category) where.category = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
     const packages = await prisma.tourPackage.findMany({ where, orderBy: { pricePerPerson: 'asc' } });
     return res.status(200).json(packages.map(shape));
-  } catch {
-    return sendError(res, 'Failed to fetch packages.', 503);
+  } catch (err: any) {
+    console.error('[packages/error]', err?.message || err);
+    return sendError(res, err?.message || 'Failed to fetch packages.', 503);
   }
 });
 
@@ -142,8 +143,9 @@ router.get('/:id', async (req: Request, res: Response) => {
 
     if (!pkg) return sendError(res, 'Package not found.', 404);
     return res.status(200).json(shape(pkg));
-  } catch {
-    return sendError(res, 'Failed to fetch package.', 503);
+  } catch (err: any) {
+    console.error('[packages/error/:id]', err?.message || err);
+    return sendError(res, err?.message || 'Failed to fetch package.', 503);
   }
 });
 
