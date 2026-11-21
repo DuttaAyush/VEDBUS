@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -14,6 +14,7 @@ export default function CustomerProfilePage() {
   const [selectedTrackBus, setSelectedTrackBus] = useState(null);
   const [isGpsModalOpen, setIsGpsModalOpen] = useState(false);
   const [upcomingTrips, setUpcomingTrips] = useState([]);
+  const [pastTrips, setPastTrips] = useState([]);
   const [userProfile, setUserProfile] = useState(null);
   const [shareToast, setShareToast] = useState('');
   const [isBoardingPassModalOpen, setIsBoardingPassModalOpen] = useState(false);
@@ -51,7 +52,7 @@ export default function CustomerProfilePage() {
       passengers: trip.passengers || trip.travelers || [],
       totalFare: trip.totalFare || trip.totalAmount || trip.paidAmount || 850,
       driverName: trip.driverName || 'Sunil Sharma (Verified Captain)',
-      driverPhone: trip.driverPhone || '+91 98220 11223',
+      driverPhone: trip.driverPhone || '+91-8208024895',
       reportingTime: '30 mins before scheduled departure',
       isPackage: !!trip.isPackage,
       packageTitle: trip.title || '',
@@ -67,9 +68,8 @@ export default function CustomerProfilePage() {
       if (!cancelModalTrip.isPackage) {
         await apiFetch(`/api/bookings/${cancelModalTrip.id}`, { method: 'DELETE' });
       } else {
-        await apiFetch(`/api/admin/package-bookings/${cancelModalTrip.id || cancelModalTrip.bookingId}/status`, {
-          method: 'PATCH',
-          body: JSON.stringify({ status: 'Cancelled' })
+        await apiFetch(`/api/packages/cancel/${cancelModalTrip.id || cancelModalTrip.bookingId}`, {
+          method: 'POST',
         });
       }
       setUpcomingTrips((prev) =>
@@ -108,6 +108,19 @@ export default function CustomerProfilePage() {
       setUserProfile(localUser);
     }
 
+    const isPastTrip = (t) => {
+      if (t.status === 'Completed') return true;
+      if (t.rawDepDate) {
+        const d = new Date(t.rawDepDate);
+        if (!isNaN(d.getTime()) && d.getTime() < Date.now()) return true;
+      }
+      if (t.date && typeof t.date === 'string') {
+        const d = new Date(t.date);
+        if (!isNaN(d.getTime()) && d.getTime() < Date.now()) return true;
+      }
+      return false;
+    };
+
     const userTripsKey = localUser?.id ? `user_trips_${localUser.id}` : (localUser?.phone ? `user_trips_${localUser.phone}` : 'user_trips');
     if (typeof window !== 'undefined') {
       try {
@@ -115,86 +128,52 @@ export default function CustomerProfilePage() {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
-            setUpcomingTrips(parsed);
+            setUpcomingTrips(parsed.filter(t => !isPastTrip(t)));
+            setPastTrips(parsed.filter(t => isPastTrip(t)));
           }
         } else {
           setUpcomingTrips([]);
+          setPastTrips([]);
         }
       } catch (err) {
         console.error('Failed to load trips from localStorage:', err);
       }
     } else {
       setUpcomingTrips([]);
+      setPastTrips([]);
     }
 
-    // Load user saved passengers (Self Only by default, automatically using registered name/phone with no fake family members)
+    // Load user saved passengers
     const passengersKey = localUser?.id ? `saved_passengers_${localUser.id}` : (localUser?.phone ? `saved_passengers_${localUser.phone}` : 'saved_passengers');
     if (typeof window !== 'undefined') {
       try {
-        const defaultSelf = [
-          {
-            id: 'sp_self',
-            name: localUser?.name || 'Registered Customer',
-            phone: localUser?.phone || '',
-            age: 30,
-            gender: 'Male',
-            relation: 'Self',
-          },
-        ];
-
         const storedP = localStorage.getItem(passengersKey) || localStorage.getItem('saved_passengers');
+        const selfPassenger = localUser?.name ? [
+          { id: 'sp1', name: localUser.name, age: localUser.age || 30, gender: localUser.gender || 'Male', relation: 'Self' }
+        ] : [];
+
         if (storedP) {
           const parsedP = JSON.parse(storedP);
-          if (Array.isArray(parsedP) && parsedP.length > 0) {
-            // Strip out legacy mock/fake family members
-            const fakeIds = new Set(['sp2', 'sp3', 'sp4']);
-            const fakeNames = new Set(['Sneha Patel', 'Aarav Patel', 'Suresh Patel']);
-            const filtered = parsedP.filter((p) => !fakeIds.has(p.id) && !fakeNames.has(p.name));
-
-            // Sync Self passenger with registered user details
-            const selfIdx = filtered.findIndex((p) => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
-            if (selfIdx >= 0) {
-              filtered[selfIdx] = {
-                ...filtered[selfIdx],
-                id: filtered[selfIdx].id || 'sp_self',
-                name: localUser?.name || (filtered[selfIdx].name !== 'Rajesh Patel' ? filtered[selfIdx].name : 'Registered Customer'),
-                phone: localUser?.phone || filtered[selfIdx].phone || '',
-                relation: 'Self',
-              };
-            } else if (localUser?.name || localUser?.phone) {
-              filtered.unshift({
-                id: 'sp_self',
-                name: localUser?.name || 'Registered Customer',
-                phone: localUser?.phone || '',
-                age: 30,
-                gender: 'Male',
-                relation: 'Self',
-              });
-            }
-
-            const finalList = filtered.length > 0 ? filtered : defaultSelf;
-            setSavedPassengers(finalList);
-            localStorage.setItem(passengersKey, JSON.stringify(finalList));
+          // Filter out legacy mock family members
+          const cleanedP = Array.isArray(parsedP)
+            ? parsedP.filter(p => !['Sneha Patel', 'Aarav Patel', 'Suresh Patel'].includes(p.name))
+            : [];
+          if (cleanedP.length > 0) {
+            setSavedPassengers(cleanedP);
+            localStorage.setItem(passengersKey, JSON.stringify(cleanedP));
           } else {
-            setSavedPassengers(defaultSelf);
-            localStorage.setItem(passengersKey, JSON.stringify(defaultSelf));
+            setSavedPassengers(selfPassenger);
+            if (selfPassenger.length > 0) {
+              localStorage.setItem(passengersKey, JSON.stringify(selfPassenger));
+            }
           }
         } else {
-          setSavedPassengers(defaultSelf);
-          localStorage.setItem(passengersKey, JSON.stringify(defaultSelf));
+          setSavedPassengers(selfPassenger);
+          if (selfPassenger.length > 0) {
+            localStorage.setItem(passengersKey, JSON.stringify(selfPassenger));
+          }
         }
-      } catch {
-        setSavedPassengers([
-          {
-            id: 'sp_self',
-            name: localUser?.name || 'Registered Customer',
-            phone: localUser?.phone || '',
-            age: 30,
-            gender: 'Male',
-            relation: 'Self',
-          },
-        ]);
-      }
+      } catch {}
     }
 
     // Fetch user profile from DB
@@ -202,46 +181,7 @@ export default function CustomerProfilePage() {
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && (data.data || data.name)) {
-          const profile = data.data || data;
-          setUserProfile(profile);
-
-          // Update Self passenger with authoritative registered DB name/phone
-          if (profile.name || profile.phone) {
-            setSavedPassengers((prev) => {
-              const hasSelf = prev.some((p) => p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1');
-              let updated;
-              if (hasSelf) {
-                updated = prev.map((p) =>
-                  p.relation === 'Self' || p.id === 'sp_self' || p.id === 'sp1'
-                    ? {
-                        ...p,
-                        name: profile.name || p.name,
-                        phone: profile.phone || p.phone || '',
-                        relation: 'Self',
-                      }
-                    : p
-                );
-              } else {
-                updated = [
-                  {
-                    id: 'sp_self',
-                    name: profile.name || 'Registered Customer',
-                    phone: profile.phone || '',
-                    age: 30,
-                    gender: 'Male',
-                    relation: 'Self',
-                  },
-                  ...prev,
-                ];
-              }
-              if (typeof window !== 'undefined') {
-                try {
-                  localStorage.setItem(passengersKey, JSON.stringify(updated));
-                } catch {}
-              }
-              return updated;
-            });
-          }
+          setUserProfile(data.data || data);
         }
       })
       .catch(() => {});
@@ -264,6 +204,7 @@ export default function CustomerProfilePage() {
           fromStation: `${b.trip?.route?.originCity || 'Nagpur'} Terminal`,
           depTime: b.trip?.departureDatetime ? new Date(b.trip.departureDatetime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '20:30',
           depDate: b.trip?.departureDatetime ? new Date(b.trip.departureDatetime).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Scheduled',
+          rawDepDate: b.trip?.departureDatetime || null,
           to: b.trip?.route?.destinationCity || 'Pune',
           toStation: `${b.trip?.route?.destinationCity || 'Pune'} Terminal`,
           arrTime: b.trip?.arrivalDatetime ? new Date(b.trip.arrivalDatetime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '07:00',
@@ -273,7 +214,7 @@ export default function CustomerProfilePage() {
           totalFare: Number(b.totalAmount || 850),
           status: b.status || 'Confirmed',
           driverName: 'Assigned Driver',
-          driverPhone: '+91 98220 11223',
+          driverPhone: '+91-8208024895',
           currentLocation: 'Terminal Bay (Scheduled)',
           speed: '0 km/h',
           nextStop: 'Departure Scheduled',
@@ -290,6 +231,7 @@ export default function CustomerProfilePage() {
           duration: `${pb.package?.durationDays || 5} Days`,
           image: pb.package?.itinerary?.image || '/images/yatra_all_india_spiritual_darshan_bus_tickets_holiday_packages_9.jpg',
           date: new Date(pb.travelDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+          rawDepDate: pb.travelDate || null,
           travelerCount: pb.travelersCount,
           totalAmount: Number(pb.totalAmount),
           status: pb.status,
@@ -299,21 +241,28 @@ export default function CustomerProfilePage() {
 
         // Merge: DB records take priority over localStorage records (by id)
         // but keep any localStorage records that aren't in the DB yet (just booked, not yet synced)
-        setUpcomingTrips(prev => {
-          const dbIds = new Set(dbMapped.map(t => t.id));
-          const localOnlyTrips = prev.filter(t => !dbIds.has(t.id));
-          const merged = [...dbMapped, ...localOnlyTrips];
-          // Persist merged list back to localStorage
-          if (userTripsKey && typeof window !== 'undefined') {
+        const dbIds = new Set(dbMapped.map(t => t.id));
+        let localExisting = [];
+        if (typeof window !== 'undefined' && userTripsKey) {
+          try {
+            const rawStored = localStorage.getItem(userTripsKey);
+            if (rawStored) localExisting = JSON.parse(rawStored) || [];
+          } catch {}
+        }
+        const localOnlyTrips = Array.isArray(localExisting) ? localExisting.filter(t => !dbIds.has(t.id)) : [];
+        const merged = [...dbMapped, ...localOnlyTrips];
+
+        if (userTripsKey && typeof window !== 'undefined') {
+          try {
             localStorage.setItem(userTripsKey, JSON.stringify(merged));
-          }
-          return merged;
-        });
+          } catch {}
+        }
+
+        setUpcomingTrips(merged.filter(t => !isPastTrip(t)));
+        setPastTrips(merged.filter(t => isPastTrip(t)));
       })
       .catch(() => {}); // Network error — silently keep localStorage data
   }, []);
-
-  const [pastTrips, setPastTrips] = useState([]);
 
   const [savedPassengers, setSavedPassengers] = useState([]);
 
@@ -322,10 +271,9 @@ export default function CustomerProfilePage() {
   const [editingPassenger, setEditingPassenger] = useState(null);
   const [passengerFormData, setPassengerFormData] = useState({
     name: '',
-    phone: '',
     age: '',
     gender: 'Male',
-    relation: 'Self',
+    relation: 'Family',
   });
 
   // Manage Account Modal State
@@ -425,7 +373,7 @@ export default function CustomerProfilePage() {
 
   const openAddPassengerModal = () => {
     setEditingPassenger(null);
-    setPassengerFormData({ name: '', phone: '', age: '', gender: 'Male', relation: 'Family' });
+    setPassengerFormData({ name: '', age: '', gender: 'Male', relation: 'Family' });
     setIsPassengerModalOpen(true);
   };
 
@@ -433,7 +381,6 @@ export default function CustomerProfilePage() {
     setEditingPassenger(passenger);
     setPassengerFormData({
       name: passenger.name,
-      phone: passenger.phone || '',
       age: passenger.age.toString(),
       gender: passenger.gender,
       relation: passenger.relation,
@@ -487,10 +434,9 @@ export default function CustomerProfilePage() {
           ? {
               ...p,
               name: passengerFormData.name.trim(),
-              phone: (passengerFormData.phone || '').trim(),
               age: parseInt(passengerFormData.age, 10),
               gender: passengerFormData.gender,
-              relation: passengerFormData.relation.trim() || 'Self',
+              relation: passengerFormData.relation.trim(),
             }
           : p
       );
@@ -500,10 +446,9 @@ export default function CustomerProfilePage() {
       const newPassenger = {
         id: newId,
         name: passengerFormData.name.trim(),
-        phone: (passengerFormData.phone || '').trim(),
         age: parseInt(passengerFormData.age, 10),
         gender: passengerFormData.gender,
-        relation: passengerFormData.relation.trim() || 'Family',
+        relation: passengerFormData.relation.trim() || 'Traveler',
       };
       updated = [...savedPassengers, newPassenger];
       setSavedPassengers(updated);
@@ -568,7 +513,7 @@ export default function CustomerProfilePage() {
                 </div>
 
                 <p className="text-xs font-semibold text-slate-700">
-                  {userProfile?.email || 'traveller@vedbus.in'} <span className="mx-1 font-normal text-slate-400">|</span> {userProfile?.phone || '+91 98765 43210'}
+                  {userProfile?.email || 'traveller@VedantaBus.in'} <span className="mx-1 font-normal text-slate-400">|</span> {userProfile?.phone || '+91-8208024895'}
                 </p>
 
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-0.5">
@@ -656,7 +601,7 @@ export default function CustomerProfilePage() {
           <div className="bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-full p-1.5 border border-slate-200/80 shadow-lg flex items-center justify-start sm:justify-between overflow-x-auto no-scrollbar touch-pan-x overscroll-x-contain gap-1 sm:gap-2">
             {[
               { label: `Upcoming Trips (${upcomingTrips.length})`, key: 'upcoming', icon: 'confirmation_number' },
-              { label: 'Past Journeys & Reviews', key: 'past', icon: 'history' },
+              { label: `Past Journeys (${pastTrips.length})`, key: 'past', icon: 'history' },
               { label: 'Wallet & Points', key: 'wallet', icon: 'account_balance_wallet' },
               { label: `Saved Passengers (${savedPassengers.length})`, key: 'passengers', icon: 'group' },
             ].map((tab) => (
@@ -837,7 +782,7 @@ export default function CustomerProfilePage() {
                           )}
 
                           <Link
-                             href={`/customize-package?package=${encodeURIComponent(trip.pkgId || 'chardham')}`}
+                            href={`/customize-package/${trip.pkgId || 'chardham'}`}
                             className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[16px]">tune</span>
@@ -1063,7 +1008,7 @@ export default function CustomerProfilePage() {
                         <span className="text-xs font-semibold text-slate-700">
                           Driver: <strong className="text-slate-900">{trip.driverName || 'Sunil Sharma'}</strong>
                           <span className="text-slate-300 mx-1.5">|</span>
-                          <span className="text-slate-600">{trip.driverPhone || '+91 98220 11223'}</span>
+                          <span className="text-slate-600">{trip.driverPhone || '+91-8208024895'}</span>
                         </span>
                       </div>
 
@@ -1086,7 +1031,7 @@ export default function CustomerProfilePage() {
                         )}
 
                         <Link
-                          href={`/track-bus?id=${encodeURIComponent(trip.id)}`}
+                          href={`/track-bus/${trip.id}`}
                           className="px-4 py-2 rounded-full bg-[#0B1527] hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer active:scale-95"
                         >
                           <span className="material-symbols-outlined text-[16px] text-emerald-400">my_location</span>
@@ -1106,7 +1051,7 @@ export default function CustomerProfilePage() {
                           type="button"
                           onClick={() => {
                             const shareText = `🎟️ Confirmed Ticket #${trip.id}\nRoute: ${trip.from} ➔ ${trip.to}\nDate: ${trip.depDate}\nSeats: ${trip.seats.join(', ')}\nBus Plate: ${trip.busPlate}`;
-                            const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/track-bus?id=${encodeURIComponent(trip.id)}` : '';
+                            const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/track-bus/${trip.id}` : '';
                             if (typeof navigator !== 'undefined' && navigator.share) {
                               navigator.share({
                                 title: `Confirmed Ticket #${trip.id}`,
@@ -1168,18 +1113,29 @@ export default function CustomerProfilePage() {
                 {pastTrips.map(trip => (
                   <div key={trip.id} className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm flex items-center justify-between flex-wrap gap-4">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ticket #{trip.id} • {trip.date}</span>
-                      <h3 className="text-base font-serif font-bold text-slate-900 mt-0.5">{trip.from} ➔ {trip.to}</h3>
-                      <p className="text-xs text-slate-500">{trip.operator} • Seats {trip.seats}</p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        Ticket #{trip.bookingId || trip.id} • {trip.date || trip.depDate || 'Past Journey'}
+                      </span>
+                      <h3 className="text-base font-serif font-bold text-slate-900 mt-0.5">
+                        {trip.from ? `${trip.from} ➔ ${trip.to}` : (trip.title || 'Completed Journey')}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {trip.operator || trip.category || 'Vedanta Express Fleet'} • {trip.isPackage ? `${trip.travelerCount || 1} Travelers` : `Seats ${Array.isArray(trip.seats) ? trip.seats.join(', ') : (trip.seats || 'L1')}`}
+                      </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-bold text-slate-900">{trip.fare}</span>
+                      <span className="text-sm font-bold text-slate-900">
+                        ₹{(trip.totalAmount || trip.totalFare || trip.paidAmount || 0).toLocaleString('en-IN')}
+                      </span>
                       <button
                         onClick={() => {
-                          setShareToast(`Directing to re-book ${trip.from} to ${trip.to}...`);
-                          setTimeout(() => setShareToast(''), 3000);
+                          if (trip.isPackage) {
+                            window.location.href = `/customize-package/${trip.pkgId || 'chardham'}`;
+                          } else {
+                            window.location.href = `/search?from=${encodeURIComponent(trip.from || 'Nagpur')}&to=${encodeURIComponent(trip.to || 'Pune')}`;
+                          }
                         }}
-                        className="px-4 py-2 rounded-xl bg-brand-scarlet text-white font-bold text-xs shadow-sm hover:bg-brand-hover transition-all"
+                        className="px-4 py-2 rounded-xl bg-brand-scarlet text-white font-bold text-xs shadow-sm hover:bg-brand-hover transition-all cursor-pointer"
                       >
                         Book Again
                       </button>
@@ -1313,7 +1269,7 @@ export default function CustomerProfilePage() {
                             </span>
                           </div>
                           <p className="text-xs font-medium text-slate-500">
-                            {p.gender} • {p.age} Years Old{p.phone ? ` • 📞 ${p.phone}` : ''} • ID Verified
+                            {p.gender} • {p.age} Years Old • ID Verified
                           </p>
                         </div>
                       </div>
@@ -1367,20 +1323,20 @@ export default function CustomerProfilePage() {
 
       {/* SIMULATED LIVE GPS BUS TRACKING MODAL */}
       {isGpsModalOpen && selectedTrackBus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
-          <div className="bg-slate-900 rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-6 text-white border border-slate-800 shadow-2xl space-y-4 my-auto overflow-x-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
+          <div className="bg-slate-900 rounded-3xl max-w-2xl w-full p-6 text-white border border-slate-800 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="min-w-0 pr-2">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block truncate">
+              <div>
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest block">
                   🟢 LIVE GPS BUS FEED
                 </span>
-                <h3 className="text-lg sm:text-xl font-serif font-bold text-white mt-0.5 truncate">
+                <h3 className="text-xl font-serif font-bold text-white mt-0.5">
                   {selectedTrackBus.operator} ({selectedTrackBus.busPlate})
                 </h3>
               </div>
               <button
                 onClick={() => setIsGpsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center shrink-0 cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -1402,12 +1358,12 @@ export default function CustomerProfilePage() {
               </div>
 
               {/* Status Overlay Box */}
-              <div className="absolute bottom-3 left-3 right-3 p-3 rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur-md flex items-center justify-between gap-3 text-xs">
-                <div className="min-w-0 flex-1">
+              <div className="absolute bottom-3 left-3 right-3 p-3 rounded-xl bg-slate-900/90 border border-slate-800 backdrop-blur-md flex items-center justify-between text-xs">
+                <div>
                   <span className="text-slate-400 block text-[10px]">CURRENT LOCATION</span>
-                  <span className="font-bold text-white truncate block">{selectedTrackBus.currentLocation}</span>
+                  <span className="font-bold text-white">{selectedTrackBus.currentLocation}</span>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right">
                   <span className="text-slate-400 block text-[10px]">CURRENT SPEED</span>
                   <span className="font-mono font-bold text-emerald-400">{selectedTrackBus.speed}</span>
                 </div>
@@ -1437,15 +1393,15 @@ export default function CustomerProfilePage() {
 
       {/* ADD / EDIT PASSENGER MODAL */}
       {isPassengerModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 text-slate-800 shadow-2xl space-y-4 sm:space-y-5 border border-slate-100 my-auto overflow-x-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-800 shadow-2xl space-y-5 border border-slate-100">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-lg sm:text-xl font-serif font-bold text-slate-900">
+              <h3 className="text-xl font-serif font-bold text-slate-900">
                 {editingPassenger ? 'Edit Passenger Details' : 'Add New Passenger'}
               </h3>
               <button
                 onClick={() => setIsPassengerModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -1499,33 +1455,18 @@ export default function CustomerProfilePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Mobile Number (Optional)
-                  </label>
-                  <input
-                    type="tel"
-                    value={passengerFormData.phone || ''}
-                    onChange={(e) => setPassengerFormData({ ...passengerFormData, phone: e.target.value })}
-                    placeholder="e.g. +91 98765 43210"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Relation / Tag *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={passengerFormData.relation}
-                    onChange={(e) => setPassengerFormData({ ...passengerFormData, relation: e.target.value })}
-                    placeholder="e.g. Self, Spouse, Father, Friend"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  Relation / Tag *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={passengerFormData.relation}
+                  onChange={(e) => setPassengerFormData({ ...passengerFormData, relation: e.target.value })}
+                  placeholder="e.g. Self, Spouse, Father, Friend"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-brand-scarlet focus:ring-2 focus:ring-brand-scarlet/20 text-sm font-semibold outline-none"
+                />
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-3">
@@ -1550,20 +1491,20 @@ export default function CustomerProfilePage() {
 
       {/* MANAGE USER ACCOUNT MODAL */}
       {isAccountModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto overflow-x-hidden animate-fadeIn">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 text-slate-800 shadow-2xl space-y-4 sm:space-y-5 border border-slate-100 relative my-auto overflow-x-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 text-slate-800 shadow-2xl space-y-5 border border-slate-100 relative">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                <div className="w-10 h-10 rounded-2xl bg-red-50 text-brand-scarlet flex items-center justify-center border border-red-200 shadow-xs shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 text-brand-scarlet flex items-center justify-center border border-red-200 shadow-xs">
                   <span className="material-symbols-outlined text-[22px]">manage_accounts</span>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-base sm:text-lg font-serif font-bold text-slate-900 leading-tight truncate">
+                <div>
+                  <h3 className="text-lg font-serif font-bold text-slate-900 leading-tight">
                     Manage User Account
                   </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate">
+                  <p className="text-[11px] text-slate-500 font-medium">
                     Edit credentials &amp; personal information
                   </p>
                 </div>
@@ -1571,7 +1512,7 @@ export default function CustomerProfilePage() {
               <button
                 type="button"
                 onClick={() => setIsAccountModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
@@ -1649,7 +1590,7 @@ export default function CustomerProfilePage() {
                     required
                     value={accountFormData.phone}
                     onChange={(e) => setAccountFormData({ ...accountFormData, phone: e.target.value })}
-                    placeholder="+91 98765 43210"
+                    placeholder="+91-8208024895"
                     className="w-full bg-transparent outline-none border-none text-xs font-bold text-slate-800 placeholder:text-slate-400 p-0"
                   />
                 </div>

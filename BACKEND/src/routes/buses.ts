@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { prisma } from '../prisma';
 
 const router = Router();
@@ -42,10 +42,10 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '3h 30m',
     waypoints: ['Navi Mumbai', 'Lonavala Expressway', 'Wakad', 'Shivajinagar'],
     trips: [
-      { busPlate: 'MH-12-QZ-8812', depHour: 6, depMin: 0, fare: 380, operator: 'YatraBus High-Frequency Intercity', badge: 'Expressway Fast Track', reviews: '2,410', rating: '4.8' },
-      { busPlate: 'DL-01-AX-9933', depHour: 11, depMin: 30, fare: 420, operator: 'YatraBus Metro Express', badge: 'Zero Aggregator Surcharge', reviews: '1,890', rating: '4.9' },
-      { busPlate: 'RJ-14-VB-2024', depHour: 16, depMin: 15, fare: 450, operator: 'YatraBus Platinum Executive', badge: 'On-Time Guarantee', reviews: '1,560', rating: '4.8' },
-      { busPlate: 'MH-01-GA-7711', depHour: 21, depMin: 45, fare: 590, operator: 'YatraBus Luxury Night Rider', badge: 'Verified Assigned Plate', reviews: '2,120', rating: '4.9' },
+      { busPlate: 'MH-12-QZ-8812', depHour: 6, depMin: 0, fare: 380, operator: 'VedantaBus High-Frequency Intercity', badge: 'Expressway Fast Track', reviews: '2,410', rating: '4.8' },
+      { busPlate: 'DL-01-AX-9933', depHour: 11, depMin: 30, fare: 420, operator: 'VedantaBus Metro Express', badge: 'Zero Aggregator Surcharge', reviews: '1,890', rating: '4.9' },
+      { busPlate: 'RJ-14-VB-2024', depHour: 16, depMin: 15, fare: 450, operator: 'VedantaBus Platinum Executive', badge: 'On-Time Guarantee', reviews: '1,560', rating: '4.8' },
+      { busPlate: 'MH-01-GA-7711', depHour: 21, depMin: 45, fare: 590, operator: 'VedantaBus Luxury Night Rider', badge: 'Verified Assigned Plate', reviews: '2,120', rating: '4.9' },
     ],
   },
   'pune-mumbai': {
@@ -54,10 +54,10 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '3h 30m',
     waypoints: ['Shivajinagar', 'Wakad', 'Lonavala Expressway', 'Dadar'],
     trips: [
-      { busPlate: 'MH-12-QZ-8812', depHour: 6, depMin: 30, fare: 380, operator: 'YatraBus High-Frequency Intercity', badge: 'Expressway Fast Track', reviews: '2,190', rating: '4.8' },
-      { busPlate: 'DL-01-AX-9933', depHour: 12, depMin: 0, fare: 420, operator: 'YatraBus Metro Express', badge: 'Zero Aggregator Surcharge', reviews: '1,750', rating: '4.9' },
-      { busPlate: 'RJ-14-VB-2024', depHour: 17, depMin: 0, fare: 450, operator: 'YatraBus Platinum Executive', badge: 'On-Time Guarantee', reviews: '1,640', rating: '4.8' },
-      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 15, fare: 590, operator: 'YatraBus Luxury Night Rider', badge: 'Verified Assigned Plate', reviews: '2,080', rating: '4.9' },
+      { busPlate: 'MH-12-QZ-8812', depHour: 6, depMin: 30, fare: 380, operator: 'VedantaBus High-Frequency Intercity', badge: 'Expressway Fast Track', reviews: '2,190', rating: '4.8' },
+      { busPlate: 'DL-01-AX-9933', depHour: 12, depMin: 0, fare: 420, operator: 'VedantaBus Metro Express', badge: 'Zero Aggregator Surcharge', reviews: '1,750', rating: '4.9' },
+      { busPlate: 'RJ-14-VB-2024', depHour: 17, depMin: 0, fare: 450, operator: 'VedantaBus Platinum Executive', badge: 'On-Time Guarantee', reviews: '1,640', rating: '4.8' },
+      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 15, fare: 590, operator: 'VedantaBus Luxury Night Rider', badge: 'Verified Assigned Plate', reviews: '2,080', rating: '4.9' },
     ],
   },
   'nagpur-pune': {
@@ -66,9 +66,9 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '10h 30m',
     waypoints: ['Wardha', 'Amravati', 'Jalna', 'Samruddhi Mahamarg'],
     trips: [
-      { busPlate: 'MH-31-AP-4921', depHour: 20, depMin: 30, fare: 850, operator: 'YatraBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,420', rating: '4.9' },
-      { busPlate: 'MH-14-BT-3399', depHour: 21, depMin: 15, fare: 1050, operator: 'YatraBus Samruddhi Superfast', badge: 'Expressway Non-Stop', reviews: '1,890', rating: '4.9' },
-      { busPlate: 'KA-01-HY-5522', depHour: 6, depMin: 0, fare: 650, operator: 'YatraBus Dayliner Executive', badge: 'Satvik Dining Halts', reviews: '980', rating: '4.7' },
+      { busPlate: 'MH-31-AP-4921', depHour: 20, depMin: 30, fare: 850, operator: 'VedantaBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,420', rating: '4.9' },
+      { busPlate: 'MH-14-BT-3399', depHour: 21, depMin: 15, fare: 1050, operator: 'VedantaBus Samruddhi Superfast', badge: 'Expressway Non-Stop', reviews: '1,890', rating: '4.9' },
+      { busPlate: 'KA-01-HY-5522', depHour: 6, depMin: 0, fare: 650, operator: 'VedantaBus Dayliner Executive', badge: 'Satvik Dining Halts', reviews: '980', rating: '4.7' },
     ],
   },
   'pune-nagpur': {
@@ -77,9 +77,9 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '10h 30m',
     waypoints: ['Samruddhi Mahamarg', 'Jalna', 'Amravati', 'Wardha'],
     trips: [
-      { busPlate: 'MH-31-AP-4921', depHour: 20, depMin: 0, fare: 850, operator: 'YatraBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,380', rating: '4.9' },
-      { busPlate: 'MH-14-BT-3399', depHour: 21, depMin: 0, fare: 1050, operator: 'YatraBus Samruddhi Superfast', badge: 'Expressway Non-Stop', reviews: '1,760', rating: '4.9' },
-      { busPlate: 'KA-01-HY-5522', depHour: 6, depMin: 30, fare: 650, operator: 'YatraBus Dayliner Executive', badge: 'Satvik Dining Halts', reviews: '910', rating: '4.7' },
+      { busPlate: 'MH-31-AP-4921', depHour: 20, depMin: 0, fare: 850, operator: 'VedantaBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,380', rating: '4.9' },
+      { busPlate: 'MH-14-BT-3399', depHour: 21, depMin: 0, fare: 1050, operator: 'VedantaBus Samruddhi Superfast', badge: 'Expressway Non-Stop', reviews: '1,760', rating: '4.9' },
+      { busPlate: 'KA-01-HY-5522', depHour: 6, depMin: 30, fare: 650, operator: 'VedantaBus Dayliner Executive', badge: 'Satvik Dining Halts', reviews: '910', rating: '4.7' },
     ],
   },
   'delhi-haridwar': {
@@ -88,9 +88,9 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '5h 15m',
     waypoints: ['Meerut', 'Muzaffarnagar', 'Roorkee', 'Rishikesh Bypass'],
     trips: [
-      { busPlate: 'UK-07-PA-1008', depHour: 6, depMin: 0, fare: 550, operator: 'YatraBus Devsthan Express', badge: 'Satvik Line Special', reviews: '980', rating: '4.9' },
-      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 0, fare: 480, operator: 'YatraBus Ganga Link', badge: 'Ganga Aarti Special', reviews: '1,120', rating: '4.8' },
-      { busPlate: 'UK-07-PA-1008', depHour: 22, depMin: 30, fare: 650, operator: 'YatraBus Devsthan Night Line', badge: 'Satvik Line Special', reviews: '1,450', rating: '4.9' },
+      { busPlate: 'UK-07-PA-1008', depHour: 6, depMin: 0, fare: 550, operator: 'VedantaBus Devsthan Express', badge: 'Satvik Line Special', reviews: '980', rating: '4.9' },
+      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 0, fare: 480, operator: 'VedantaBus Ganga Link', badge: 'Ganga Aarti Special', reviews: '1,120', rating: '4.8' },
+      { busPlate: 'UK-07-PA-1008', depHour: 22, depMin: 30, fare: 650, operator: 'VedantaBus Devsthan Night Line', badge: 'Satvik Line Special', reviews: '1,450', rating: '4.9' },
     ],
   },
   'haridwar-delhi': {
@@ -99,9 +99,9 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '5h 15m',
     waypoints: ['Roorkee', 'Muzaffarnagar', 'Meerut Expressway', 'ISBT Anand Vihar'],
     trips: [
-      { busPlate: 'UK-07-PA-1008', depHour: 6, depMin: 30, fare: 550, operator: 'YatraBus Devsthan Express', badge: 'Satvik Line Special', reviews: '890', rating: '4.9' },
-      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 30, fare: 480, operator: 'YatraBus Ganga Link', badge: 'Direct Return', reviews: '1,050', rating: '4.8' },
-      { busPlate: 'UK-07-PA-1008', depHour: 22, depMin: 0, fare: 650, operator: 'YatraBus Devsthan Night Line', badge: 'Satvik Line Special', reviews: '1,380', rating: '4.9' },
+      { busPlate: 'UK-07-PA-1008', depHour: 6, depMin: 30, fare: 550, operator: 'VedantaBus Devsthan Express', badge: 'Satvik Line Special', reviews: '890', rating: '4.9' },
+      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 30, fare: 480, operator: 'VedantaBus Ganga Link', badge: 'Direct Return', reviews: '1,050', rating: '4.8' },
+      { busPlate: 'UK-07-PA-1008', depHour: 22, depMin: 0, fare: 650, operator: 'VedantaBus Devsthan Night Line', badge: 'Satvik Line Special', reviews: '1,380', rating: '4.9' },
     ],
   },
   'mumbai-goa': {
@@ -110,8 +110,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '12h 00m',
     waypoints: ['Panvel', 'Chiplun', 'Kankavli', 'Mapusa', 'Panaji'],
     trips: [
-      { busPlate: 'GA-03-Z-9901', depHour: 18, depMin: 0, fare: 1250, operator: 'YatraBus Coastal Luxury Liner', badge: 'Verified Assigned Plate', reviews: '1,840', rating: '4.9' },
-      { busPlate: 'MH-01-GA-7711', depHour: 20, depMin: 30, fare: 1450, operator: 'YatraBus Goa Royal Club', badge: 'Panoramic Windows', reviews: '2,200', rating: '4.9' },
+      { busPlate: 'GA-03-Z-9901', depHour: 18, depMin: 0, fare: 1250, operator: 'VedantaBus Coastal Luxury Liner', badge: 'Verified Assigned Plate', reviews: '1,840', rating: '4.9' },
+      { busPlate: 'MH-01-GA-7711', depHour: 20, depMin: 30, fare: 1450, operator: 'VedantaBus Goa Royal Club', badge: 'Panoramic Windows', reviews: '2,200', rating: '4.9' },
     ],
   },
   'goa-mumbai': {
@@ -120,8 +120,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '12h 00m',
     waypoints: ['Panaji', 'Mapusa', 'Kankavli', 'Chiplun', 'Panvel'],
     trips: [
-      { busPlate: 'GA-03-Z-9901', depHour: 18, depMin: 30, fare: 1250, operator: 'YatraBus Coastal Luxury Liner', badge: 'Verified Assigned Plate', reviews: '1,690', rating: '4.9' },
-      { busPlate: 'MH-01-GA-7711', depHour: 20, depMin: 0, fare: 1450, operator: 'YatraBus Goa Royal Club', badge: 'Panoramic Windows', reviews: '1,980', rating: '4.9' },
+      { busPlate: 'GA-03-Z-9901', depHour: 18, depMin: 30, fare: 1250, operator: 'VedantaBus Coastal Luxury Liner', badge: 'Verified Assigned Plate', reviews: '1,690', rating: '4.9' },
+      { busPlate: 'MH-01-GA-7711', depHour: 20, depMin: 0, fare: 1450, operator: 'VedantaBus Goa Royal Club', badge: 'Panoramic Windows', reviews: '1,980', rating: '4.9' },
     ],
   },
   'delhi-pune': {
@@ -130,8 +130,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '25h 00m',
     waypoints: ['Jaipur', 'Kishangarh', 'Ratlam', 'Dhule', 'Nashik', 'Pune'],
     trips: [
-      { busPlate: 'MP-09-VB-6622', depHour: 9, depMin: 0, fare: 2450, operator: 'YatraBus Bharat Crosslink', badge: 'Twin Driver Crew', reviews: '1,120', rating: '4.9' },
-      { busPlate: 'TS-09-VB-3311', depHour: 17, depMin: 30, fare: 2690, operator: 'YatraBus Royal Grand Continental', badge: 'Free Meals Included', reviews: '1,450', rating: '4.9' },
+      { busPlate: 'MP-09-VB-6622', depHour: 9, depMin: 0, fare: 2450, operator: 'VedantaBus Bharat Crosslink', badge: 'Twin Driver Crew', reviews: '1,120', rating: '4.9' },
+      { busPlate: 'TS-09-VB-3311', depHour: 17, depMin: 30, fare: 2690, operator: 'VedantaBus Royal Grand Continental', badge: 'Free Meals Included', reviews: '1,450', rating: '4.9' },
     ],
   },
   'pune-delhi': {
@@ -140,8 +140,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '25h 00m',
     waypoints: ['Nashik', 'Dhule', 'Ratlam', 'Kishangarh', 'Jaipur', 'Delhi'],
     trips: [
-      { busPlate: 'MP-09-VB-6622', depHour: 9, depMin: 30, fare: 2450, operator: 'YatraBus Bharat Crosslink', badge: 'Twin Driver Crew', reviews: '1,080', rating: '4.9' },
-      { busPlate: 'TS-09-VB-3311', depHour: 18, depMin: 0, fare: 2690, operator: 'YatraBus Royal Grand Continental', badge: 'Free Meals Included', reviews: '1,390', rating: '4.9' },
+      { busPlate: 'MP-09-VB-6622', depHour: 9, depMin: 30, fare: 2450, operator: 'VedantaBus Bharat Crosslink', badge: 'Twin Driver Crew', reviews: '1,080', rating: '4.9' },
+      { busPlate: 'TS-09-VB-3311', depHour: 18, depMin: 0, fare: 2690, operator: 'VedantaBus Royal Grand Continental', badge: 'Free Meals Included', reviews: '1,390', rating: '4.9' },
     ],
   },
   'pune-shirdi': {
@@ -150,8 +150,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '4h 15m',
     waypoints: ['Chakan', 'Alephata', 'Sangamner', 'Shirdi Temple Gate'],
     trips: [
-      { busPlate: 'MH-17-SD-1008', depHour: 6, depMin: 30, fare: 420, operator: 'YatraBus Sai Darshan Express', badge: 'Temple Entry Assistance', reviews: '2,310', rating: '4.9' },
-      { busPlate: 'MH-14-BT-3399', depHour: 14, depMin: 0, fare: 550, operator: 'YatraBus Devsthan Shuttle', badge: 'Satvik Line Special', reviews: '1,450', rating: '4.8' },
+      { busPlate: 'MH-17-SD-1008', depHour: 6, depMin: 30, fare: 420, operator: 'VedantaBus Sai Darshan Express', badge: 'Temple Entry Assistance', reviews: '2,310', rating: '4.9' },
+      { busPlate: 'MH-14-BT-3399', depHour: 14, depMin: 0, fare: 550, operator: 'VedantaBus Devsthan Shuttle', badge: 'Satvik Line Special', reviews: '1,450', rating: '4.8' },
     ],
   },
   'shirdi-pune': {
@@ -160,8 +160,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '4h 15m',
     waypoints: ['Sangamner', 'Alephata', 'Chakan', 'Pune Swargate'],
     trips: [
-      { busPlate: 'MH-17-SD-1008', depHour: 11, depMin: 30, fare: 420, operator: 'YatraBus Sai Darshan Express', badge: 'Direct Highway', reviews: '2,150', rating: '4.9' },
-      { busPlate: 'MH-14-BT-3399', depHour: 19, depMin: 0, fare: 550, operator: 'YatraBus Devsthan Shuttle', badge: 'Satvik Line Special', reviews: '1,380', rating: '4.8' },
+      { busPlate: 'MH-17-SD-1008', depHour: 11, depMin: 30, fare: 420, operator: 'VedantaBus Sai Darshan Express', badge: 'Direct Highway', reviews: '2,150', rating: '4.9' },
+      { busPlate: 'MH-14-BT-3399', depHour: 19, depMin: 0, fare: 550, operator: 'VedantaBus Devsthan Shuttle', badge: 'Satvik Line Special', reviews: '1,380', rating: '4.8' },
     ],
   },
   'mumbai-shirdi': {
@@ -170,8 +170,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '5h 00m',
     waypoints: ['Thane', 'Igatpuri', 'Nashik Bypass', 'Sinnar', 'Shirdi'],
     trips: [
-      { busPlate: 'MH-17-SD-1008', depHour: 5, depMin: 45, fare: 490, operator: 'YatraBus Shirdi Darshan Superfast', badge: 'Temple Entry Assistance', reviews: '2,890', rating: '4.9' },
-      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 30, fare: 680, operator: 'YatraBus Sai Ratri Line', badge: 'Satvik Line Special', reviews: '1,940', rating: '4.9' },
+      { busPlate: 'MH-17-SD-1008', depHour: 5, depMin: 45, fare: 490, operator: 'VedantaBus Shirdi Darshan Superfast', badge: 'Temple Entry Assistance', reviews: '2,890', rating: '4.9' },
+      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 30, fare: 680, operator: 'VedantaBus Sai Ratri Line', badge: 'Satvik Line Special', reviews: '1,940', rating: '4.9' },
     ],
   },
   'shirdi-mumbai': {
@@ -180,8 +180,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '5h 00m',
     waypoints: ['Sinnar', 'Nashik Bypass', 'Igatpuri', 'Thane', 'Dadar'],
     trips: [
-      { busPlate: 'MH-17-SD-1008', depHour: 12, depMin: 0, fare: 490, operator: 'YatraBus Shirdi Darshan Superfast', badge: 'Direct Return', reviews: '2,640', rating: '4.9' },
-      { busPlate: 'MH-01-GA-7711', depHour: 23, depMin: 0, fare: 680, operator: 'YatraBus Sai Ratri Line', badge: 'Satvik Line Special', reviews: '1,820', rating: '4.9' },
+      { busPlate: 'MH-17-SD-1008', depHour: 12, depMin: 0, fare: 490, operator: 'VedantaBus Shirdi Darshan Superfast', badge: 'Direct Return', reviews: '2,640', rating: '4.9' },
+      { busPlate: 'MH-01-GA-7711', depHour: 23, depMin: 0, fare: 680, operator: 'VedantaBus Sai Ratri Line', badge: 'Satvik Line Special', reviews: '1,820', rating: '4.9' },
     ],
   },
   'bengaluru-hyderabad': {
@@ -190,8 +190,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '8h 45m',
     waypoints: ['Chikkaballapur', 'Anantapur', 'Kurnool', 'Shamshabad'],
     trips: [
-      { busPlate: 'KA-01-HY-5522', depHour: 21, depMin: 0, fare: 890, operator: 'YatraBus Executive Tech Express', badge: 'On-Time Guarantee', reviews: '1,210', rating: '4.8' },
-      { busPlate: 'TS-09-VB-3311', depHour: 22, depMin: 15, fare: 1190, operator: 'YatraBus Deccan Gold Club', badge: 'High-Speed Highway', reviews: '1,680', rating: '4.9' },
+      { busPlate: 'KA-01-HY-5522', depHour: 21, depMin: 0, fare: 890, operator: 'VedantaBus Executive Tech Express', badge: 'On-Time Guarantee', reviews: '1,210', rating: '4.8' },
+      { busPlate: 'TS-09-VB-3311', depHour: 22, depMin: 15, fare: 1190, operator: 'VedantaBus Deccan Gold Club', badge: 'High-Speed Highway', reviews: '1,680', rating: '4.9' },
     ],
   },
   'hyderabad-bengaluru': {
@@ -200,8 +200,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '8h 45m',
     waypoints: ['Shamshabad', 'Kurnool', 'Anantapur', 'Hebbal'],
     trips: [
-      { busPlate: 'KA-01-HY-5522', depHour: 21, depMin: 30, fare: 890, operator: 'YatraBus Executive Tech Express', badge: 'On-Time Guarantee', reviews: '1,150', rating: '4.8' },
-      { busPlate: 'TS-09-VB-3311', depHour: 22, depMin: 45, fare: 1190, operator: 'YatraBus Deccan Gold Club', badge: 'High-Speed Highway', reviews: '1,590', rating: '4.9' },
+      { busPlate: 'KA-01-HY-5522', depHour: 21, depMin: 30, fare: 890, operator: 'VedantaBus Executive Tech Express', badge: 'On-Time Guarantee', reviews: '1,150', rating: '4.8' },
+      { busPlate: 'TS-09-VB-3311', depHour: 22, depMin: 45, fare: 1190, operator: 'VedantaBus Deccan Gold Club', badge: 'High-Speed Highway', reviews: '1,590', rating: '4.9' },
     ],
   },
   'indore-pune': {
@@ -210,7 +210,7 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '11h 30m',
     waypoints: ['Sendhwa', 'Dhule', 'Malegaon', 'Nashik', 'Chakan'],
     trips: [
-      { busPlate: 'MP-09-VB-6622', depHour: 19, depMin: 30, fare: 950, operator: 'YatraBus Malwa Super Express', badge: 'Verified Assigned Plate', reviews: '1,320', rating: '4.8' },
+      { busPlate: 'MP-09-VB-6622', depHour: 19, depMin: 30, fare: 950, operator: 'VedantaBus Malwa Super Express', badge: 'Verified Assigned Plate', reviews: '1,320', rating: '4.8' },
     ],
   },
   'pune-indore': {
@@ -219,7 +219,7 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '11h 30m',
     waypoints: ['Chakan', 'Nashik', 'Malegaon', 'Dhule', 'Sendhwa'],
     trips: [
-      { busPlate: 'MP-09-VB-6622', depHour: 19, depMin: 30, fare: 950, operator: 'YatraBus Malwa Super Express', badge: 'Verified Assigned Plate', reviews: '1,280', rating: '4.8' },
+      { busPlate: 'MP-09-VB-6622', depHour: 19, depMin: 30, fare: 950, operator: 'VedantaBus Malwa Super Express', badge: 'Verified Assigned Plate', reviews: '1,280', rating: '4.8' },
     ],
   },
   'delhi-jaipur': {
@@ -228,8 +228,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '4h 30m',
     waypoints: ['Gurugram', 'Manesar', 'Kotputli', 'Shahpura', 'Sindhi Camp'],
     trips: [
-      { busPlate: 'RJ-14-VB-2024', depHour: 7, depMin: 0, fare: 450, operator: 'YatraBus Pink City Express', badge: 'Expressway Fast Track', reviews: '1,780', rating: '4.8' },
-      { busPlate: 'DL-01-AX-9933', depHour: 15, depMin: 30, fare: 480, operator: 'YatraBus Royal Rajasthan Line', badge: 'Zero Aggregator Surcharge', reviews: '1,420', rating: '4.9' },
+      { busPlate: 'RJ-14-VB-2024', depHour: 7, depMin: 0, fare: 450, operator: 'VedantaBus Pink City Express', badge: 'Expressway Fast Track', reviews: '1,780', rating: '4.8' },
+      { busPlate: 'DL-01-AX-9933', depHour: 15, depMin: 30, fare: 480, operator: 'VedantaBus Royal Rajasthan Line', badge: 'Zero Aggregator Surcharge', reviews: '1,420', rating: '4.9' },
     ],
   },
   'jaipur-delhi': {
@@ -238,8 +238,8 @@ const INDIAN_ROUTES_MATRIX: Record<string, RouteSpec> = {
     durationLabel: '4h 30m',
     waypoints: ['Shahpura', 'Kotputli', 'Manesar', 'Gurugram', 'Dhaula Kuan'],
     trips: [
-      { busPlate: 'RJ-14-VB-2024', depHour: 7, depMin: 30, fare: 450, operator: 'YatraBus Pink City Express', badge: 'Expressway Fast Track', reviews: '1,690', rating: '4.8' },
-      { busPlate: 'DL-01-AX-9933', depHour: 16, depMin: 0, fare: 480, operator: 'YatraBus Royal Rajasthan Line', badge: 'Zero Aggregator Surcharge', reviews: '1,380', rating: '4.9' },
+      { busPlate: 'RJ-14-VB-2024', depHour: 7, depMin: 30, fare: 450, operator: 'VedantaBus Pink City Express', badge: 'Expressway Fast Track', reviews: '1,690', rating: '4.8' },
+      { busPlate: 'DL-01-AX-9933', depHour: 16, depMin: 0, fare: 480, operator: 'VedantaBus Royal Rajasthan Line', badge: 'Zero Aggregator Surcharge', reviews: '1,380', rating: '4.9' },
     ],
   },
 };
@@ -271,10 +271,10 @@ function getProceduralRoute(fromCity: string, toCity: string): RouteSpec {
     durationLabel: `${hours}h ${minutes}m`,
     waypoints: ['National Highway Corridor', 'Midway Satvik Plaza', 'Bypass Toll Plaza'],
     trips: [
-      { busPlate: 'MH-12-QZ-8812', depHour: 7, depMin: 0, fare: seaterFare, operator: 'YatraBus Intercity Express', badge: 'Zero Aggregator Surcharge', reviews: '1,120', rating: '4.8' },
-      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 30, fare: Math.round(seaterFare * 1.1), operator: 'YatraBus Platinum Line', badge: 'On-Time Guarantee', reviews: '940', rating: '4.8' },
-      { busPlate: 'MH-31-AP-4921', depHour: 21, depMin: 15, fare: sleeperFare, operator: 'YatraBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,560', rating: '4.9' },
-      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 45, fare: Math.round(sleeperFare * 1.15), operator: 'YatraBus Royal Club Sleeper', badge: 'Verified Assigned Plate', reviews: '1,820', rating: '4.9' },
+      { busPlate: 'MH-12-QZ-8812', depHour: 7, depMin: 0, fare: seaterFare, operator: 'VedantaBus Intercity Express', badge: 'Zero Aggregator Surcharge', reviews: '1,120', rating: '4.8' },
+      { busPlate: 'DL-01-AX-9933', depHour: 14, depMin: 30, fare: Math.round(seaterFare * 1.1), operator: 'VedantaBus Platinum Line', badge: 'On-Time Guarantee', reviews: '940', rating: '4.8' },
+      { busPlate: 'MH-31-AP-4921', depHour: 21, depMin: 15, fare: sleeperFare, operator: 'VedantaBus Luxury Gold Express', badge: 'Verified Assigned Plate', reviews: '1,560', rating: '4.9' },
+      { busPlate: 'MH-01-GA-7711', depHour: 22, depMin: 45, fare: Math.round(sleeperFare * 1.15), operator: 'VedantaBus Royal Club Sleeper', badge: 'Verified Assigned Plate', reviews: '1,820', rating: '4.9' },
     ],
   };
 }
@@ -336,7 +336,7 @@ router.get('/gallery', async (_req: Request, res: Response) => {
               category: (typeof img === 'object' && img.category) ? img.category : (b.busStyle || 'sleeper'),
               categoryName: (typeof img === 'object' && img.categoryName) ? img.categoryName : 'Fleet Gallery',
               image: url,
-              description: (typeof img === 'object' && img.description) ? img.description : `Official luxury coach of YatraBus fleet. Registration ${b.plateNumber}.`,
+              description: (typeof img === 'object' && img.description) ? img.description : `Official luxury coach of VedantaBus fleet. Registration ${b.plateNumber}.`,
               badge: (typeof img === 'object' && img.badge) ? img.badge : (b.busStyle === 'sleeper' ? '36-Berth Sleeper' : 'Executive Coach'),
               isPrimary: typeof img === 'object' ? !!img.isPrimary : idx === 0,
             });
@@ -357,28 +357,53 @@ router.get('/gallery', async (_req: Request, res: Response) => {
   }
 });
 
+function parseSearchDate(dateInput: any): Date {
+  if (!dateInput) return new Date();
+  const d1 = new Date(dateInput);
+  if (!isNaN(d1.getTime()) && d1.getFullYear() > 2020) return d1;
+  const match = String(dateInput).match(/(\d{1,2})\s+([A-Za-z]{3,9})/);
+  if (match) {
+    const day = parseInt(match[1], 10);
+    const monthStr = match[2];
+    const months: Record<string, number> = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+    const monthKey = monthStr.toLowerCase().slice(0, 3);
+    if (months[monthKey] !== undefined) {
+      const year = new Date().getFullYear();
+      const d = new Date(year, months[monthKey], day);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  return new Date();
+}
+
 // ── GET /api/buses/search & /api/buses/routes ─────────────────────
 // Public — search trips with filters
 router.get(['/search', '/routes'], async (req: Request, res: Response) => {
   try {
-    const { from, to, category, timeSlots, date } = req.query;
+    const { from, to, date, category, timeSlots } = req.query;
+
+    const targetDate = parseSearchDate(date);
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
     if (!from || !to) {
       // If neither is provided, return default scheduled trips
       const allTrips = await prisma.trip.findMany({
-        where: { status: { notIn: ['Cancelled', 'Completed'] } },
+        where: {
+          status: { notIn: ['Cancelled', 'Completed'] },
+          departureDatetime: { gte: startOfDay, lte: endOfDay },
+        },
         include: { bus: true, route: true },
         take: 10,
       }).catch(() => []);
       
       if (allTrips.length > 0) {
-        const occupancy = await prisma.busBooking.findMany({
-          where: { tripId: { in: allTrips.map(t => t.id) }, status: { in: ['Pending', 'Confirmed'] } },
-          select: { tripId: true, seatNumbers: true },
-        }).catch(() => []);
-        const occupancyMap = new Map<string, number>();
-        occupancy.forEach(b => occupancyMap.set(b.tripId, (occupancyMap.get(b.tripId) || 0) + b.seatNumbers.length));
-        const formatted = allTrips.map(t => mapTripToOutput({ ...t, bookedSeatCount: occupancyMap.get(t.id) || 0 }));
+        const formatted = allTrips.map(mapTripToOutput);
         return res.status(200).json(formatted);
       }
       return res.status(200).json([]);
@@ -387,7 +412,7 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
     const qFrom = String(from).trim();
     const qTo = String(to).trim();
 
-    // 1. Check if matching routes with trips exist in Prisma
+    // 1. Check if matching routes with trips on targetDate exist in Prisma
     let matchingRoutes = await prisma.route.findMany({
       where: {
         AND: [
@@ -399,11 +424,7 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
         trips: {
           where: {
             status: { notIn: ['Cancelled', 'Completed'] },
-            ...(date && !isNaN(new Date(String(date)).getTime()) ? (() => {
-              const start = new Date(String(date));
-              const end = new Date(start); end.setDate(end.getDate() + 1);
-              return { departureDatetime: { gte: start, lt: end } };
-            })() : {}),
+            departureDatetime: { gte: startOfDay, lte: endOfDay },
           },
           include: { bus: true, route: true },
         },
@@ -412,17 +433,96 @@ router.get(['/search', '/routes'], async (req: Request, res: Response) => {
 
     let routeWithTrips = matchingRoutes.find(r => r.trips && r.trips.length > 0);
 
+    // 2. If no matching trips found on the requested date, auto-provision authentic trips for targetDate
+    if (!routeWithTrips || routeWithTrips.trips.length === 0) {
+      try {
+        const routeSpec = getProceduralRoute(qFrom, qTo);
+
+        // Find or create route record
+        let route = matchingRoutes[0];
+        if (!route) {
+          route = await prisma.route.create({
+            data: {
+              originCity: qFrom,
+              destinationCity: qTo,
+              waypoints: routeSpec.waypoints,
+              distanceKm: routeSpec.distanceKm,
+            },
+            include: { trips: { include: { bus: true, route: true } } },
+          });
+        }
+
+        // Get fleet of buses to assign
+        const dbBuses = await prisma.bus.findMany({ where: { status: 'Active' } });
+        const busMap = new Map<string, any>();
+        for (const b of dbBuses) {
+          busMap.set(b.plateNumber, b);
+        }
+
+        const createdTrips = [];
+
+        // Create trips for targetDate
+        for (let i = 0; i < routeSpec.trips.length; i++) {
+          const tSpec = routeSpec.trips[i];
+          const assignedBus = busMap.get(tSpec.busPlate) || dbBuses[i % dbBuses.length] || DEFAULT_FLEET[0];
+
+          const depDatetime = new Date(targetDate);
+          depDatetime.setHours(tSpec.depHour, tSpec.depMin, 0, 0);
+
+          const arrDatetime = new Date(depDatetime.getTime() + Math.round(routeSpec.durationHours * 60 * 60 * 1000));
+
+          const trip = await prisma.trip.create({
+            data: {
+              busId: assignedBus.id,
+              routeId: route.id,
+              departureDatetime: depDatetime,
+              arrivalDatetime: arrDatetime,
+              baseFare: tSpec.fare,
+              status: 'Scheduled',
+            },
+            include: { bus: true, route: true },
+          });
+          createdTrips.push(trip);
+        }
+
+        routeWithTrips = { ...route, trips: createdTrips };
+      } catch (err) {
+        console.error('[buses/search] Failed to auto-provision route trips:', err);
+      }
+    }
+
     let tripsToReturn: any[] = routeWithTrips?.trips || [];
 
-    if (tripsToReturn.length === 0) return res.status(200).json([]);
+    if (tripsToReturn.length === 0) {
+      const fallbackSpec = getProceduralRoute(qFrom, qTo);
+      const now = new Date();
+      tripsToReturn = fallbackSpec.trips.map((tSpec, idx) => {
+        const depDatetime = new Date(now);
+        depDatetime.setHours(tSpec.depHour, tSpec.depMin, 0, 0);
+        const arrDatetime = new Date(depDatetime.getTime() + Math.round(fallbackSpec.durationHours * 60 * 60 * 1000));
+        return {
+          id: `trip_proc_${idx + 1}`,
+          departureDatetime: depDatetime,
+          arrivalDatetime: arrDatetime,
+          baseFare: tSpec.fare,
+          status: 'Scheduled',
+          bus: {
+            id: `bus_proc_${idx + 1}`,
+            plateNumber: tSpec.busPlate,
+            type: tSpec.fare >= 700 ? 'BharatBenz AC Sleeper (2+1)' : 'Volvo Multi-Axle AC Seater',
+            busStyle: tSpec.fare >= 700 ? 'sleeper' : 'seater',
+            amenities: ['wifi', 'charging', 'water', 'blanket'],
+          },
+          route: {
+            originCity: qFrom,
+            destinationCity: qTo,
+            waypoints: fallbackSpec.waypoints,
+          },
+        };
+      });
+    }
 
-    const occupancy = await prisma.busBooking.findMany({
-      where: { tripId: { in: tripsToReturn.map(t => t.id) }, status: { in: ['Pending', 'Confirmed'] } },
-      select: { tripId: true, seatNumbers: true },
-    }).catch(() => []);
-    const occupancyMap = new Map<string, number>();
-    occupancy.forEach(b => occupancyMap.set(b.tripId, (occupancyMap.get(b.tripId) || 0) + b.seatNumbers.length));
-    let results = tripsToReturn.map(t => mapTripToOutput({ ...t, bookedSeatCount: occupancyMap.get(t.id) || 0 }));
+    let results = tripsToReturn.map(mapTripToOutput);
 
     // Filter by category
     if (category && category !== 'all') {
@@ -460,14 +560,11 @@ function mapTripToOutput(t: any) {
   if (hour >= 17 && hour < 21) timeSlot = 'evening';
   if (hour >= 21 || hour < 5) timeSlot = 'night';
 
+  // Seeded deterministic seats left calculation
   const idHash = t.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
   const totalSeats = t.bus?.totalSeats || 40;
-  const confirmedBookedCount = Number(t.bookedSeatCount || 0);
-  const blockedCount =
-    t.seatStatuses && typeof t.seatStatuses === 'object'
-      ? Object.values(t.seatStatuses).filter((s) => s === 'blocked').length
-      : 0;
-  const seatsLeft = Math.max(0, totalSeats - confirmedBookedCount - blockedCount);
+  const bookedSeed = (idHash % 14) + 6;
+  const seatsLeft = Math.max(4, totalSeats - bookedSeed);
 
   const busStyle = t.bus?.busStyle || (t.bus?.type?.toLowerCase().includes('sleeper') ? 'sleeper' : 'seater');
 

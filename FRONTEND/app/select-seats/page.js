@@ -152,7 +152,7 @@ function CinemaSeatBookingContent() {
 
   // Helper to get status of a seat
   const getSeatStatus = (seat) => {
-    if (bookedSeatIds.includes(seat.id) || bookedSeatIds.includes(`BK_${seat.id}`)) {
+    if (bookedSeatIds.includes(seat.id) || bookedSeatIds.includes(`BK_${seat.id}`) || seat.status === 'sold' || seat.status === 'booked') {
       return 'booked';
     }
     return seat.defaultStatus;

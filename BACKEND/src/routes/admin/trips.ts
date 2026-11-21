@@ -153,21 +153,17 @@ router.patch('/:id', async (req: Request, res: Response) => {
       return sendError(res, `status must be one of: ${validStatuses.join(', ')}.`, 400);
     }
 
-    const nextDeparture = departureDatetime ? new Date(departureDatetime) : trip.departureDatetime;
-    const nextArrival = arrivalDatetime ? new Date(arrivalDatetime) : trip.arrivalDatetime;
-    if (isNaN(nextDeparture.getTime()) || isNaN(nextArrival.getTime()) || nextArrival <= nextDeparture) return sendError(res, 'arrivalDatetime must be after departureDatetime.', 400);
-    if (baseFare !== undefined && (!Number.isFinite(Number(baseFare)) || Number(baseFare) <= 0)) return sendError(res, 'baseFare must be positive.', 400);
     const updated = await prisma.trip.update({
       where: { id },
       data: {
         ...(busId             && { busId: String(busId) }),
         ...(routeId           && { routeId: String(routeId) }),
-        ...(departureDatetime && { departureDatetime: nextDeparture }),
-        ...(arrivalDatetime   && { arrivalDatetime: nextArrival }),
-        ...(baseFare !== undefined && { baseFare: Number(baseFare) }),
+        ...(departureDatetime && { departureDatetime: new Date(departureDatetime) }),
+        ...(arrivalDatetime   && { arrivalDatetime:   new Date(arrivalDatetime) }),
+        ...(baseFare          && { baseFare: Number(baseFare) }),
         ...(status            && { status }),
         ...(seatPricingConfig !== undefined && { seatPricingConfig }),
-        ...(seatStatuses !== undefined && { seatStatuses }),
+        ...(seatStatuses      !== undefined && { seatStatuses }),
       },
       include: { bus: true, route: true },
     });
@@ -229,12 +225,14 @@ router.get('/:id/seats', async (req: Request, res: Response) => {
 
     return sendSuccess(res, {
       tripId,
-      busPlate:    trip.bus.plateNumber,
-      busType:     trip.bus.type,
-      busStyle:    trip.bus.busStyle,
-      totalSeats:  trip.bus.totalSeats,
+      busPlate:          trip.bus.plateNumber,
+      busType:           trip.bus.type,
+      busStyle:          trip.bus.busStyle,
+      totalSeats:        trip.bus.totalSeats,
       bookedSeats,
-      seatsLeft:   Math.max(0, trip.bus.totalSeats - bookedSeats.length),
+      seatsLeft:         Math.max(0, trip.bus.totalSeats - bookedSeats.length),
+      seatPricingConfig: trip.seatPricingConfig,
+      seatStatuses:      trip.seatStatuses,
     });
   } catch (err) {
     console.error('[admin/trips/:id/seats GET]', err);

@@ -7,7 +7,6 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import DatePickerPopover from '@/components/ui/DatePickerPopover';
 import { apiFetch } from '@/lib/api';
-import { getRelativeDate } from '@/lib/dates';
 
 const popularCities = [
   'Nagpur',
@@ -26,8 +25,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const initialFrom = searchParams.get('from') || 'Nagpur';
   const initialTo = searchParams.get('to') || 'Pune';
-  const initialDate = searchParams.get('dateLabel') || searchParams.get('date') || getRelativeDate(0).mainText;
-  const initialDateValue = searchParams.get('date') || '';
+  const initialDate = searchParams.get('date') || 'Tomorrow, 24 Oct';
 
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +39,6 @@ function SearchContent() {
   const [selectedDate, setSelectedDate] = useState({
     mainText: initialDate,
     subText: 'Scheduled Journey',
-    date: initialDateValue,
   });
   const [passengerCount, setPassengerCount] = useState(() => {
     const p = parseInt(searchParams.get('passengers'));
@@ -65,7 +62,7 @@ function SearchContent() {
     return 'Thursday';
   };
 
-  const fetchBuses = async (queryFrom = fromCity, queryTo = toCity, queryDate = selectedDate.date) => {
+  const fetchBuses = async (queryFrom = fromCity, queryTo = toCity, queryDate = selectedDate?.mainText) => {
     setLoading(true);
     setBuses([]);
     try {
@@ -87,17 +84,9 @@ function SearchContent() {
   };
 
   React.useEffect(() => {
-    fetchBuses(initialFrom, initialTo, initialDateValue);
+    fetchBuses(initialFrom, initialTo, initialDate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialFrom, initialTo]);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      closeAllDropdowns();
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [initialFrom, initialTo, initialDate]);
 
   const [isFromOpen, setIsFromOpen] = useState(false);
   const [isToOpen, setIsToOpen] = useState(false);
@@ -118,12 +107,11 @@ function SearchContent() {
   };
 
   // Instant live sync of search parameters into URL without needing "Update Search"
-  const syncSearchLive = (nextFrom = fromCity, nextTo = toCity, nextDateText = selectedDate?.mainText, nextPax = passengerCount, nextDateValue = selectedDate?.date) => {
+  const syncSearchLive = (nextFrom = fromCity, nextTo = toCity, nextDateText = selectedDate?.mainText, nextPax = passengerCount) => {
     const params = new URLSearchParams();
     if (nextFrom) params.set('from', nextFrom);
     if (nextTo) params.set('to', nextTo);
-    if (nextDateValue) params.set('date', nextDateValue);
-    if (nextDateText) params.set('dateLabel', nextDateText);
+    if (nextDateText) params.set('date', nextDateText);
     params.set('passengers', nextPax.toString());
     const newUri = `/search?${params.toString()}`;
     router.replace(newUri, { scroll: false });
@@ -135,7 +123,7 @@ function SearchContent() {
     const newTo = fromCity;
     setFromCity(newFrom);
     setToCity(newTo);
-    fetchBuses(newFrom, newTo, selectedDate.date);
+    fetchBuses(newFrom, newTo);
     syncSearchLive(newFrom, newTo, selectedDate?.mainText, passengerCount);
   };
 
@@ -143,10 +131,9 @@ function SearchContent() {
     setSelectedDate({
       mainText: dateResult.mainText,
       subText: dateResult.subText,
-      date: dateResult.date,
     });
-    fetchBuses(fromCity, toCity, dateResult.date);
-    syncSearchLive(fromCity, toCity, dateResult.mainText, passengerCount, dateResult.date);
+    fetchBuses(fromCity, toCity, dateResult.mainText);
+    syncSearchLive(fromCity, toCity, dateResult.mainText, passengerCount);
   };
 
   const handlePassengerSelect = (count) => {
@@ -172,7 +159,7 @@ function SearchContent() {
   const handleUpdateSearch = () => {
     closeAllDropdowns();
     setIsMobileSearchExpanded(false);
-    fetchBuses(fromCity, toCity, selectedDate.date);
+    fetchBuses(fromCity, toCity);
     syncSearchLive(fromCity, toCity, selectedDate?.mainText, passengerCount);
   };
 
@@ -213,9 +200,7 @@ function SearchContent() {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans antialiased">
       <Header />
 
-      <div className={`bg-white border-b border-slate-200/90 shadow-sm py-3 sm:py-4 px-4 sm:px-6 lg:px-8 sticky top-16 sm:top-18 lg:top-20 transition-all ${
-        (isFromOpen || isToOpen || isDatePickerOpen || isPassengerOpen) ? 'z-[9999]' : 'z-30'
-      }`}>
+      <div className="bg-white border-b border-slate-200/90 shadow-sm py-3 sm:py-4 px-4 sm:px-6 lg:px-8 sticky top-16 sm:top-18 lg:top-20 z-30">
         <div className="max-w-7xl mx-auto flex flex-col gap-3">
           {/* Compact Mobile Summary Row (< lg) */}
           <div className="flex lg:hidden items-center justify-between gap-2">
@@ -285,7 +270,7 @@ function SearchContent() {
                 </button>
 
                 {isFromOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-slate-200 p-2 z-[99999] animate-fadeIn">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-fadeIn">
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-slate-100">
                       Select Departure City
                     </div>
@@ -334,7 +319,7 @@ function SearchContent() {
                 </button>
 
                 {isToOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-slate-200 p-2 z-[99999] animate-fadeIn">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 animate-fadeIn">
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-3 py-1.5 border-b border-slate-100">
                       Select Destination City
                     </div>
@@ -745,7 +730,7 @@ function SearchContent() {
                         {bus.seatsLeft} Seats Left
                       </span>
                       <Link
-                        href={`/select-seats?busId=${bus.id}&operator=${encodeURIComponent(bus.operator)}&busPlate=${encodeURIComponent(bus.busPlate)}&busType=${encodeURIComponent(bus.busType)}&price=${bus.price}&category=${bus.category}&from=${encodeURIComponent(bus.depLocation || fromCity)}&to=${encodeURIComponent(bus.arrLocation || toCity)}&date=${encodeURIComponent(selectedDate.mainText)}&depTime=${encodeURIComponent(bus.depTime)}&arrTime=${encodeURIComponent(bus.arrTime)}&depLocation=${encodeURIComponent(bus.depLocation)}&arrLocation=${encodeURIComponent(bus.arrLocation)}&passengers=${passengerCount}`}
+                        href={`/select-seats?busId=${bus.id}&tripId=${bus.id}&operator=${encodeURIComponent(bus.operator)}&busPlate=${encodeURIComponent(bus.busPlate)}&busType=${encodeURIComponent(bus.busType)}&price=${bus.price}&category=${bus.category}&from=${encodeURIComponent(bus.depLocation || fromCity)}&to=${encodeURIComponent(bus.arrLocation || toCity)}&date=${encodeURIComponent(selectedDate.mainText)}&depTime=${encodeURIComponent(bus.depTime)}&arrTime=${encodeURIComponent(bus.arrTime)}&depLocation=${encodeURIComponent(bus.depLocation)}&arrLocation=${encodeURIComponent(bus.arrLocation)}&passengers=${passengerCount}`}
                         className="flex-1 sm:flex-none justify-center px-5 py-2.5 rounded-xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 active:scale-95 min-h-[44px]"
                       >
                         <span>SELECT SEATS</span>
@@ -792,16 +777,16 @@ function SearchContent() {
 
       {/* Mobile Filter Drawer / Bottom Sheet */}
       {isMobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden overflow-hidden">
+        <div className="fixed inset-0 z-50 lg:hidden">
           <div
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileFilterOpen(false)}
           />
-          <div className="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col z-50 animate-fadeIn overflow-hidden">
+          <div className="fixed inset-x-0 bottom-0 max-h-[85vh] bg-white rounded-t-3xl shadow-2xl flex flex-col z-50 animate-fadeIn">
             <div className="pt-3 pb-1 flex justify-center">
               <div className="w-12 h-1.5 bg-slate-200 rounded-full" />
             </div>
-            <div className="px-4 sm:px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+            <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px] text-brand-scarlet">tune</span>
                 <h3 className="text-base font-serif font-bold text-slate-900">
@@ -828,14 +813,14 @@ function SearchContent() {
                 <button
                   type="button"
                   onClick={() => setIsMobileFilterOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-5 space-y-5 sm:space-y-6">
+            <div className="flex-1 overflow-y-auto p-5 space-y-6">
               {/* Sort Options */}
               <div className="space-y-2.5">
                 <label className="text-xs font-extrabold uppercase tracking-wider text-slate-500 block">
