@@ -8,7 +8,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
-const FALLBACK_DATABASE_URL = 'postgresql://ayush:AyushDev2026X9@82.29.161.126:5432/vedantabus';
+const FALLBACK_DATABASE_URL = 'postgresql://ayush:AyushDev2026X9@82.29.161.126:5432/vedbus';
 const databaseUrl = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
 
 // Prevent multiple instances of Prisma Client in development
