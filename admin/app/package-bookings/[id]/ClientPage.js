@@ -1,13 +1,15 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import AdminShell from "@/components/layout/AdminShell";
 import AdminBoardingPassModal from "@/components/ui/AdminBoardingPassModal";
 import { adminFetch } from "@/lib/api";
 
-export default function PackageBookingDetailPage({ params }) {
-  const bookingId = params?.id || "";
+export default function PackageBookingDetailPage({ params, id }) {
+  const routeParams = useParams();
+  const bookingId = routeParams?.id || params?.id || id || "";
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("Confirmed");
