@@ -6,8 +6,27 @@ import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import Testimonials from '@/components/site/Testimonials';
 import PackageDetailModal from '@/components/site/PackageDetailModal';
+import { allPackagesData } from '@/lib/data/packagesData';
 
 import { apiFetch } from '@/lib/api';
+
+const getFallbackPackages = () => {
+  return Object.values(allPackagesData).map((p) => ({
+    id: p.id,
+    title: p.title,
+    destinations: p.subtitle || p.destinations || p.title,
+    description: p.shortPlan || p.description || p.subtitle,
+    badge: p.badge || 'Verified Journey',
+    duration: p.duration,
+    price: p.price || `₹${(p.basePrice || 49999).toLocaleString('en-IN')}`,
+    image: p.image || '/images/screen.png',
+    category: p.category?.toLowerCase().includes('spiritual')
+      ? 'spiritual'
+      : p.category?.toLowerCase().includes('international')
+      ? 'international'
+      : 'domestic',
+  }));
+};
 
 export default function CuratedPackagesMasterPage() {
   const [activeTab, setActiveTab] = useState('all');
@@ -28,17 +47,31 @@ export default function CuratedPackagesMasterPage() {
   useEffect(() => {
     const fetchPackages = async () => {
       setLoading(true);
+      const applyFallback = () => {
+        const fallback = getFallbackPackages();
+        setSpiritualPackagesData(fallback.filter((p) => p.category === 'spiritual'));
+        setInternationalPackagesData(fallback.filter((p) => p.category === 'international'));
+        setDomesticPackagesData(fallback.filter((p) => p.category === 'domestic'));
+      };
+
       try {
         const res = await apiFetch('/api/packages');
         if (res.ok) {
           const data = await res.json();
           const items = Array.isArray(data) ? data : data.data || [];
-          setSpiritualPackagesData(items.filter(p => p.category?.toLowerCase() === 'spiritual'));
-          setInternationalPackagesData(items.filter(p => p.category?.toLowerCase() === 'international'));
-          setDomesticPackagesData(items.filter(p => p.category?.toLowerCase() === 'domestic'));
+          if (items.length > 0) {
+            setSpiritualPackagesData(items.filter((p) => p.category?.toLowerCase() === 'spiritual'));
+            setInternationalPackagesData(items.filter((p) => p.category?.toLowerCase() === 'international'));
+            setDomesticPackagesData(items.filter((p) => p.category?.toLowerCase() === 'domestic'));
+          } else {
+            applyFallback();
+          }
+        } else {
+          applyFallback();
         }
       } catch (err) {
-        console.error('Failed to fetch packages from API:', err);
+        console.error('Failed to fetch packages from API, using catalog fallback:', err);
+        applyFallback();
       } finally {
         setLoading(false);
       }
@@ -100,8 +133,8 @@ export default function CuratedPackagesMasterPage() {
       <Header />
 
       <main className="flex-1 relative">
-        {/* HERO MASTER BANNER - STICKY WITH SCROLL ZOOM & PARALLAX */}
-        <div className="relative bg-slate-950 text-white pt-10 pb-20 sm:pt-12 sm:pb-24 px-4 sm:px-6 lg:px-8 xl:px-12 overflow-hidden min-h-screen flex items-center justify-center sticky top-0 z-0">
+        {/* HERO MASTER BANNER - SCROLL ZOOM & PARALLAX */}
+        <div className="relative bg-slate-950 text-white pt-10 pb-20 sm:pt-12 sm:pb-24 px-4 sm:px-6 lg:px-8 xl:px-12 overflow-hidden min-h-[560px] lg:min-h-[640px] flex items-center justify-center z-0">
         {/* HERO BACKGROUND IMAGE WITH SCROLL SCALE ZOOM */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
@@ -210,7 +243,7 @@ export default function CuratedPackagesMasterPage() {
       </div>
 
       {/* MAIN CATALOG CONTENT - OVERLAPPING SHEET EFFECT */}
-      <div className="relative z-10 bg-slate-50 rounded-t-[2.5rem] sm:rounded-t-[3.5rem] md:rounded-t-[4rem] shadow-[0_-25px_60px_rgba(15,23,42,0.35)] border-t border-slate-200/80 -mt-12 sm:-mt-16 pt-10 sm:pt-14 pb-16 w-full overflow-hidden">
+      <div className="relative z-10 bg-slate-50 rounded-t-[2.5rem] sm:rounded-t-[3.5rem] md:rounded-t-[4rem] shadow-[0_-25px_60px_rgba(15,23,42,0.35)] border-t border-slate-200/80 -mt-12 sm:-mt-16 pt-10 sm:pt-14 pb-16 w-full">
         <div className="max-w-[1850px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 space-y-16 pb-12">
         
         {/* SECTION 1: SPIRITUAL YATRAS */}

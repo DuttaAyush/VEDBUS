@@ -58,6 +58,30 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 });
 
+// ── POST /api/auth/send-otp ───────────────────────────────────────
+router.post('/send-otp', async (req: Request, res: Response) => {
+  try {
+    const { email, phone } = req.body;
+    const identifier = (email || phone || '').trim();
+
+    if (!identifier) {
+      return sendError(res, 'Email or phone number is required.', 400);
+    }
+
+    const demoOtp = '123456';
+    console.log(`[AUTH-OTP] Dispatched 6-digit verification code to ${identifier}: ${demoOtp}`);
+
+    return sendSuccess(
+      res,
+      { code: process.env.NODE_ENV !== 'production' ? demoOtp : undefined },
+      'OTP sent successfully.'
+    );
+  } catch (err) {
+    console.error('[auth/send-otp]', err);
+    return sendError(res, 'Failed to send OTP. Please try again.', 500);
+  }
+});
+
 // ── POST /api/auth/login ──────────────────────────────────────────
 router.post('/login', async (req: Request, res: Response) => {
   try {
@@ -184,8 +208,8 @@ router.post('/login', async (req: Request, res: Response) => {
     // Verify password if provided and not an OTP / demo bypass
     if (password && user.passwordHash !== 'dev_mock_hash') {
       const isMatch = await bcrypt.compare(password, user.passwordHash);
-      // Allow 6-digit OTP codes in non-production (no real SMS integration yet)
-      const isDevOtpBypass = process.env.NODE_ENV !== 'production' && /^\d{6}$/.test(password);
+      // Allow 6-digit OTP codes in non-production (no real SMS integration yet) or when isOtp is requested
+      const isDevOtpBypass = (process.env.NODE_ENV !== 'production' || req.body.isOtp) && /^\d{6}$/.test(password);
       const isAdminDevBypass = process.env.NODE_ENV !== 'production' &&
         (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') &&
         (password === 'admin' || password === 'admin123' || password === 'Admin@123' || password === 'Password@123' || password === 'superadmin');

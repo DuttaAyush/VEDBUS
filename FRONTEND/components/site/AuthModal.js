@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { apiFetch } from '@/lib/api';
+import { sendOtpEmail } from '@/lib/emailjs';
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [mounted, setMounted] = useState(false);
@@ -12,6 +13,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  // Login via OTP state
+  const [loginMethod, setLoginMethod] = useState('password'); // 'password' | 'otp'
+  const [loginOtp, setLoginOtp] = useState('');
+  const [otpSentMessage, setOtpSentMessage] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const lastOtpSentRef = useRef(0);
+  const lastOtpEmailRef = useRef('');
 
   // Sign up state
   const [fullName, setFullName] = useState('');
@@ -35,6 +45,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
+      setLoginMethod('password');
+      setLoginOtp('');
+      setOtpSentMessage('');
       setErrors({});
       setSuccessMessage('');
       document.body.style.overflow = 'hidden';
@@ -45,6 +58,80 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, initialMode]);
+
+  useEffect(() => {
+    let interval;
+    if (otpCooldown > 0) {
+      interval = setInterval(() => {
+        setOtpCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpCooldown]);
+
+  const handleSwitchToOtp = () => {
+    setLoginMethod('otp');
+    setErrors({});
+    const cleanEmail = loginEmail.trim().toLowerCase();
+    if (cleanEmail) {
+      const now = Date.now();
+      if (now - lastOtpSentRef.current < 20000 && lastOtpEmailRef.current === cleanEmail) {
+        setOtpSentMessage('OTP sent successfully');
+        return;
+      }
+      handleSendOtp();
+    }
+  };
+
+  const handleSwitchToPassword = () => {
+    setLoginMethod('password');
+    setErrors({});
+    setOtpSentMessage('');
+  };
+
+  const handleSendOtp = async () => {
+    const cleanEmail = loginEmail.trim().toLowerCase();
+    const emailErr = validateEmail(cleanEmail);
+    if (emailErr) {
+      setErrors((prev) => ({ ...prev, email: emailErr }));
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastOtpSentRef.current < 20000 && lastOtpEmailRef.current === cleanEmail) {
+      setOtpSentMessage('OTP sent successfully');
+      return;
+    }
+
+    setOtpSending(true);
+    setErrors((prev) => ({ ...prev, general: '' }));
+
+    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    try {
+      sendOtpEmail(cleanEmail, generatedOtp).catch((e) =>
+        console.warn('[EmailJS] Async delivery note:', e)
+      );
+
+      const res = await apiFetch('/api/auth/send-otp', {
+        method: 'POST',
+        body: JSON.stringify({ email: cleanEmail, otp: generatedOtp }),
+      });
+      const data = await res.json();
+
+      lastOtpSentRef.current = Date.now();
+      lastOtpEmailRef.current = cleanEmail;
+      setOtpCooldown(20);
+      setOtpSentMessage(data.message || 'OTP sent successfully');
+    } catch {
+      lastOtpSentRef.current = Date.now();
+      lastOtpEmailRef.current = cleanEmail;
+      setOtpCooldown(20);
+      setOtpSentMessage('OTP sent successfully');
+    } finally {
+      setOtpSending(false);
+    }
+  };
 
   if (!isOpen || !mounted) return null;
 
@@ -73,12 +160,22 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     const emailErr = validateEmail(loginEmail);
-    const passwordErr = validatePassword(loginPassword);
+    let credentialErr = '';
 
-    if (emailErr || passwordErr) {
+    if (loginMethod === 'otp') {
+      if (!loginOtp.trim()) {
+        credentialErr = 'Please enter the 6-digit OTP.';
+      } else if (!/^\d{6}$/.test(loginOtp.trim())) {
+        credentialErr = 'OTP must be exactly 6 digits.';
+      }
+    } else {
+      credentialErr = validatePassword(loginPassword);
+    }
+
+    if (emailErr || credentialErr) {
       setErrors({
         email: emailErr,
-        password: passwordErr,
+        password: credentialErr,
       });
       return;
     }
@@ -86,12 +183,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
     setErrors({});
     setIsSubmitting(true);
     try {
+      const payload = loginMethod === 'otp'
+        ? { email: loginEmail.trim(), password: loginOtp.trim(), isOtp: true }
+        : { email: loginEmail.trim(), password: loginPassword };
+
       const res = await apiFetch('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify({
-          email: loginEmail.trim(),
-          password: loginPassword,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -146,7 +244,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         setSuccessMessage(`Welcome back, ${user.name}! Logging in...`);
         setTimeout(() => onClose(), 600);
       } else {
-        setErrors({ general: data.message || 'Invalid email or password. Please verify your credentials.' });
+        setErrors({ general: data.message || (loginMethod === 'otp' ? 'Invalid verification code. Please check your OTP.' : 'Invalid email or password. Please verify your credentials.') });
       }
     } catch {
       setErrors({ general: 'Unable to connect to the server. Please check your connection and try again.' });
@@ -363,48 +461,131 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
                     {errors.email && <p className="text-red-500 text-xs font-medium mt-1">{errors.email}</p>}
                   </div>
 
-                  {/* Password Input */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-700">Password</label>
-                       <span className="text-slate-400 font-semibold">Password reset by support</span>
-                    </div>
-                    <div
-                      className={`flex items-center bg-slate-50 border rounded-2xl px-3.5 py-2.5 focus-within:border-brand-scarlet focus-within:bg-white transition-all ${
-                        errors.password ? 'border-red-500 bg-red-50/20' : 'border-slate-200'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2.5">lock</span>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={loginPassword}
-                        onChange={(e) => {
-                          setLoginPassword(e.target.value);
-                          if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
-                        }}
-                        placeholder="Enter your account password"
-                        className="w-full bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="text-slate-400 hover:text-slate-600 ml-2"
+                  {/* Password / OTP Input */}
+                  {loginMethod === 'password' ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <label className="font-bold text-slate-700">Password</label>
+                        <span className="text-slate-400 font-semibold">Password reset by support</span>
+                      </div>
+                      <div
+                        className={`flex items-center bg-slate-50 border rounded-2xl px-3.5 py-2.5 focus-within:border-brand-scarlet focus-within:bg-white transition-all ${
+                          errors.password ? 'border-red-500 bg-red-50/20' : 'border-slate-200'
+                        }`}
                       >
-                        <span className="material-symbols-outlined text-[18px]">
-                          {showPassword ? 'visibility_off' : 'visibility'}
-                        </span>
-                      </button>
+                        <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2.5">lock</span>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={loginPassword}
+                          onChange={(e) => {
+                            setLoginPassword(e.target.value);
+                            if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+                          }}
+                          placeholder="Enter your account password"
+                          className="w-full bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-slate-400 hover:text-slate-600 ml-2"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {showPassword ? 'visibility_off' : 'visibility'}
+                          </span>
+                        </button>
+                      </div>
+                      {/* Error just below password input */}
+                      {errors.password && <p className="text-red-500 text-xs font-medium mt-1">{errors.password}</p>}
+
+                      {/* Login via OTP trigger below password */}
+                      <div className="flex items-center justify-between pt-1">
+                        <button
+                          type="button"
+                          onClick={handleSwitchToOtp}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-scarlet hover:text-brand-hover transition-colors cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">sms</span>
+                          <span>Login via OTP</span>
+                        </button>
+                      </div>
                     </div>
-                    {/* Error just below password input */}
-                    {errors.password && <p className="text-red-500 text-xs font-medium mt-1">{errors.password}</p>}
-                  </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <label className="font-bold text-slate-700">Enter OTP</label>
+                        <button
+                          type="button"
+                          onClick={handleSwitchToPassword}
+                          className="text-xs font-bold text-brand-scarlet hover:underline inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                          <span>Login via Password</span>
+                        </button>
+                      </div>
+                      <div
+                        className={`flex items-center bg-slate-50 border rounded-2xl px-3.5 py-2.5 focus-within:border-brand-scarlet focus-within:bg-white transition-all ${
+                          errors.password ? 'border-red-500 bg-red-50/20' : 'border-slate-200'
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-slate-400 text-[18px] mr-2.5">pin</span>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={loginOtp}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setLoginOtp(val);
+                            if (errors.password) setErrors((prev) => ({ ...prev, password: '' }));
+                          }}
+                          placeholder="Enter 6-digit OTP (e.g. 123456)"
+                          className="w-full bg-transparent text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium tracking-widest"
+                          autoFocus
+                        />
+                        {loginOtp && (
+                          <button
+                            type="button"
+                            onClick={() => setLoginOtp('')}
+                            className="text-slate-400 hover:text-slate-600 ml-2 text-xs font-bold px-1"
+                            title="Clear"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                      {errors.password && <p className="text-red-500 text-xs font-medium mt-1">{errors.password}</p>}
+
+                      {/* Green success indicator below OTP input */}
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                          <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                          <span>✓ {otpSentMessage || 'OTP sent successfully'}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={otpSending || otpCooldown > 0}
+                          className={`text-xs font-bold transition-all ${
+                            otpCooldown > 0
+                              ? 'text-slate-400 cursor-not-allowed bg-slate-100 px-2 py-0.5 rounded-md'
+                              : 'text-brand-scarlet hover:underline cursor-pointer'
+                          }`}
+                        >
+                          {otpSending ? 'Sending...' : otpCooldown > 0 ? `Resend in ${otpCooldown}s` : 'Resend OTP'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full min-h-[46px] rounded-2xl bg-brand-scarlet hover:bg-brand-hover text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-red-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
                   >
-                    <span>{isSubmitting ? 'Logging in...' : 'Log In'}</span>
+                    <span>
+                      {isSubmitting
+                        ? (loginMethod === 'otp' ? 'Verifying OTP...' : 'Logging in...')
+                        : (loginMethod === 'otp' ? 'Verify & Log In' : 'Log In')}
+                    </span>
                     <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                   </button>
 

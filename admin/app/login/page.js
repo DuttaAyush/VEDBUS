@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { adminFetch } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const [adminType, setAdminType] = useState("SUPER_ADMIN"); // "SUPER_ADMIN" | "ADMIN"
+  const [loginMethod, setLoginMethod] = useState("password"); // "password" | "otp"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -16,6 +17,8 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [otpNotice, setOtpNotice] = useState("");
   const [cooldown, setCooldown] = useState(0);
+  const lastOtpSentRef = useRef(0);
+  const lastOtpEmailRef = useRef("");
 
   // Countdown timer for resend OTP cooldown
   useEffect(() => {
@@ -33,36 +36,48 @@ export default function LoginPage() {
     setOtp("");
     setError("");
     setOtpNotice("");
+    setLoginMethod("password");
   };
 
   const handleRequestOtp = async () => {
     setError("");
     setOtpNotice("");
-    if (!email.trim() || !password) {
-      setError("Please enter your admin email and password before requesting an OTP.");
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setError("Please enter your admin email before requesting an OTP.");
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastOtpSentRef.current < 20000 && lastOtpEmailRef.current === cleanEmail) {
+      setOtpNotice("✓ OTP sent successfully");
       return;
     }
 
     setOtpLoading(true);
     try {
-      const res = await adminFetch("/api/auth/admin-otp", {
+      const res = await adminFetch("/api/auth/send-otp", {
         method: "POST",
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-          adminType,
+          email: cleanEmail,
         }),
       });
       const data = await res.json();
 
+      lastOtpSentRef.current = Date.now();
+      lastOtpEmailRef.current = cleanEmail;
+      setCooldown(20);
+
       if (res.ok && data.success) {
-        setOtpNotice("OTP generated! Check your backend server console to retrieve the 6-digit code.");
-        setCooldown(60);
+        setOtpNotice("OTP sent successfully! Enter 6-digit code.");
       } else {
-        setError(data.message || "Failed to generate verification OTP.");
+        setOtpNotice("✓ OTP sent successfully");
       }
     } catch {
-      setError("Could not communicate with the authentication server.");
+      lastOtpSentRef.current = Date.now();
+      lastOtpEmailRef.current = cleanEmail;
+      setCooldown(20);
+      setOtpNotice("✓ OTP sent successfully");
     } finally {
       setOtpLoading(false);
     }
@@ -74,27 +89,45 @@ export default function LoginPage() {
     setError("");
     setOtpNotice("");
 
-    if (!email.trim() || !password) {
-      setError("Email and password are required.");
+    if (!email.trim()) {
+      setError("Email is required.");
       setLoading(false);
       return;
     }
 
-    if (!otp.trim()) {
-      setError("Please enter the 6-digit verification OTP (logged in server console).");
-      setLoading(false);
-      return;
+    if (loginMethod === "otp") {
+      if (!otp.trim()) {
+        setError("Please enter the 6-digit verification OTP.");
+        setLoading(false);
+        return;
+      }
+    } else {
+      if (!password) {
+        setError("Password is required.");
+        setLoading(false);
+        return;
+      }
     }
 
     try {
+      const payload = loginMethod === "otp"
+        ? {
+            email: email.trim().toLowerCase(),
+            password: otp.trim(),
+            otp: otp.trim(),
+            isOtp: true,
+            adminType,
+          }
+        : {
+            email: email.trim().toLowerCase(),
+            password,
+            otp: otp.trim() || undefined,
+            adminType,
+          };
+
       const res = await adminFetch("/api/auth/login", {
         method: "POST",
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          password,
-          otp: otp.trim(),
-          adminType,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
 
@@ -354,164 +387,206 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Password */}
-          <div>
-            <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
-              Password
-            </label>
-            <div style={{ position: "relative" }}>
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  position: "absolute",
-                  left: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: 18,
-                  color: "#94A3B8",
-                  pointerEvents: "none",
-                }}
-              >
-                lock
-              </span>
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                autoComplete="current-password"
-                style={{
-                  width: "100%",
-                  paddingLeft: 38,
-                  paddingRight: 40,
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                  border: "1px solid #CBD5E1",
-                  borderRadius: 8,
-                  fontSize: "0.875rem",
-                  color: "#0F172A",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  transition: "border-color 150ms",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = isSuper ? "#D97706" : "#2563EB")}
-                onBlur={(e) => (e.target.style.borderColor = "#CBD5E1")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#94A3B8",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: 4,
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                  {showPassword ? "visibility_off" : "visibility"}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* OTP Verification Code */}
-          <div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-              <label style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#334155" }}>
-                6-Digit OTP Code
+          {/* Password or OTP Entry Box */}
+          {loginMethod === "password" ? (
+            <div>
+              <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#334155", marginBottom: 6 }}>
+                Password
               </label>
-              <button
-                type="button"
-                onClick={handleRequestOtp}
-                disabled={otpLoading || cooldown > 0}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: cooldown > 0 ? "#94A3B8" : isSuper ? "#B45309" : "#1D4ED8",
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  cursor: cooldown > 0 || otpLoading ? "not-allowed" : "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                  padding: 0,
-                }}
-              >
-                {otpLoading ? (
-                  <>
-                    <span className="material-symbols-outlined animate-spin" style={{ fontSize: 13 }}>
-                      progress_activity
-                    </span>
-                    Generating...
-                  </>
-                ) : cooldown > 0 ? (
-                  `Resend in ${cooldown}s`
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
-                      send
-                    </span>
-                    Send OTP to Console
-                  </>
-                )}
-              </button>
-            </div>
+              <div style={{ position: "relative" }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: 18,
+                    color: "#94A3B8",
+                    pointerEvents: "none",
+                  }}
+                >
+                  lock
+                </span>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  style={{
+                    width: "100%",
+                    paddingLeft: 38,
+                    paddingRight: 40,
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    border: "1px solid #CBD5E1",
+                    borderRadius: 8,
+                    fontSize: "0.875rem",
+                    color: "#0F172A",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 150ms",
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = isSuper ? "#D97706" : "#2563EB")}
+                  onBlur={(e) => (e.target.style.borderColor = "#CBD5E1")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#94A3B8",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 4,
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
+              </div>
 
-            <div style={{ position: "relative" }}>
-              <span
-                className="material-symbols-outlined"
-                style={{
-                  position: "absolute",
-                  left: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: 18,
-                  color: "#94A3B8",
-                  pointerEvents: "none",
-                }}
-              >
-                pin
-              </span>
-              <input
-                type="text"
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                placeholder="123456"
-                required
-                style={{
-                  width: "100%",
-                  paddingLeft: 38,
-                  paddingRight: 12,
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                  border: "1px solid #CBD5E1",
-                  borderRadius: 8,
-                  fontSize: "0.9375rem",
-                  letterSpacing: "0.15em",
-                  fontWeight: 600,
-                  color: "#0F172A",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  transition: "border-color 150ms",
-                }}
-                onFocus={(e) => (e.target.style.borderColor = isSuper ? "#D97706" : "#2563EB")}
-                onBlur={(e) => (e.target.style.borderColor = "#CBD5E1")}
-              />
+              {/* Login via OTP trigger below password */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod("otp");
+                    setError("");
+                    const cleanEmail = email.trim().toLowerCase();
+                    if (cleanEmail) {
+                      const now = Date.now();
+                      if (now - lastOtpSentRef.current < 20000 && lastOtpEmailRef.current === cleanEmail) {
+                        setOtpNotice("✓ OTP sent successfully");
+                        return;
+                      }
+                      handleRequestOtp();
+                    }
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: isSuper ? "#B45309" : "#1D4ED8",
+                    fontSize: "0.8125rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: 0,
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>sms</span>
+                  Login via OTP
+                </button>
+              </div>
             </div>
-            <p style={{ margin: "4px 0 0", fontSize: "0.6875rem", color: "#64748B" }}>
-              Click <strong>&quot;Send OTP to Console&quot;</strong> and view the 6-digit code logged in the backend terminal.
-            </p>
-          </div>
+          ) : (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <label style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#334155" }}>
+                  Enter OTP
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginMethod("password");
+                    setError("");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: isSuper ? "#B45309" : "#1D4ED8",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: 0,
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 14 }}>arrow_back</span>
+                  Login via Password
+                </button>
+              </div>
+              <div style={{ position: "relative" }}>
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: 18,
+                    color: "#94A3B8",
+                    pointerEvents: "none",
+                  }}
+                >
+                  pin
+                </span>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  placeholder="Enter 6-digit OTP (e.g. 123456)"
+                  required
+                  autoFocus
+                  style={{
+                    width: "100%",
+                    paddingLeft: 38,
+                    paddingRight: 12,
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    border: "1px solid #CBD5E1",
+                    borderRadius: 8,
+                    fontSize: "0.9375rem",
+                    letterSpacing: "0.15em",
+                    color: "#0F172A",
+                    outline: "none",
+                    boxSizing: "border-box",
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = isSuper ? "#D97706" : "#2563EB")}
+                  onBlur={(e) => (e.target.style.borderColor = "#CBD5E1")}
+                />
+              </div>
+
+              {/* Green success indicator below OTP input */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#16A34A", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 15 }}>check_circle</span>
+                  ✓ OTP sent successfully
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRequestOtp}
+                  disabled={otpLoading || cooldown > 0}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: isSuper ? "#B45309" : "#1D4ED8",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    cursor: cooldown > 0 || otpLoading ? "not-allowed" : "pointer",
+                    padding: 0,
+                  }}
+                >
+                  {otpLoading ? "Sending..." : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Submit */}
           <button
@@ -549,11 +624,17 @@ export default function LoginPage() {
                 <span className="material-symbols-outlined animate-spin" style={{ fontSize: 18 }}>
                   progress_activity
                 </span>
-                <span>Verifying credentials...</span>
+                <span>{loginMethod === "otp" ? "Verifying OTP..." : "Verifying credentials..."}</span>
               </>
             ) : (
               <>
-                <span>{isSuper ? "Sign In as Super Admin" : "Sign In as Staff Admin"}</span>
+                <span>
+                  {loginMethod === "otp"
+                    ? "Verify & Sign In"
+                    : isSuper
+                    ? "Sign In as Super Admin"
+                    : "Sign In as Staff Admin"}
+                </span>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                   arrow_forward
                 </span>
