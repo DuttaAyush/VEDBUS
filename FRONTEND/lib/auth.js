@@ -55,8 +55,14 @@ export async function logoutUser(redirectTo = '/') {
 }
 
 export function getUserAvatar(user) {
-  if (user?.avatar && typeof user.avatar === 'string' && (user.avatar.startsWith('http') || user.avatar.startsWith('/')) && !user.avatar.includes('pravatar')) {
+  if (
+    user?.avatar &&
+    typeof user.avatar === 'string' &&
+    (user.avatar.startsWith('http') || user.avatar.startsWith('/')) &&
+    !user.avatar.includes('pravatar') &&
+    !user.avatar.includes('avatar.png')
+  ) {
     return user.avatar;
   }
-  return '/images/avatar.png';
+  return '/images/default-avatar.svg';
 }
